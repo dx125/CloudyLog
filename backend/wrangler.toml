@@ -1,0 +1,14 @@
+name = "cloudy-log-api"
+main = "src/worker.ts"
+compatibility_date = "2025-01-15"
+
+# Run the daily aggregate job every 6 hours.
+[triggers]
+crons = ["0 */6 * * *"]
+
+# Secrets are provisioned via `wrangler secret put`:
+#   DATABASE_URL       Neon connection string
+#   JWT_SECRET         long random string
+#   GOOGLE_CLIENT_ID   Google OAuth client ID used to validate ID tokens
+#
+# For local development, set the same values in .dev.vars (gitignored).

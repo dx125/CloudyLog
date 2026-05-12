@@ -1,0 +1,88 @@
+{
+  "@@locale": "en",
+  "appTitle": "CloudyLog",
+  "homeTitle": "Clouding Tracker",
+  "greeting": "Hello, {name}!",
+  "@greeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "todaysCloudingsLabel": "Today's Cloudings",
+  "recommendedLabel": "Recommended: {count}",
+  "@recommendedLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "progressLabel": "{current} / {goal}",
+  "@progressLabel": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "goal": { "type": "int" }
+    }
+  },
+  "progressPercentLabel": "{percent}%",
+  "@progressPercentLabel": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "goalReached": "Goal reached!",
+  "goalExceeded": "{over} over goal",
+  "@goalExceeded": {
+    "placeholders": {
+      "over": { "type": "int" }
+    }
+  },
+  "incrementButton": "Clouding!",
+  "incrementTooltip": "Add one Clouding",
+  "shareButton": "Share",
+  "shareTooltip": "Share your results with friends",
+  "shareSubject": "My Clouding results",
+  "shareMessage": "I did {count} Cloudings today (goal: {goal}). Join me on CloudyLog!",
+  "@shareMessage": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "goal": { "type": "int" }
+    }
+  },
+  "settingsTitle": "Settings",
+  "settingsTooltip": "Open settings",
+  "recommendedCountSetting": "Recommended daily Cloudings",
+  "recommendedCountHint": "Enter a positive number",
+  "languageSetting": "Language",
+  "displayNameSetting": "Displayed user name",
+  "displayNameHint": "Your display name",
+  "languageEnglish": "English",
+  "languageSpanish": "Spanish",
+  "saveButton": "Save",
+  "cancelButton": "Cancel",
+  "resetTodayButton": "Reset today's count",
+  "resetConfirmTitle": "Reset today's Cloudings?",
+  "resetConfirmMessage": "This will set today's count back to zero.",
+  "invalidNumberError": "Please enter a number greater than 0",
+  "loginTitle": "Sign in",
+  "loginWelcome": "Welcome to CloudyLog",
+  "loginSubtitle": "Sign in to start counting your Cloudings.",
+  "usernameLabel": "Username or email",
+  "passwordLabel": "Password",
+  "usernameRequired": "Username is required",
+  "passwordRequired": "Password is required",
+  "signInButton": "Sign in",
+  "signInWithGoogleButton": "Continue with Google",
+  "orDivider": "OR",
+  "signOutButton": "Sign out",
+  "signOutTooltip": "Sign out",
+  "settingsSaved": "Settings saved",
+  "loginFailed": "Sign in failed. Please try again.",
+  "calendarTitle": "History",
+  "calendarTooltip": "Open history calendar",
+  "legendGoalReached": "Goal reached",
+  "legendGoalClose": "Close to goal",
+  "legendGoalLow": "Less than half",
+  "statusGoalReached": "Goal reached. Nice work!",
+  "statusGoalClose": "Close — over halfway there.",
+  "statusGoalLow": "Less than half of the goal.",
+  "statusGoalNone": "No Cloudings logged this day."
+}

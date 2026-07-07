@@ -14,7 +14,21 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 320 }).notNull().unique(),
   displayName: text('display_name').notNull(),
   passwordHash: text('password_hash'),
+  country: varchar('country', { length: 2 }),
   createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const subscriptions = pgTable('subscriptions', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  status: text('status').notNull(),
+  provider: text('provider').notNull(),
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -69,14 +83,22 @@ export const friendships = pgTable(
   }),
 );
 
-export const dailyAggregates = pgTable('daily_aggregates', {
-  day: date('day').primaryKey(),
-  totalUsers: integer('total_users').notNull(),
-  p50: integer('p50').notNull(),
-  p75: integer('p75').notNull(),
-  p90: integer('p90').notNull(),
-  distribution: jsonb('distribution').notNull(),
-  computedAt: timestamp('computed_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const dailyAggregates = pgTable(
+  'daily_aggregates',
+  {
+    day: date('day').notNull(),
+    // '*' for the worldwide aggregate, else an ISO 3166-1 alpha-2 code.
+    country: varchar('country', { length: 2 }).notNull(),
+    totalUsers: integer('total_users').notNull(),
+    p50: integer('p50').notNull(),
+    p75: integer('p75').notNull(),
+    p90: integer('p90').notNull(),
+    distribution: jsonb('distribution').notNull(),
+    computedAt: timestamp('computed_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.day, t.country] }),
+  }),
+);

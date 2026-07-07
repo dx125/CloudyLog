@@ -2,6 +2,11 @@ import 'package:flutter/foundation.dart';
 
 import '../data/clouding_repository.dart';
 
+/// Free tier keeps all data on-device under this fixed profile. Signing in
+/// (Pro) doesn't switch profiles — the device data stays the source of truth
+/// and SyncService mirrors it to the account's cloud storage.
+const String kLocalProfileId = 'local';
+
 class CloudingService extends ChangeNotifier {
   CloudingService(this._repository);
 
@@ -14,6 +19,7 @@ class CloudingService extends ChangeNotifier {
 
   String? get currentUserId => _userId;
   int get todayCount => _todayCount;
+  DateTime get today => _today;
   bool get isLoaded => _loaded;
 
   static DateTime _startOfDay(DateTime date) =>

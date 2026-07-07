@@ -2,10 +2,12 @@ import { Hono } from 'hono';
 
 import type { AppBindings } from '../app';
 import { requireAuth } from '../middleware/auth';
+import { requirePro } from '../middleware/subscription';
 
 export const friendRoutes = new Hono<AppBindings>();
 
-friendRoutes.use('*', requireAuth);
+// Friends and stat sharing are a Pro feature.
+friendRoutes.use('*', requireAuth, requirePro);
 
 friendRoutes.post('/requests', async (c) => {
   const body = await c.req.json<{ email?: string }>();
@@ -16,6 +18,20 @@ friendRoutes.post('/requests', async (c) => {
     .get('container')
     .sendFriendRequest.execute(c.get('userId'), body.email);
   return c.json({ friendship });
+});
+
+friendRoutes.get('/requests', async (c) => {
+  const requests = await c
+    .get('container')
+    .listPendingFriendRequests.execute(c.get('userId'));
+  return c.json({
+    requests: requests.map((r) => ({
+      requesterId: r.requesterId,
+      requesterDisplayName: r.requesterDisplayName,
+      requesterEmail: r.requesterEmail,
+      createdAt: r.createdAt.toISOString(),
+    })),
+  });
 });
 
 friendRoutes.post('/requests/:requesterId/respond', async (c) => {

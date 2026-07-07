@@ -4,6 +4,12 @@ export interface NewUser {
   email: string;
   displayName: string;
   passwordHash?: string;
+  country?: string | null;
+}
+
+export interface UserProfilePatch {
+  displayName?: string;
+  country?: string | null;
 }
 
 export interface UserRepository {
@@ -19,4 +25,5 @@ export interface UserRepository {
     identity?: Omit<UserIdentity, 'userId'>,
   ): Promise<User>;
   linkIdentity(identity: UserIdentity): Promise<void>;
+  updateProfile(userId: string, patch: UserProfilePatch): Promise<User>;
 }

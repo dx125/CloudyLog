@@ -1,7 +1,7 @@
 import type { GoogleIdTokenVerifier } from '../ports/google-id-token-verifier';
 import type { TokenIssuer } from '../ports/token-issuer';
 import type { UserRepository } from '../ports/user-repository';
-import type { SignInResult } from './sign-up-credentials';
+import { normalizeCountry, type SignInResult } from './sign-up-credentials';
 
 export class AccountLinkingRequired extends Error {
   constructor() {
@@ -19,7 +19,10 @@ export class SignInWithGoogle {
     private readonly tokens: TokenIssuer,
   ) {}
 
-  async execute(idToken: string): Promise<SignInResult> {
+  async execute(
+    idToken: string,
+    country?: string | null,
+  ): Promise<SignInResult> {
     const claims = await this.google.verify(idToken);
     const email = claims.email.toLowerCase();
 
@@ -39,7 +42,11 @@ export class SignInWithGoogle {
 
     // Fresh sign-up via Google.
     const user = await this.users.create(
-      { email, displayName: claims.name?.trim() || email },
+      {
+        email,
+        displayName: claims.name?.trim() || email,
+        country: normalizeCountry(country),
+      },
       { provider: 'google', providerSubject: claims.sub },
     );
     return { user, token: await this.tokens.issue(user.id) };

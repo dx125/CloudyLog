@@ -1,7 +1,15 @@
 import type { PasswordHasher } from '../ports/password-hasher';
 import type { TokenIssuer } from '../ports/token-issuer';
 import type { UserRepository } from '../ports/user-repository';
-import type { User } from '../../domain/user';
+import { isValidCountryCode, type User } from '../../domain/user';
+
+/** Signup treats the country as best-effort: an unusable value becomes null
+ * (the user can set it later) rather than failing account creation. */
+export function normalizeCountry(country?: string | null): string | null {
+  if (!country) return null;
+  const code = country.trim().toUpperCase();
+  return isValidCountryCode(code) ? code : null;
+}
 
 export interface SignInResult {
   user: User;
@@ -26,6 +34,7 @@ export class SignUpWithCredentials {
     email: string,
     password: string,
     displayName: string,
+    country?: string | null,
   ): Promise<SignInResult> {
     const normalizedEmail = email.trim().toLowerCase();
     const existing = await this.users.findByEmail(normalizedEmail);
@@ -39,6 +48,7 @@ export class SignUpWithCredentials {
           email: normalizedEmail,
           displayName: displayName.trim(),
           passwordHash,
+          country: normalizeCountry(country),
         },
         { provider: 'credentials', providerSubject: normalizedEmail },
       );

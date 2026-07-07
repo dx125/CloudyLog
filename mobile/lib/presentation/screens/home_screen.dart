@@ -6,9 +6,13 @@ import '../../services/clouding_service.dart';
 import '../../services/config_service.dart';
 import '../../services/login_service.dart';
 import '../../services/share_service.dart';
+import '../../services/subscription_service.dart';
 import '../widgets/clouding_progress_bar.dart';
 import 'calendar_screen.dart';
+import 'friends_screen.dart';
+import 'pro_screen.dart';
 import 'settings_screen.dart';
+import 'stats_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,20 +85,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _openSettings(BuildContext context) {
+  void _push(BuildContext context, Widget screen) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+      MaterialPageRoute<void>(builder: (_) => screen),
     );
-  }
-
-  void _openCalendar(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const CalendarScreen()),
-    );
-  }
-
-  Future<void> _signOut(BuildContext context) async {
-    await context.read<LoginService>().signOut();
   }
 
   String _resolveDisplayName(ConfigService config, LoginService login) {
@@ -109,7 +103,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final clouding = context.watch<CloudingService>();
     final config = context.watch<ConfigService>();
     final login = context.watch<LoginService>();
+    final subscription = context.watch<SubscriptionService>();
     final displayName = _resolveDisplayName(config, login);
+    final isPro = subscription.isPro;
 
     return Scaffold(
       appBar: AppBar(
@@ -123,12 +119,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           IconButton(
             icon: const Icon(Icons.calendar_month),
             tooltip: strings.calendarTooltip,
-            onPressed: () => _openCalendar(context),
+            onPressed: () => _push(context, const CalendarScreen()),
           ),
+          if (isPro) ...[
+            IconButton(
+              icon: const Icon(Icons.leaderboard),
+              tooltip: strings.statsTooltip,
+              onPressed: () => _push(context, const StatsScreen()),
+            ),
+            IconButton(
+              icon: const Icon(Icons.group),
+              tooltip: strings.friendsTooltip,
+              onPressed: () => _push(context, const FriendsScreen()),
+            ),
+          ],
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: strings.settingsTooltip,
-            onPressed: () => _openSettings(context),
+            onPressed: () => _push(context, const SettingsScreen()),
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -136,9 +144,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             onPressed: () => _confirmReset(context),
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: strings.signOutTooltip,
-            onPressed: () => _signOut(context),
+            icon: Icon(
+              isPro ? Icons.verified : Icons.workspace_premium,
+              color: isPro ? theme.colorScheme.primary : null,
+            ),
+            tooltip: strings.proTooltip,
+            onPressed: () => _push(context, const ProScreen()),
           ),
         ],
       ),
@@ -177,6 +188,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 goal: config.recommendedDailyCount,
               ),
               const Spacer(),
+              if (!isPro)
+                TextButton.icon(
+                  onPressed: () => _push(context, const ProScreen()),
+                  icon: const Icon(Icons.workspace_premium),
+                  label: Text(strings.upgradeButton),
+                ),
               FilledButton.tonalIcon(
                 onPressed: () => _share(context),
                 icon: const Icon(Icons.share),

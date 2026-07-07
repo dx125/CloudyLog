@@ -10,6 +10,7 @@ authRoutes.post('/signup', async (c) => {
     email?: string;
     password?: string;
     displayName?: string;
+    country?: string;
   }>();
   if (!body.email || !body.password || !body.displayName) {
     return c.json(
@@ -19,7 +20,12 @@ authRoutes.post('/signup', async (c) => {
   }
   const result = await c
     .get('container')
-    .signUpWithCredentials.execute(body.email, body.password, body.displayName);
+    .signUpWithCredentials.execute(
+      body.email,
+      body.password,
+      body.displayName,
+      body.country,
+    );
   return c.json({ user: toPublicUser(result.user), token: result.token });
 });
 
@@ -35,11 +41,13 @@ authRoutes.post('/signin', async (c) => {
 });
 
 authRoutes.post('/google', async (c) => {
-  const body = await c.req.json<{ idToken?: string }>();
+  const body = await c.req.json<{ idToken?: string; country?: string }>();
   if (!body.idToken) {
     return c.json({ error: 'idToken is required' }, 400);
   }
-  const result = await c.get('container').signInWithGoogle.execute(body.idToken);
+  const result = await c
+    .get('container')
+    .signInWithGoogle.execute(body.idToken, body.country);
   return c.json({ user: toPublicUser(result.user), token: result.token });
 });
 
@@ -48,6 +56,7 @@ function toPublicUser(user: User) {
     id: user.id,
     email: user.email,
     displayName: user.displayName,
+    country: user.country,
     createdAt: user.createdAt.toISOString(),
   };
 }

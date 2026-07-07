@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to start counting your Cloudings.'**
+  /// **'Sign in so your Cloudings can sync to your account.'**
   String get loginSubtitle;
 
   /// No description provided for @usernameLabel.
@@ -319,6 +319,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password is required'**
   String get passwordRequired;
+
+  /// No description provided for @signUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get signUpTitle;
+
+  /// No description provided for @createAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccountButton;
+
+  /// No description provided for @haveAccountSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get haveAccountSignIn;
+
+  /// No description provided for @noAccountSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'No account? Create one'**
+  String get noAccountSignUp;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get emailRequired;
+
+  /// No description provided for @displayNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name is required'**
+  String get displayNameRequired;
+
+  /// No description provided for @errorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong email or password.'**
+  String get errorInvalidCredentials;
+
+  /// No description provided for @errorEmailAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered.'**
+  String get errorEmailAlreadyRegistered;
+
+  /// No description provided for @errorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server. Check your connection.'**
+  String get errorNetwork;
+
+  /// No description provided for @googleSignInUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in isn\'t available yet.'**
+  String get googleSignInUnavailable;
+
+  /// No description provided for @proTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account & Pro'**
+  String get proTitle;
+
+  /// No description provided for @proTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Account & Pro'**
+  String get proTooltip;
+
+  /// No description provided for @upgradeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro'**
+  String get upgradeButton;
+
+  /// No description provided for @accountHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountHeader;
+
+  /// No description provided for @signedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {email}'**
+  String signedInAs(String email);
+
+  /// No description provided for @notSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get notSignedIn;
+
+  /// No description provided for @freeTierNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The free version keeps everything on this device.'**
+  String get freeTierNote;
+
+  /// No description provided for @proBenefitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro'**
+  String get proBenefitsTitle;
+
+  /// No description provided for @proBenefitStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your history to the cloud'**
+  String get proBenefitStorage;
+
+  /// No description provided for @proBenefitCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare your stats with your country and the world'**
+  String get proBenefitCompare;
+
+  /// No description provided for @proBenefitFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Add friends and share your results'**
+  String get proBenefitFriends;
+
+  /// No description provided for @proPriceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Development build: the purchase is simulated — no real charge.'**
+  String get proPriceNote;
+
+  /// No description provided for @subscribeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate Pro'**
+  String get subscribeButton;
+
+  /// No description provided for @signInRequiredForPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro needs an account so your data can sync.'**
+  String get signInRequiredForPro;
+
+  /// No description provided for @purchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re Pro now! Your history is syncing to the cloud.'**
+  String get purchaseSuccess;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase failed. Please try again.'**
+  String get purchaseFailed;
+
+  /// No description provided for @manageSubscriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription'**
+  String get manageSubscriptionTitle;
+
+  /// No description provided for @subscriptionStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro — active'**
+  String get subscriptionStatusActive;
+
+  /// No description provided for @subscriptionStatusCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro — canceled (active until expiry)'**
+  String get subscriptionStatusCanceled;
+
+  /// No description provided for @expiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String expiresOn(String date);
+
+  /// No description provided for @cancelSubscriptionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel subscription'**
+  String get cancelSubscriptionButton;
+
+  /// No description provided for @cancelSubscriptionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Pro?'**
+  String get cancelSubscriptionConfirmTitle;
+
+  /// No description provided for @cancelSubscriptionConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro stays active until the expiry date, then the app returns to the free tier. Your data stays on this device.'**
+  String get cancelSubscriptionConfirmMessage;
+
+  /// No description provided for @subscriptionCanceledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription canceled. Pro stays active until the expiry date.'**
+  String get subscriptionCanceledMessage;
+
+  /// No description provided for @syncNowButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNowButton;
+
+  /// No description provided for @proRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature needs an active Pro subscription.'**
+  String get proRequiredMessage;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get statsTitle;
+
+  /// No description provided for @statsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with others'**
+  String get statsTooltip;
+
+  /// No description provided for @statsWorldwide.
+  ///
+  /// In en, this message translates to:
+  /// **'Worldwide'**
+  String get statsWorldwide;
+
+  /// No description provided for @statsCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Your country ({country})'**
+  String statsCountry(String country);
+
+  /// No description provided for @statsCountryUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Your country'**
+  String get statsCountryUnknown;
+
+  /// No description provided for @statsYourCountToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Cloudings today: {count}'**
+  String statsYourCountToday(int count);
+
+  /// No description provided for @statsPercentile.
+  ///
+  /// In en, this message translates to:
+  /// **'Ahead of {percentile}% of participants'**
+  String statsPercentile(int percentile);
+
+  /// No description provided for @statsParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} participants today'**
+  String statsParticipants(int count);
+
+  /// No description provided for @statsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No comparison data yet. Check back later.'**
+  String get statsNoData;
+
+  /// No description provided for @statsCountryNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your country in Settings to see country rankings.'**
+  String get statsCountryNotSet;
+
+  /// No description provided for @friendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get friendsTitle;
+
+  /// No description provided for @friendsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get friendsTooltip;
+
+  /// No description provided for @friendsTodayHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Cloudings'**
+  String get friendsTodayHeader;
+
+  /// No description provided for @friendsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No friends yet. Send a request above!'**
+  String get friendsEmpty;
+
+  /// No description provided for @friendRequestsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending requests'**
+  String get friendRequestsHeader;
+
+  /// No description provided for @addFriendLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a friend by email'**
+  String get addFriendLabel;
+
+  /// No description provided for @sendRequestButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get sendRequestButton;
+
+  /// No description provided for @friendRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend request sent.'**
+  String get friendRequestSent;
+
+  /// No description provided for @friendUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No user with that email.'**
+  String get friendUserNotFound;
+
+  /// No description provided for @friendCannotAddSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t add yourself.'**
+  String get friendCannotAddSelf;
+
+  /// No description provided for @acceptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptButton;
+
+  /// No description provided for @declineButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineButton;
+
+  /// No description provided for @countrySetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Country (2-letter code)'**
+  String get countrySetting;
+
+  /// No description provided for @countryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. US'**
+  String get countryHint;
+
+  /// No description provided for @invalidCountryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 2-letter country code'**
+  String get invalidCountryError;
 
   /// No description provided for @signInButton.
   ///

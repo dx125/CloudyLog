@@ -7,7 +7,9 @@ import { toErrorResponse } from './error-response';
 import { authRoutes } from './routes/auth';
 import { cloudingRoutes } from './routes/cloudings';
 import { friendRoutes } from './routes/friends';
+import { meRoutes } from './routes/me';
 import { statsRoutes } from './routes/stats';
+import { subscriptionRoutes } from './routes/subscription';
 
 export type AppBindings = {
   Bindings: Env;
@@ -28,6 +30,8 @@ export function createApp(resolveContainer: (env: Env) => Container) {
 
   app.get('/healthz', (c) => c.json({ ok: true }));
   app.route('/auth', authRoutes);
+  app.route('/me', meRoutes);
+  app.route('/subscription', subscriptionRoutes);
   app.route('/cloudings', cloudingRoutes);
   app.route('/stats', statsRoutes);
   app.route('/friends', friendRoutes);

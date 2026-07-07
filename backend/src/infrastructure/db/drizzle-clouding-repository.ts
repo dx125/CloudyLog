@@ -1,9 +1,13 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 
 import type { CloudingRepository } from '../../application/ports/clouding-repository';
-import type { CloudingEntry, DailyAggregate } from '../../domain/clouding';
+import {
+  WORLDWIDE_SCOPE,
+  type CloudingEntry,
+  type DailyAggregate,
+} from '../../domain/clouding';
 import type { Db } from './client';
-import { cloudingEntries, dailyAggregates } from './schema';
+import { cloudingEntries, dailyAggregates, users } from './schema';
 
 type EntryRow = typeof cloudingEntries.$inferSelect;
 
@@ -57,6 +61,34 @@ export class DrizzleCloudingRepository implements CloudingRepository {
     return toDomain(row);
   }
 
+  async mergeMaxForDay(
+    userId: string,
+    day: string,
+    count: number,
+  ): Promise<CloudingEntry> {
+    const [row] = await this.db
+      .insert(cloudingEntries)
+      .values({ userId, day, count, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: [cloudingEntries.userId, cloudingEntries.day],
+        set: {
+          count: sql`GREATEST(${cloudingEntries.count}, ${count})`,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    if (!row) throw new Error('Failed to merge clouding entry');
+    return toDomain(row);
+  }
+
+  async getAllForUser(userId: string): Promise<CloudingEntry[]> {
+    const rows = await this.db
+      .select()
+      .from(cloudingEntries)
+      .where(eq(cloudingEntries.userId, userId));
+    return rows.map(toDomain);
+  }
+
   async getCountsForUsers(
     userIds: string[],
     day: string,
@@ -77,31 +109,29 @@ export class DrizzleCloudingRepository implements CloudingRepository {
     return new Map(rows.map((r) => [r.userId, r.count]));
   }
 
-  async computeDailyAggregate(day: string): Promise<DailyAggregate> {
+  async computeDailyAggregates(day: string): Promise<DailyAggregate[]> {
     const rows = await this.db
-      .select({ count: cloudingEntries.count })
+      .select({ count: cloudingEntries.count, country: users.country })
       .from(cloudingEntries)
+      .innerJoin(users, eq(cloudingEntries.userId, users.id))
       .where(eq(cloudingEntries.day, day));
-    const counts = rows.map((r) => r.count).sort((a, b) => a - b);
-    const total = counts.length;
-    const distribution: Record<string, number> = {};
-    for (const c of counts) {
-      const key = String(c);
-      distribution[key] = (distribution[key] ?? 0) + 1;
+
+    const byScope = new Map<string, number[]>();
+    byScope.set(WORLDWIDE_SCOPE, []);
+    for (const row of rows) {
+      byScope.get(WORLDWIDE_SCOPE)!.push(row.count);
+      if (row.country) {
+        const bucket = byScope.get(row.country) ?? [];
+        bucket.push(row.count);
+        byScope.set(row.country, bucket);
+      }
     }
-    const percentile = (p: number): number => {
-      if (total === 0) return 0;
-      const idx = Math.min(total - 1, Math.floor(p * total));
-      return counts[idx] ?? 0;
-    };
-    return {
-      day,
-      totalUsers: total,
-      p50: percentile(0.5),
-      p75: percentile(0.75),
-      p90: percentile(0.9),
-      distribution,
-    };
+
+    const aggregates: DailyAggregate[] = [];
+    for (const [country, counts] of byScope) {
+      aggregates.push(buildAggregate(day, country, counts));
+    }
+    return aggregates;
   }
 
   async saveAggregate(aggregate: DailyAggregate): Promise<void> {
@@ -109,6 +139,7 @@ export class DrizzleCloudingRepository implements CloudingRepository {
       .insert(dailyAggregates)
       .values({
         day: aggregate.day,
+        country: aggregate.country,
         totalUsers: aggregate.totalUsers,
         p50: aggregate.p50,
         p75: aggregate.p75,
@@ -117,7 +148,7 @@ export class DrizzleCloudingRepository implements CloudingRepository {
         computedAt: new Date(),
       })
       .onConflictDoUpdate({
-        target: dailyAggregates.day,
+        target: [dailyAggregates.day, dailyAggregates.country],
         set: {
           totalUsers: aggregate.totalUsers,
           p50: aggregate.p50,
@@ -129,13 +160,20 @@ export class DrizzleCloudingRepository implements CloudingRepository {
       });
   }
 
-  async getAggregate(day: string): Promise<DailyAggregate | null> {
+  async getAggregate(
+    day: string,
+    country: string,
+  ): Promise<DailyAggregate | null> {
     const row = await this.db.query.dailyAggregates.findFirst({
-      where: eq(dailyAggregates.day, day),
+      where: and(
+        eq(dailyAggregates.day, day),
+        eq(dailyAggregates.country, country),
+      ),
     });
     if (!row) return null;
     return {
       day: row.day,
+      country: row.country,
       totalUsers: row.totalUsers,
       p50: row.p50,
       p75: row.p75,
@@ -143,6 +181,34 @@ export class DrizzleCloudingRepository implements CloudingRepository {
       distribution: row.distribution as Record<string, number>,
     };
   }
+}
+
+function buildAggregate(
+  day: string,
+  country: string,
+  rawCounts: number[],
+): DailyAggregate {
+  const counts = [...rawCounts].sort((a, b) => a - b);
+  const total = counts.length;
+  const distribution: Record<string, number> = {};
+  for (const c of counts) {
+    const key = String(c);
+    distribution[key] = (distribution[key] ?? 0) + 1;
+  }
+  const percentile = (p: number): number => {
+    if (total === 0) return 0;
+    const idx = Math.min(total - 1, Math.floor(p * total));
+    return counts[idx] ?? 0;
+  };
+  return {
+    day,
+    country,
+    totalUsers: total,
+    p50: percentile(0.5),
+    p75: percentile(0.75),
+    p90: percentile(0.9),
+    distribution,
+  };
 }
 
 function toDomain(row: EntryRow): CloudingEntry {

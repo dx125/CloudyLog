@@ -64,11 +64,103 @@
   "invalidNumberError": "Please enter a number greater than 0",
   "loginTitle": "Sign in",
   "loginWelcome": "Welcome to CloudyLog",
-  "loginSubtitle": "Sign in to start counting your Cloudings.",
+  "loginSubtitle": "Sign in so your Cloudings can sync to your account.",
   "usernameLabel": "Username or email",
   "passwordLabel": "Password",
   "usernameRequired": "Username is required",
   "passwordRequired": "Password is required",
+  "signUpTitle": "Create account",
+  "createAccountButton": "Create account",
+  "haveAccountSignIn": "Already have an account? Sign in",
+  "noAccountSignUp": "No account? Create one",
+  "emailLabel": "Email",
+  "emailRequired": "Enter a valid email",
+  "displayNameRequired": "Display name is required",
+  "errorInvalidCredentials": "Wrong email or password.",
+  "errorEmailAlreadyRegistered": "This email is already registered.",
+  "errorNetwork": "Could not reach the server. Check your connection.",
+  "googleSignInUnavailable": "Google sign-in isn't available yet.",
+  "proTitle": "Account & Pro",
+  "proTooltip": "Account & Pro",
+  "upgradeButton": "Upgrade to Pro",
+  "accountHeader": "Account",
+  "signedInAs": "Signed in as {email}",
+  "@signedInAs": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "notSignedIn": "Not signed in",
+  "freeTierNote": "The free version keeps everything on this device.",
+  "proBenefitsTitle": "Go Pro",
+  "proBenefitStorage": "Back up your history to the cloud",
+  "proBenefitCompare": "Compare your stats with your country and the world",
+  "proBenefitFriends": "Add friends and share your results",
+  "proPriceNote": "Development build: the purchase is simulated — no real charge.",
+  "subscribeButton": "Activate Pro",
+  "signInRequiredForPro": "Pro needs an account so your data can sync.",
+  "purchaseSuccess": "You're Pro now! Your history is syncing to the cloud.",
+  "purchaseFailed": "Purchase failed. Please try again.",
+  "manageSubscriptionTitle": "Your subscription",
+  "subscriptionStatusActive": "Pro — active",
+  "subscriptionStatusCanceled": "Pro — canceled (active until expiry)",
+  "expiresOn": "Valid until {date}",
+  "@expiresOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "cancelSubscriptionButton": "Cancel subscription",
+  "cancelSubscriptionConfirmTitle": "Cancel Pro?",
+  "cancelSubscriptionConfirmMessage": "Pro stays active until the expiry date, then the app returns to the free tier. Your data stays on this device.",
+  "subscriptionCanceledMessage": "Subscription canceled. Pro stays active until the expiry date.",
+  "syncNowButton": "Sync now",
+  "proRequiredMessage": "This feature needs an active Pro subscription.",
+  "statsTitle": "Compare",
+  "statsTooltip": "Compare with others",
+  "statsWorldwide": "Worldwide",
+  "statsCountry": "Your country ({country})",
+  "@statsCountry": {
+    "placeholders": {
+      "country": { "type": "String" }
+    }
+  },
+  "statsCountryUnknown": "Your country",
+  "statsYourCountToday": "Your Cloudings today: {count}",
+  "@statsYourCountToday": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "statsPercentile": "Ahead of {percentile}% of participants",
+  "@statsPercentile": {
+    "placeholders": {
+      "percentile": { "type": "int" }
+    }
+  },
+  "statsParticipants": "{count} participants today",
+  "@statsParticipants": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "statsNoData": "No comparison data yet. Check back later.",
+  "statsCountryNotSet": "Set your country in Settings to see country rankings.",
+  "friendsTitle": "Friends",
+  "friendsTooltip": "Friends",
+  "friendsTodayHeader": "Today's Cloudings",
+  "friendsEmpty": "No friends yet. Send a request above!",
+  "friendRequestsHeader": "Pending requests",
+  "addFriendLabel": "Add a friend by email",
+  "sendRequestButton": "Send",
+  "friendRequestSent": "Friend request sent.",
+  "friendUserNotFound": "No user with that email.",
+  "friendCannotAddSelf": "You can't add yourself.",
+  "acceptButton": "Accept",
+  "declineButton": "Decline",
+  "countrySetting": "Country (2-letter code)",
+  "countryHint": "e.g. US",
+  "invalidCountryError": "Enter a 2-letter country code",
   "signInButton": "Sign in",
   "signInWithGoogleButton": "Continue with Google",
   "orDivider": "OR",

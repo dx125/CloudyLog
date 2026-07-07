@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puff — Brand &amp; Product Design Book v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cloud:#F4FAF6; --mint:#D7F5E9; --mint-bright:#5DCAA5; --mint-soft:#9FE1CB;
+  --teal:#1D9E75; --deep-teal:#0F6E56; --pine:#0A4536;
+  --cream:#FFF1D6; --coral:#E0603A; --coral-soft:#F0997B; --coral-deep:#993C1D;
+  --ink:#1E2A38; --ink-deep:#141D28; --ink-raised:#26354A;
+  --paper-text:#22303F; --paper-muted:#5B6B7A;
+  --radius-lg:28px; --radius-md:18px; --radius-sm:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--cloud); color:var(--paper-text);
+  font-family:'Nunito',system-ui,sans-serif; font-size:17px; line-height:1.7;
+}
+h1,h2,h3,h4,.display{font-family:'Baloo 2',sans-serif; line-height:1.2; color:var(--ink);}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px;}
+section{padding:88px 0;}
+.eyebrow{
+  font-family:'Baloo 2',sans-serif;font-weight:600;font-size:14px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--teal);display:flex;align-items:center;gap:12px;margin-bottom:14px;
+}
+.eyebrow::before{content:"";width:26px;height:14px;background:var(--mint-bright);
+  border-radius:50% 60% 55% 50%/60% 55% 50% 55%;display:inline-block;}
+h2{font-size:40px;font-weight:700;margin-bottom:18px;}
+h3{font-size:23px;font-weight:600;margin:40px 0 12px;}
+p{max-width:64ch;margin-bottom:16px;}
+p.lead{font-size:20px;color:var(--paper-muted);}
+.muted{color:var(--paper-muted);}
+.divider{height:1px;background:#DCEAE0;}
+
+/* ---------- cover ---------- */
+.cover{padding:110px 0 90px;background:linear-gradient(180deg,var(--mint) 0%,var(--cloud) 100%);
+  border-bottom:1px solid #CBE8D8;}
+.cover .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;}
+.cover h1{font-size:76px;font-weight:700;letter-spacing:-.01em;}
+.cover .tag{font-size:22px;color:var(--deep-teal);margin:6px 0 26px;font-weight:600;font-family:'Baloo 2',sans-serif;}
+.meta{display:flex;gap:10px;flex-wrap:wrap;}
+.meta span{background:#fff;border:1px solid #CBE8D8;border-radius:999px;padding:6px 16px;
+  font-size:13.5px;font-weight:700;color:var(--deep-teal);}
+.cover-mascot{display:flex;justify-content:center;}
+.float{animation:float 4.5s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@media (prefers-reduced-motion:reduce){.float{animation:none;}}
+
+/* ---------- generic cards ---------- */
+.grid{display:grid;gap:18px;}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+.card{background:#fff;border:1px solid #DCEAE0;border-radius:var(--radius-lg);padding:26px 28px;}
+.card h4{font-size:18px;margin-bottom:8px;color:var(--deep-teal);}
+.card p{font-size:15.5px;margin:0;color:var(--paper-muted);}
+
+/* ---------- swatches ---------- */
+.swatch-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:20px 0 8px;}
+.swatch{border-radius:var(--radius-md);overflow:hidden;border:1px solid #DCEAE0;background:#fff;}
+.swatch .chip{height:88px;}
+.swatch .info{padding:12px 14px;font-size:13px;line-height:1.5;}
+.swatch .info b{display:block;font-size:14px;color:var(--ink);}
+.swatch .info code{font-family:ui-monospace,monospace;color:var(--paper-muted);font-size:12.5px;}
+
+/* ---------- token tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:16px 0 8px;background:#fff;
+  border:1px solid #DCEAE0;border-radius:var(--radius-md);overflow:hidden;}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid #E8F2EA;}
+th{font-family:'Baloo 2',sans-serif;font-weight:600;color:var(--deep-teal);font-size:13.5px;
+  letter-spacing:.06em;text-transform:uppercase;background:#F0F8F2;}
+tr:last-child td{border-bottom:none;}
+td code{font-family:ui-monospace,monospace;font-size:13px;color:var(--coral-deep);}
+.dot{display:inline-block;width:15px;height:15px;border-radius:5px;vertical-align:-2px;margin-right:8px;border:1px solid rgba(0,0,0,.12);}
+
+/* ---------- mode panels ---------- */
+.mode-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-top:22px;}
+.panel{border-radius:var(--radius-lg);padding:26px 28px;border:1px solid #DCEAE0;}
+.panel.light{background:#FDFEFD;}
+.panel.dark{background:var(--ink-deep);border-color:#2C3D52;}
+.panel .label{font-family:'Baloo 2',sans-serif;font-weight:600;font-size:14px;letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:16px;}
+.panel.light .label{color:var(--teal);}
+.panel.dark .label{color:var(--mint-bright);}
+
+/* ---------- type specimens ---------- */
+.spec{background:#fff;border:1px solid #DCEAE0;border-radius:var(--radius-lg);padding:30px 32px;margin-top:18px;}
+.spec .row{display:flex;align-items:baseline;gap:22px;padding:14px 0;border-bottom:1px dashed #E1EEE4;}
+.spec .row:last-child{border-bottom:none;}
+.spec .use{min-width:180px;font-size:12.5px;color:var(--paper-muted);font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;}
+
+/* ---------- do/don't ---------- */
+.dd{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:18px;}
+.dd .item{border-radius:var(--radius-md);padding:18px 20px;font-size:15px;background:#fff;border:1px solid #DCEAE0;}
+.dd .item b{font-family:'Baloo 2',sans-serif;display:block;margin-bottom:4px;font-size:15px;}
+.dd .yes b{color:var(--teal);} .dd .no b{color:var(--coral);}
+
+/* ---------- component demos ---------- */
+.demo-btn{display:inline-flex;align-items:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:600;
+  font-size:16px;border-radius:999px;padding:13px 26px;border:none;cursor:default;}
+.chipset{display:flex;gap:9px;flex-wrap:wrap;margin:8px 0;}
+.tagchip{font-size:13.5px;font-weight:700;border-radius:999px;padding:7px 15px;}
+.badge{display:inline-flex;align-items:center;gap:8px;border-radius:14px;padding:9px 14px;font-size:13.5px;font-weight:700;}
+
+/* ---------- phone mockups ---------- */
+.phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:34px;margin-top:26px;justify-items:center;}
+.phone{width:302px;border-radius:44px;padding:12px;border:1px solid #D3E4D8;}
+.phone.pl{background:#E9F4EC;} .phone.pd{background:#0E1620;border-color:#2C3D52;}
+.screen{border-radius:34px;overflow:hidden;height:600px;display:flex;flex-direction:column;position:relative;}
+.screen.sl{background:#F4FAF6;color:var(--ink);}
+.screen.sd{background:#141D28;color:#EAF4EE;}
+.notch{width:110px;height:24px;border-radius:14px;margin:10px auto 2px;}
+.sl .notch{background:#DBEBDF;} .sd .notch{background:#212F40;}
+.appbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 4px;}
+.appbar .wordmark{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;}
+.sl .wordmark{color:var(--deep-teal);} .sd .wordmark{color:var(--mint-bright);}
+.streak{font-size:12px;font-weight:800;border-radius:999px;padding:5px 12px;}
+.sl .streak{background:var(--cream);color:var(--coral-deep);}
+.sd .streak{background:#3A2A22;color:var(--coral-soft);}
+.today{text-align:center;margin-top:14px;}
+.today .date{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.sl .date{color:#7B8B98;} .sd .date{color:#8DA0B3;}
+.count{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:74px;line-height:1;margin-top:2px;}
+.sl .count{color:var(--deep-teal);} .sd .count{color:var(--mint-soft);}
+.count-label{font-size:14px;font-weight:700;margin-top:-4px;}
+.sl .count-label{color:var(--ink);} .sd .count-label{color:#EAF4EE;}
+.avg{font-size:12px;margin-top:5px;}
+.sl .avg{color:#7B8B98;} .sd .avg{color:#8DA0B3;}
+.tapzone{display:flex;justify-content:center;margin:20px 0 6px;}
+.tapbtn{width:158px;height:158px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;}
+.sl .tapbtn{background:var(--teal);box-shadow:0 10px 0 var(--deep-teal);}
+.sd .tapbtn{background:var(--mint-bright);box-shadow:0 10px 0 #2E8065;}
+.tapring{position:absolute;inset:-11px;border-radius:50%;border:2px dashed;opacity:.5;}
+.sl .tapring{border-color:var(--mint-bright);} .sd .tapring{border-color:#3E6B58;}
+.taphint{text-align:center;font-size:12.5px;font-weight:700;margin-top:14px;}
+.sl .taphint{color:#7B8B98;} .sd .taphint{color:#8DA0B3;}
+.qtags{display:flex;justify-content:center;gap:7px;margin-top:14px;flex-wrap:wrap;padding:0 14px;}
+.qtag{font-size:11.5px;font-weight:800;border-radius:999px;padding:6px 12px;}
+.sl .qtag{background:#fff;border:1px solid #CBE8D8;color:var(--deep-teal);}
+.sd .qtag{background:#1E2A38;border:1px solid #33465E;color:var(--mint-soft);}
+.sl .qtag.on{background:var(--mint);border-color:var(--teal);}
+.sd .qtag.on{background:#0F3A2D;border-color:var(--mint-bright);}
+.week{margin:auto 18px 12px;border-radius:18px;padding:13px 16px 11px;}
+.sl .week{background:#fff;border:1px solid #DCEAE0;}
+.sd .week{background:#1B2635;border:1px solid #2C3D52;}
+.week .wt{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;}
+.sl .wt{color:#7B8B98;} .sd .wt{color:#8DA0B3;}
+.sl .wt b{color:var(--teal);} .sd .wt b{color:var(--mint-bright);}
+.bars{display:flex;align-items:flex-end;gap:7px;height:44px;}
+.bars i{flex:1;border-radius:5px 5px 2px 2px;display:block;}
+.sl .bars i{background:var(--mint-soft);} .sd .bars i{background:#2E4A3F;}
+.sl .bars i.hot{background:var(--teal);} .sd .bars i.hot{background:var(--mint-bright);}
+.navbar{display:flex;justify-content:space-around;align-items:center;padding:11px 8px 20px;border-top:1px solid;}
+.sl .navbar{border-color:#E1EEE4;background:#fff;}
+.sd .navbar{border-color:#2C3D52;background:#101823;}
+.nav-item{font-size:10.5px;font-weight:800;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.sl .nav-item{color:#93A3AE;} .sd .nav-item{color:#5F7386;}
+.sl .nav-item.on{color:var(--teal);} .sd .nav-item.on{color:var(--mint-bright);}
+.nav-ic{width:22px;height:22px;border-radius:7px;border:2px solid currentColor;}
+.nav-ic.round{border-radius:50%;}
+.pro-dot{position:relative;}
+.pro-dot::after{content:"PRO";position:absolute;top:-7px;right:-20px;font-size:8px;letter-spacing:.05em;
+  background:var(--coral);color:#fff;border-radius:6px;padding:1.5px 5px;}
+.caption{text-align:center;font-size:13.5px;color:var(--paper-muted);margin-top:12px;font-weight:700;}
+
+/* ---------- footer ---------- */
+footer{padding:56px 0 72px;background:var(--ink);color:#B9CDD6;}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:center;}
+footer b{font-family:'Baloo 2',sans-serif;color:#fff;font-size:20px;}
+@media(max-width:760px){
+  .cover .wrap{grid-template-columns:1fr;}
+  .cover h1{font-size:56px;}
+  h2{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow" style="margin-bottom:22px;">Brand &amp; product design book · v1.0</div>
+      <h1>Puff</h1>
+      <div class="tag">Every toot counts.</div>
+      <p class="lead" style="max-width:46ch;">The gut health tracker that doesn't take itself seriously. This book defines the Puff identity, its design tokens for light and dark modes, core components, and the main screen — everything a designer or developer needs to build Puff consistently.</p>
+      <div class="meta">
+        <span>Version 1.0</span><span>July 2026</span><span>Light + dark</span><span>iOS · Android</span>
+      </div>
+    </div>
+    <div class="cover-mascot">
+      <svg class="float" width="290" height="230" viewBox="0 0 290 230" role="img" aria-label="Gust, the Puff mascot">
+        <ellipse cx="145" cy="205" rx="72" ry="12" fill="#BFE6D2"/>
+        <ellipse cx="145" cy="128" rx="78" ry="50" fill="#1D9E75"/>
+        <circle cx="92" cy="102" r="38" fill="#1D9E75"/>
+        <circle cx="147" cy="82" r="46" fill="#1D9E75"/>
+        <circle cx="200" cy="104" r="33" fill="#1D9E75"/>
+        <circle cx="118" cy="118" r="9" fill="#0A3D30"/>
+        <circle cx="172" cy="118" r="9" fill="#0A3D30"/>
+        <circle cx="121" cy="115" r="3" fill="#D7F5E9"/>
+        <circle cx="175" cy="115" r="3" fill="#D7F5E9"/>
+        <path d="M130 142 Q145 156 160 142" fill="none" stroke="#0A3D30" stroke-width="7" stroke-linecap="round"/>
+        <ellipse cx="98" cy="140" rx="11" ry="7" fill="#5DCAA5" opacity=".65"/>
+        <ellipse cx="192" cy="140" rx="11" ry="7" fill="#5DCAA5" opacity=".65"/>
+        <path d="M34 168 Q56 158 72 168" fill="none" stroke="#5DCAA5" stroke-width="8" stroke-linecap="round"/>
+        <path d="M24 188 Q52 176 76 188" fill="none" stroke="#5DCAA5" stroke-width="8" stroke-linecap="round"/>
+        <path d="M218 168 Q240 158 256 168" fill="none" stroke="#5DCAA5" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 01 FOUNDATIONS ============ -->
+<section id="foundations">
+  <div class="wrap">
+    <div class="eyebrow">01 · Foundations</div>
+    <h2>What Puff is</h2>
+    <p class="lead">Puff counts something everybody does and nobody tracks. One giant button, one satisfying tap, and over time an oddly fascinating picture of your gut.</p>
+    <p>The brand lives on a deliberate tension: <b>funny on the surface, useful underneath</b>. People install Puff as a joke, screenshot it for the group chat, and stay because the data quietly becomes interesting — and, for the IBS and FODMAP community, genuinely valuable. Every design decision should survive both readings: it must make a teenager laugh and a gastroenterology patient feel respected.</p>
+
+    <h3>Personality</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Cheeky, never crude</h4><p>We joke about the act, never at the person. Wink, don't shout. If a copy line would embarrass someone showing the app to their mom, cut it.</p></div>
+      <div class="card"><h4>Airy, never gross</h4><p>The visual world is wind, clouds and breeze — mint, cream and sky. No brown, no smells, no toilet imagery. Ever.</p></div>
+      <div class="card"><h4>Honest about data</h4><p>Numbers are real, comparisons are sourced, and health language stays soft: patterns worth noticing, never diagnoses.</p></div>
+    </div>
+
+    <h3>Voice in one table</h3>
+    <table>
+      <tr><th>Moment</th><th>Say</th><th>Don't say</th></tr>
+      <tr><td>After a tap</td><td>Logged. That's 14 today.</td><td>Ew! Another one?!</td></tr>
+      <tr><td>Empty day</td><td>All quiet on the wind front.</td><td>You haven't farted today?</td></tr>
+      <tr><td>High count</td><td>Breezy day. Beans, maybe?</td><td>That's abnormal — see a doctor.</td></tr>
+      <tr><td>Pro upsell</td><td>Find your trigger foods with Pro.</td><td>Unlock premium to continue!!</td></tr>
+      <tr><td>Health context</td><td>Most people land between 10 and 20 a day.</td><td>Your gas levels indicate a condition.</td></tr>
+    </table>
+    <p class="muted" style="font-size:14.5px;">Rules of thumb: sentence case everywhere, contractions always, one joke per screen maximum, health claims phrased as ranges and patterns.</p>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ============ 02 MASCOT ============ -->
+<section id="mascot">
+  <div class="wrap">
+    <div class="eyebrow">02 · Logo &amp; mascot</div>
+    <h2>Meet Gust</h2>
+    <p class="lead">Gust is a small cloud of air with a face — the puff itself, personified. Gust is the app icon, the empty state, the notification voice and, someday, the sticker pack.</p>
+
+    <div class="mode-pair">
+      <div class="panel light" style="text-align:center;">
+        <div class="label">Light mode</div>
+        <svg width="200" height="150" viewBox="0 0 200 150" role="img" aria-label="Gust on light background">
+          <rect x="0" y="0" width="200" height="150" rx="24" fill="#D7F5E9"/>
+          <ellipse cx="100" cy="88" rx="52" ry="33" fill="#0F6E56"/>
+          <circle cx="65" cy="70" r="25" fill="#0F6E56"/>
+          <circle cx="101" cy="57" r="30" fill="#0F6E56"/>
+          <circle cx="136" cy="72" r="22" fill="#0F6E56"/>
+          <circle cx="83" cy="81" r="6" fill="#D7F5E9"/>
+          <circle cx="119" cy="81" r="6" fill="#D7F5E9"/>
+          <path d="M91 97 Q100 106 109 97" fill="none" stroke="#D7F5E9" stroke-width="5" stroke-linecap="round"/>
+          <path d="M28 116 Q42 109 54 116" fill="none" stroke="#1D9E75" stroke-width="6" stroke-linecap="round"/>
+          <path d="M146 116 Q160 109 172 116" fill="none" stroke="#1D9E75" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+        <p style="font-size:14px;margin:12px 0 0;">Deep teal body on mint air.</p>
+      </div>
+      <div class="panel dark" style="text-align:center;">
+        <div class="label">Dark mode</div>
+        <svg width="200" height="150" viewBox="0 0 200 150" role="img" aria-label="Gust on dark background">
+          <rect x="0" y="0" width="200" height="150" rx="24" fill="#1E2A38"/>
+          <ellipse cx="100" cy="88" rx="52" ry="33" fill="#5DCAA5"/>
+          <circle cx="65" cy="70" r="25" fill="#5DCAA5"/>
+          <circle cx="101" cy="57" r="30" fill="#5DCAA5"/>
+          <circle cx="136" cy="72" r="22" fill="#5DCAA5"/>
+          <circle cx="83" cy="81" r="6" fill="#1E2A38"/>
+          <circle cx="119" cy="81" r="6" fill="#1E2A38"/>
+          <path d="M91 97 Q100 106 109 97" fill="none" stroke="#1E2A38" stroke-width="5" stroke-linecap="round"/>
+          <path d="M28 116 Q42 109 54 116" fill="none" stroke="#9FE1CB" stroke-width="6" stroke-linecap="round" opacity=".8"/>
+          <path d="M146 116 Q160 109 172 116" fill="none" stroke="#9FE1CB" stroke-width="6" stroke-linecap="round" opacity=".8"/>
+        </svg>
+        <p style="font-size:14px;margin:12px 0 0;color:#B9CDD6;">Bright mint body on ink. This is also the App Store icon.</p>
+      </div>
+    </div>
+
+    <h3>Construction rules</h3>
+    <p>Gust is always built from <b>one ellipse and three circles</b> — never more lumps, never fewer. Eyes are plain dots (background color), the smile is a single rounded stroke, and two short double-gust lines may float beside the body. Gust has no limbs, no gradient shading, and no outline. In motion, Gust bobs gently (a 4–5&nbsp;s float loop) and puffs up 8% on tap before settling.</p>
+
+    <div class="dd">
+      <div class="item yes"><b>Do</b>Scale Gust proportionally; minimum size 24 px. Keep clearspace equal to one eye-to-eye distance on all sides.</div>
+      <div class="item yes"><b>Do</b>Use only palette colors: deep teal on light surfaces, bright mint on dark surfaces.</div>
+      <div class="item no"><b>Don't</b>Add gradients, outlines, shadows, extra facial features, or accessories (except seasonal event skins, which are a Pro cosmetic).</div>
+      <div class="item no"><b>Don't</b>Place Gust on coral or busy photographic backgrounds, rotate more than 8°, or pair with any toilet imagery.</div>
+    </div>
+
+    <h3>Wordmark</h3>
+    <p>The wordmark is <span style="font-family:'Baloo 2';font-weight:700;font-size:26px;color:var(--deep-teal);">Puff</span> set in Baloo&nbsp;2 Bold, lowercase never, tracking normal. It appears in deep teal on light and bright mint on dark. Lockup: Gust sits left of the wordmark at cap height, separated by half the word's width.</p>
+  </div>
+</section>
+<div class="divider"></div>
+<!-- ============ 03 COLOR ============ -->
+<section id="color">
+  <div class="wrap">
+    <div class="eyebrow">03 · Color</div>
+    <h2>Air, not waste</h2>
+    <p class="lead">The palette is deliberately the opposite of the obvious joke: fresh mint, warm cream and sea teal, with a single coral accent. Brown is banned from the product forever.</p>
+
+    <h3>Core palette</h3>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:#D7F5E9;"></div><div class="info"><b>Mint air</b><code>#D7F5E9</code>Surfaces, icon field</div></div>
+      <div class="swatch"><div class="chip" style="background:#5DCAA5;"></div><div class="info"><b>Sea mint</b><code>#5DCAA5</code>Dark-mode primary</div></div>
+      <div class="swatch"><div class="chip" style="background:#1D9E75;"></div><div class="info"><b>Teal</b><code>#1D9E75</code>Primary action</div></div>
+      <div class="swatch"><div class="chip" style="background:#0F6E56;"></div><div class="info"><b>Deep teal</b><code>#0F6E56</code>Pressed, headings</div></div>
+      <div class="swatch"><div class="chip" style="background:#FFF1D6;"></div><div class="info"><b>Cream</b><code>#FFF1D6</code>Streaks, warm chips</div></div>
+      <div class="swatch"><div class="chip" style="background:#E0603A;"></div><div class="info"><b>Coral</b><code>#E0603A</code>Pro, highlights only</div></div>
+      <div class="swatch"><div class="chip" style="background:#1E2A38;"></div><div class="info"><b>Ink</b><code>#1E2A38</code>Text, dark surfaces</div></div>
+      <div class="swatch"><div class="chip" style="background:#141D28;"></div><div class="info"><b>Ink deep</b><code>#141D28</code>Dark-mode canvas</div></div>
+    </div>
+    <p class="muted" style="font-size:14.5px;">Coral is rationed: Pro markers, streak flames and celebratory moments only. If a screen has two coral elements, remove one.</p>
+
+    <h3>Semantic tokens</h3>
+    <div class="mode-pair">
+      <div class="panel light">
+        <div class="label">Light mode tokens</div>
+        <table style="border:none;margin:0;">
+          <tr><th>Token</th><th>Value</th></tr>
+          <tr><td><code>bg/canvas</code></td><td><span class="dot" style="background:#F4FAF6;"></span>#F4FAF6</td></tr>
+          <tr><td><code>bg/surface</code></td><td><span class="dot" style="background:#FFFFFF;"></span>#FFFFFF</td></tr>
+          <tr><td><code>bg/raised</code></td><td><span class="dot" style="background:#D7F5E9;"></span>#D7F5E9</td></tr>
+          <tr><td><code>text/primary</code></td><td><span class="dot" style="background:#1E2A38;"></span>#1E2A38</td></tr>
+          <tr><td><code>text/secondary</code></td><td><span class="dot" style="background:#7B8B98;"></span>#7B8B98</td></tr>
+          <tr><td><code>action/primary</code></td><td><span class="dot" style="background:#1D9E75;"></span>#1D9E75</td></tr>
+          <tr><td><code>action/pressed</code></td><td><span class="dot" style="background:#0F6E56;"></span>#0F6E56</td></tr>
+          <tr><td><code>accent/pro</code></td><td><span class="dot" style="background:#E0603A;"></span>#E0603A</td></tr>
+          <tr><td><code>border/hairline</code></td><td><span class="dot" style="background:#DCEAE0;"></span>#DCEAE0</td></tr>
+        </table>
+      </div>
+      <div class="panel dark">
+        <div class="label">Dark mode tokens</div>
+        <table style="border:none;margin:0;background:#141D28;">
+          <tr><th style="background:#1B2635;color:#5DCAA5;">Token</th><th style="background:#1B2635;color:#5DCAA5;">Value</th></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">bg/canvas</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#141D28;"></span>#141D28</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">bg/surface</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#1B2635;"></span>#1B2635</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">bg/raised</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#26354A;"></span>#26354A</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">text/primary</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#EAF4EE;"></span>#EAF4EE</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">text/secondary</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#8DA0B3;"></span>#8DA0B3</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">action/primary</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#5DCAA5;"></span>#5DCAA5</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">action/pressed</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#9FE1CB;"></span>#9FE1CB</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">accent/pro</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#F0997B;"></span>#F0997B</td></tr>
+          <tr><td style="color:#EAF4EE;border-color:#26354A;"><code style="color:#F0997B;">border/hairline</code></td><td style="color:#EAF4EE;border-color:#26354A;"><span class="dot" style="background:#2C3D52;"></span>#2C3D52</td></tr>
+        </table>
+      </div>
+    </div>
+    <p style="margin-top:18px;font-size:15px;" class="muted">Contrast rules: body text always meets WCAG AA against its surface (ink on mint passes; never place teal text on mint). On the dark canvas, sea mint replaces teal everywhere — teal #1D9E75 fails contrast on ink and is not used in dark mode.</p>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ============ 04 TYPOGRAPHY ============ -->
+<section id="type">
+  <div class="wrap">
+    <div class="eyebrow">04 · Typography</div>
+    <h2>Round and buoyant</h2>
+    <p class="lead">Two faces, both rounded, both free (Google Fonts): <b>Baloo 2</b> for anything that speaks with the brand's voice, <b>Nunito</b> for everything the user reads.</p>
+    <div class="spec">
+      <div class="row"><div class="use">Display / counter</div><div style="font-family:'Baloo 2';font-weight:700;font-size:52px;color:var(--deep-teal);">14 toots today</div></div>
+      <div class="row"><div class="use">Headline · Baloo 2 · 600</div><div style="font-family:'Baloo 2';font-weight:600;font-size:26px;">Your breeziest week yet</div></div>
+      <div class="row"><div class="use">Button · Baloo 2 · 600</div><div style="font-family:'Baloo 2';font-weight:600;font-size:17px;color:var(--teal);">Start a duel</div></div>
+      <div class="row"><div class="use">Body · Nunito · 400</div><div style="font-size:16px;">Most people pass gas 10–20 times a day. You're right in the healthy range.</div></div>
+      <div class="row"><div class="use">Caption · Nunito · 700</div><div style="font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-muted);">World average · updated hourly</div></div>
+    </div>
+    <p style="margin-top:16px;font-size:15px;" class="muted">Scale (mobile): counter 72, display 34, headline 26, title 20, body 16, secondary 14, caption 12.5. Numerals in stats are always Baloo 2 — the round digits are part of the brand. Never use italic Baloo; never set long paragraphs in Baloo.</p>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ============ 05 SHAPE, ICONS, MOTION ============ -->
+<section id="shape">
+  <div class="wrap">
+    <div class="eyebrow">05 · Shape, icons &amp; motion</div>
+    <h2>Everything floats</h2>
+    <div class="grid g3" style="margin-top:8px;">
+      <div class="card"><h4>Radius</h4><p>Cards 28, controls 18, chips fully round. Nothing in Puff has a sharp corner — if it looks like it could pop, it's right.</p></div>
+      <div class="card"><h4>Icons</h4><p>Outline style, 2 px rounded strokes, no fills except the active nav state. Wind, clouds and simple geometry; never noses, gas clouds or flames outside the streak.</p></div>
+      <div class="card"><h4>Elevation</h4><p>No drop shadows. Depth comes from the hard offset under the tap button (an 8–10 px solid "pillow") and surface color steps.</p></div>
+      <div class="card"><h4>The tap</h4><p>Press: button sinks onto its pillow, heavy haptic, Gust puffs +8%, a small cloud drifts up and fades, counter rolls. Total 450 ms. This is the product — tune it forever.</p></div>
+      <div class="card"><h4>Ambient motion</h4><p>Gust bobs on a 4.5 s loop on the home screen only. All motion honors reduced-motion settings; the tap haptic never does.</p></div>
+      <div class="card"><h4>Sound</h4><p>Off by default. Optional tap sounds are a cosmetic pack (Pro/IAP); the free tier ships one tasteful "pop".</p></div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ============ 06 COMPONENTS ============ -->
+<section id="components">
+  <div class="wrap">
+    <div class="eyebrow">06 · Components</div>
+    <h2>Core kit, both modes</h2>
+    <div class="mode-pair">
+      <div class="panel light">
+        <div class="label">Light</div>
+        <p style="font-size:13px;font-weight:800;color:#7B8B98;margin-bottom:8px;">BUTTONS</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <span class="demo-btn" style="background:#1D9E75;color:#fff;box-shadow:0 5px 0 #0F6E56;">Log it</span>
+          <span class="demo-btn" style="background:#fff;color:#0F6E56;border:2px solid #CBE8D8;">Maybe later</span>
+          <span class="demo-btn" style="background:#E0603A;color:#fff;box-shadow:0 5px 0 #993C1D;">Go Pro</span>
+        </div>
+        <p style="font-size:13px;font-weight:800;color:#7B8B98;margin-bottom:8px;">TAGS</p>
+        <div class="chipset">
+          <span class="tagchip" style="background:#D7F5E9;color:#0F6E56;border:1.5px solid #1D9E75;">Silent</span>
+          <span class="tagchip" style="background:#fff;color:#0F6E56;border:1.5px solid #CBE8D8;">Squeaky</span>
+          <span class="tagchip" style="background:#fff;color:#0F6E56;border:1.5px solid #CBE8D8;">Thunder</span>
+          <span class="tagchip" style="background:#fff;color:#0F6E56;border:1.5px solid #CBE8D8;">SBD</span>
+        </div>
+        <p style="font-size:13px;font-weight:800;color:#7B8B98;margin:20px 0 8px;">BADGES &amp; STATS</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <span class="badge" style="background:#FFF1D6;color:#993C1D;">6-day streak</span>
+          <span class="badge" style="background:#D7F5E9;color:#0F6E56;">Top 12% today</span>
+          <span class="badge" style="background:#E0603A;color:#fff;">PRO</span>
+        </div>
+      </div>
+      <div class="panel dark">
+        <div class="label">Dark</div>
+        <p style="font-size:13px;font-weight:800;color:#8DA0B3;margin-bottom:8px;">BUTTONS</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <span class="demo-btn" style="background:#5DCAA5;color:#141D28;box-shadow:0 5px 0 #2E8065;">Log it</span>
+          <span class="demo-btn" style="background:#1B2635;color:#9FE1CB;border:2px solid #33465E;">Maybe later</span>
+          <span class="demo-btn" style="background:#F0997B;color:#3A1608;box-shadow:0 5px 0 #993C1D;">Go Pro</span>
+        </div>
+        <p style="font-size:13px;font-weight:800;color:#8DA0B3;margin-bottom:8px;">TAGS</p>
+        <div class="chipset">
+          <span class="tagchip" style="background:#0F3A2D;color:#9FE1CB;border:1.5px solid #5DCAA5;">Silent</span>
+          <span class="tagchip" style="background:#1E2A38;color:#9FE1CB;border:1.5px solid #33465E;">Squeaky</span>
+          <span class="tagchip" style="background:#1E2A38;color:#9FE1CB;border:1.5px solid #33465E;">Thunder</span>
+          <span class="tagchip" style="background:#1E2A38;color:#9FE1CB;border:1.5px solid #33465E;">SBD</span>
+        </div>
+        <p style="font-size:13px;font-weight:800;color:#8DA0B3;margin:20px 0 8px;">BADGES &amp; STATS</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <span class="badge" style="background:#3A2A22;color:#F0997B;">6-day streak</span>
+          <span class="badge" style="background:#0F3A2D;color:#9FE1CB;">Top 12% today</span>
+          <span class="badge" style="background:#F0997B;color:#3A1608;">PRO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+<!-- ============ 07 MAIN SCREEN ============ -->
+<section id="mainscreen">
+  <div class="wrap">
+    <div class="eyebrow">07 · Main screen</div>
+    <h2>The home screen</h2>
+    <p class="lead">One job: make logging instant and satisfying. Count on top, giant button in the middle, one quick-tag row, one glanceable week chart. Everything else lives behind the nav.</p>
+
+    <div class="phones">
+      <div>
+        <div class="phone pl">
+          <div class="screen sl">
+            <div class="notch"></div>
+            <div class="appbar">
+              <span class="wordmark">Puff</span>
+              <span class="streak">6-day streak</span>
+            </div>
+            <div class="today">
+              <div class="date">Monday · Jul 6</div>
+              <div class="count">14</div>
+              <div class="count-label">toots today</div>
+              <div class="avg">world average 10–20 · you're on pace</div>
+            </div>
+            <div class="tapzone">
+              <div class="tapbtn">
+                <div class="tapring"></div>
+                <svg width="96" height="72" viewBox="0 0 140 100" aria-hidden="true">
+                  <ellipse cx="70" cy="62" rx="36" ry="23" fill="#D7F5E9"/>
+                  <circle cx="45" cy="50" r="17" fill="#D7F5E9"/>
+                  <circle cx="70" cy="41" r="21" fill="#D7F5E9"/>
+                  <circle cx="95" cy="52" r="15" fill="#D7F5E9"/>
+                  <circle cx="58" cy="58" r="4.5" fill="#0F6E56"/>
+                  <circle cx="82" cy="58" r="4.5" fill="#0F6E56"/>
+                  <path d="M62 70 Q70 77 78 70" fill="none" stroke="#0F6E56" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="taphint">Tap when it happens</div>
+            <div class="qtags">
+              <span class="qtag on">Silent</span><span class="qtag">Squeaky</span><span class="qtag">Thunder</span><span class="qtag">SBD</span>
+            </div>
+            <div class="week">
+              <div class="wt"><span>This week</span><b>82 total</b></div>
+              <div class="bars">
+                <i style="height:40%"></i><i style="height:62%"></i><i style="height:48%"></i>
+                <i style="height:88%"></i><i style="height:55%"></i><i style="height:30%"></i>
+                <i class="hot" style="height:70%"></i>
+              </div>
+            </div>
+            <div class="navbar">
+              <div class="nav-item on"><span class="nav-ic round"></span>Home</div>
+              <div class="nav-item"><span class="nav-ic"></span>Stats</div>
+              <div class="nav-item pro-dot"><span class="nav-ic round"></span>Duels</div>
+              <div class="nav-item"><span class="nav-ic"></span>You</div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">Light mode</div>
+      </div>
+
+      <div>
+        <div class="phone pd">
+          <div class="screen sd">
+            <div class="notch"></div>
+            <div class="appbar">
+              <span class="wordmark">Puff</span>
+              <span class="streak">6-day streak</span>
+            </div>
+            <div class="today">
+              <div class="date">Monday · Jul 6</div>
+              <div class="count">14</div>
+              <div class="count-label">toots today</div>
+              <div class="avg">world average 10–20 · you're on pace</div>
+            </div>
+            <div class="tapzone">
+              <div class="tapbtn">
+                <div class="tapring"></div>
+                <svg width="96" height="72" viewBox="0 0 140 100" aria-hidden="true">
+                  <ellipse cx="70" cy="62" rx="36" ry="23" fill="#141D28"/>
+                  <circle cx="45" cy="50" r="17" fill="#141D28"/>
+                  <circle cx="70" cy="41" r="21" fill="#141D28"/>
+                  <circle cx="95" cy="52" r="15" fill="#141D28"/>
+                  <circle cx="58" cy="58" r="4.5" fill="#5DCAA5"/>
+                  <circle cx="82" cy="58" r="4.5" fill="#5DCAA5"/>
+                  <path d="M62 70 Q70 77 78 70" fill="none" stroke="#5DCAA5" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="taphint">Tap when it happens</div>
+            <div class="qtags">
+              <span class="qtag on">Silent</span><span class="qtag">Squeaky</span><span class="qtag">Thunder</span><span class="qtag">SBD</span>
+            </div>
+            <div class="week">
+              <div class="wt"><span>This week</span><b>82 total</b></div>
+              <div class="bars">
+                <i style="height:40%"></i><i style="height:62%"></i><i style="height:48%"></i>
+                <i style="height:88%"></i><i style="height:55%"></i><i style="height:30%"></i>
+                <i class="hot" style="height:70%"></i>
+              </div>
+            </div>
+            <div class="navbar">
+              <div class="nav-item on"><span class="nav-ic round"></span>Home</div>
+              <div class="nav-item"><span class="nav-ic"></span>Stats</div>
+              <div class="nav-item pro-dot"><span class="nav-ic round"></span>Duels</div>
+              <div class="nav-item"><span class="nav-ic"></span>You</div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">Dark mode</div>
+      </div>
+    </div>
+
+    <h3>Layout rules</h3>
+    <p>The tap button is 158 px, centered, thumb-reachable one-handed; nothing tappable sits within 24 px of it except the quick tags. Quick tags apply to the <i>last</i> log for 10 seconds after a tap, then reset. The streak pill and the Pro marker on Duels are the only warm-colored elements on this screen. In dark mode the layout is identical — only tokens change.</p>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ============ 08 ACCESSIBILITY ============ -->
+<section id="a11y">
+  <div class="wrap">
+    <div class="eyebrow">08 · Accessibility &amp; care</div>
+    <h2>Quietly inclusive</h2>
+    <div class="grid g2">
+      <div class="card"><h4>Contrast</h4><p>All text meets WCAG AA in both modes. The counter and button labels meet AAA. Charts never rely on color alone — the highlighted bar is also the tallest labeled element.</p></div>
+      <div class="card"><h4>Touch &amp; motor</h4><p>Minimum target 44 px; the core action is a 158 px button. Full VoiceOver/TalkBack labels ("Log a toot, 14 today"). The whole core loop works with one thumb, no typing.</p></div>
+      <div class="card"><h4>Motion &amp; sound</h4><p>Reduced-motion disables Gust's bobbing and the puff animation, keeping only a color pulse. Sound is opt-in, always.</p></div>
+      <div class="card"><h4>Dignity</h4><p>Puff may be used by people with GI conditions. Copy never shames a count, high or low, and health framing is always ranges and patterns — with a standing "this isn't medical advice" note in Stats.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><b>Puff</b><br>Brand &amp; product design book · v1.0 · July 2026</div>
+    <div style="font-size:14px;">Fonts: Baloo 2, Nunito (OFL) · Tokens are the source of truth — when in doubt, ship the quieter option.</div>
+  </div>
+</footer>
+</body>
+</html>

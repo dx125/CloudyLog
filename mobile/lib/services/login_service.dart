@@ -1,26 +1,40 @@
 import 'package:flutter/foundation.dart';
 
+import '../data/api/api_client.dart';
 import '../data/auth_repository.dart';
+import '../data/gateways.dart';
 import '../data/models/auth_user.dart';
 
+/// Machine-readable sign-in failure; screens map these to localized text.
+enum LoginError {
+  invalidCredentials,
+  emailAlreadyRegistered,
+  network,
+  googleUnavailable,
+  unknown,
+}
+
 class LoginResult {
-  const LoginResult({required this.success, this.user, this.errorMessage});
+  const LoginResult({required this.success, this.user, this.error});
 
   final bool success;
   final AuthUser? user;
-  final String? errorMessage;
+  final LoginError? error;
 
   factory LoginResult.ok(AuthUser user) =>
       LoginResult(success: true, user: user);
 
-  factory LoginResult.failure(String message) =>
-      LoginResult(success: false, errorMessage: message);
+  factory LoginResult.failure(LoginError error) =>
+      LoginResult(success: false, error: error);
 }
 
 class LoginService extends ChangeNotifier {
-  LoginService(this._repository);
+  LoginService(this._repository, this._gateway, this._profile, this._api);
 
   final AuthRepository _repository;
+  final AuthGateway _gateway;
+  final ProfileGateway _profile;
+  final ApiClient _api;
 
   AuthUser? _currentUser;
   bool _loaded = false;
@@ -33,59 +47,98 @@ class LoginService extends ChangeNotifier {
 
   Future<void> load() async {
     _currentUser = await _repository.loadUser();
+    final token = await _repository.loadToken();
+    if (_currentUser != null && token != null) {
+      _api.token = token;
+    } else {
+      // A user without a token (or vice versa) is unusable half-state.
+      _currentUser = null;
+      _api.token = null;
+    }
     _loaded = true;
     notifyListeners();
   }
 
   Future<LoginResult> signInWithCredentials({
-    required String username,
+    required String email,
     required String password,
-  }) async {
-    return _runSignIn(() async {
-      // TODO: replace with real backend auth call. Stub always succeeds.
-      final user = AuthUser(
-        id: 'local-${username.hashCode.toUnsigned(32)}',
-        displayName: username,
-        email: username.contains('@') ? username : '$username@local',
-        provider: AuthProvider.credentials,
-      );
-      return LoginResult.ok(user);
-    });
+  }) {
+    return _runSignIn(
+      () => _gateway.signIn(email: email.trim(), password: password),
+    );
+  }
+
+  Future<LoginResult> signUp({
+    required String email,
+    required String password,
+    required String displayName,
+    String? country,
+  }) {
+    return _runSignIn(
+      () => _gateway.signUp(
+        email: email.trim(),
+        password: password,
+        displayName: displayName.trim(),
+        country: country,
+      ),
+    );
   }
 
   Future<LoginResult> signInWithGoogle() async {
-    return _runSignIn(() async {
-      // TODO: wire google_sign_in plugin. Stub always succeeds with a fake user.
-      const user = AuthUser(
-        id: 'google-stub-user',
-        displayName: 'Google User',
-        email: 'user@gmail.com',
-        provider: AuthProvider.google,
-      );
-      return LoginResult.ok(user);
-    });
+    // The google_sign_in plugin isn't integrated yet; the backend endpoint
+    // (/auth/google) exists and this becomes a real flow once it is.
+    return LoginResult.failure(LoginError.googleUnavailable);
+  }
+
+  /// Updates the account's country on the server and in the local session.
+  Future<bool> updateCountry(String country) async {
+    if (_currentUser == null) return false;
+    try {
+      final updated = await _profile.updateProfile(country: country);
+      _currentUser = updated;
+      await _repository.saveUser(updated);
+      notifyListeners();
+      return true;
+    } on ApiException {
+      return false;
+    }
   }
 
   Future<LoginResult> _runSignIn(
-    Future<LoginResult> Function() performSignIn,
+    Future<AuthSession> Function() performSignIn,
   ) async {
     _inProgress = true;
     notifyListeners();
     try {
-      final result = await performSignIn();
-      if (result.success && result.user != null) {
-        _currentUser = result.user;
-        await _repository.saveUser(result.user!);
-      }
-      return result;
+      final session = await performSignIn();
+      _currentUser = session.user;
+      _api.token = session.token;
+      await _repository.saveUser(session.user);
+      await _repository.saveToken(session.token);
+      return LoginResult.ok(session.user);
+    } on ApiException catch (e) {
+      return LoginResult.failure(_mapError(e));
     } finally {
       _inProgress = false;
       notifyListeners();
     }
   }
 
+  static LoginError _mapError(ApiException e) {
+    if (e.isNetwork) return LoginError.network;
+    switch (e.code) {
+      case 'invalid_credentials':
+        return LoginError.invalidCredentials;
+      case 'email_already_registered':
+        return LoginError.emailAlreadyRegistered;
+      default:
+        return LoginError.unknown;
+    }
+  }
+
   Future<void> signOut() async {
     _currentUser = null;
+    _api.token = null;
     await _repository.clear();
     notifyListeners();
   }

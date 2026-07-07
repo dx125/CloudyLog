@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 
 import type {
   NewUser,
+  UserProfilePatch,
   UserRepository,
 } from '../../application/ports/user-repository';
 import type { AuthProvider, User, UserIdentity } from '../../domain/user';
@@ -61,6 +62,7 @@ export class DrizzleUserRepository implements UserRepository {
         email: user.email.toLowerCase(),
         displayName: user.displayName,
         passwordHash: user.passwordHash ?? null,
+        country: user.country ?? null,
       })
       .returning();
     if (!inserted) {
@@ -81,6 +83,27 @@ export class DrizzleUserRepository implements UserRepository {
       .values(identity)
       .onConflictDoNothing();
   }
+
+  async updateProfile(
+    userId: string,
+    patch: UserProfilePatch,
+  ): Promise<User> {
+    const set: Partial<UserRow> = {};
+    if (patch.displayName !== undefined) set.displayName = patch.displayName;
+    if (patch.country !== undefined) set.country = patch.country;
+    if (Object.keys(set).length === 0) {
+      const current = await this.findById(userId);
+      if (!current) throw new Error('User not found');
+      return current;
+    }
+    const [row] = await this.db
+      .update(users)
+      .set(set)
+      .where(eq(users.id, userId))
+      .returning();
+    if (!row) throw new Error('User not found');
+    return toDomain(row);
+  }
 }
 
 function toDomain(row: UserRow): User {
@@ -88,6 +111,7 @@ function toDomain(row: UserRow): User {
     id: row.id,
     email: row.email,
     displayName: row.displayName,
+    country: row.country,
     createdAt: row.createdAt,
   };
 }

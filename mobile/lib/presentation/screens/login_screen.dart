@@ -5,6 +5,8 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../services/config_service.dart';
 import '../../services/login_service.dart';
 
+/// Sign-in / sign-up screen. Free users never see it — it's pushed from the
+/// Pro flow (and pops `true` on success).
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -14,46 +16,87 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _displayNameController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isSignUp = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
+    _displayNameController.dispose();
     super.dispose();
   }
 
-  Future<void> _signInWithCredentials() async {
-    final strings = AppLocalizations.of(context)!;
+  /// Country default comes from the device's region; editable in Settings.
+  String? _deviceCountry() {
+    final code =
+        WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    if (code == null) return null;
+    final upper = code.toUpperCase();
+    return RegExp(r'^[A-Z]{2}$').hasMatch(upper) ? upper : null;
+  }
+
+  Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final login = context.read<LoginService>();
-    final result = await login.signInWithCredentials(
-      username: _usernameController.text.trim(),
-      password: _passwordController.text,
-    );
+    final LoginResult result;
+    if (_isSignUp) {
+      result = await login.signUp(
+        email: _emailController.text,
+        password: _passwordController.text,
+        displayName: _displayNameController.text,
+        country: _deviceCountry(),
+      );
+    } else {
+      result = await login.signInWithCredentials(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+    }
     if (!mounted) return;
 
     if (!result.success) {
-      _showError(result.errorMessage ?? strings.loginFailed);
+      _showError(_errorText(result.error));
       return;
     }
     await _applyDefaultDisplayName(result.user!.displayName);
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
   }
 
   Future<void> _signInWithGoogle() async {
-    final strings = AppLocalizations.of(context)!;
     final login = context.read<LoginService>();
     final result = await login.signInWithGoogle();
     if (!mounted) return;
 
     if (!result.success) {
-      _showError(result.errorMessage ?? strings.loginFailed);
+      _showError(_errorText(result.error));
       return;
     }
     await _applyDefaultDisplayName(result.user!.displayName);
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
+  }
+
+  String _errorText(LoginError? error) {
+    final strings = AppLocalizations.of(context)!;
+    switch (error) {
+      case LoginError.invalidCredentials:
+        return strings.errorInvalidCredentials;
+      case LoginError.emailAlreadyRegistered:
+        return strings.errorEmailAlreadyRegistered;
+      case LoginError.network:
+        return strings.errorNetwork;
+      case LoginError.googleUnavailable:
+        return strings.googleSignInUnavailable;
+      case LoginError.unknown:
+      case null:
+        return strings.loginFailed;
+    }
   }
 
   Future<void> _applyDefaultDisplayName(String name) async {
@@ -76,7 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final login = context.watch<LoginService>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.loginTitle)),
+      appBar: AppBar(
+        title: Text(_isSignUp ? strings.signUpTitle : strings.loginTitle),
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -106,18 +151,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 32),
+                    if (_isSignUp) ...[
+                      TextFormField(
+                        controller: _displayNameController,
+                        enabled: !login.isInProgress,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          labelText: strings.displayNameSetting,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.badge_outlined),
+                        ),
+                        validator: (value) {
+                          if ((value ?? '').trim().isEmpty) {
+                            return strings.displayNameRequired;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     TextFormField(
-                      controller: _usernameController,
+                      controller: _emailController,
                       enabled: !login.isInProgress,
+                      keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        labelText: strings.usernameLabel,
+                        labelText: strings.emailLabel,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.person_outline),
                       ),
                       validator: (value) {
-                        if ((value ?? '').trim().isEmpty) {
-                          return strings.usernameRequired;
+                        final trimmed = (value ?? '').trim();
+                        if (trimmed.isEmpty || !trimmed.contains('@')) {
+                          return strings.emailRequired;
                         }
                         return null;
                       },
@@ -128,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       enabled: !login.isInProgress,
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _signInWithCredentials(),
+                      onFieldSubmitted: (_) => _submit(),
                       decoration: InputDecoration(
                         labelText: strings.passwordLabel,
                         border: const OutlineInputBorder(),
@@ -153,18 +219,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     FilledButton(
-                      onPressed: login.isInProgress
-                          ? null
-                          : _signInWithCredentials,
+                      onPressed: login.isInProgress ? null : _submit,
                       child: login.isInProgress
                           ? const SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Text(strings.signInButton),
+                          : Text(
+                              _isSignUp
+                                  ? strings.createAccountButton
+                                  : strings.signInButton,
+                            ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: login.isInProgress
+                          ? null
+                          : () => setState(() => _isSignUp = !_isSignUp),
+                      child: Text(
+                        _isSignUp
+                            ? strings.haveAccountSignIn
+                            : strings.noAccountSignUp,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         const Expanded(child: Divider()),
@@ -175,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Expanded(child: Divider()),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed: login.isInProgress ? null : _signInWithGoogle,
                       icon: const Icon(Icons.g_mobiledata, size: 28),

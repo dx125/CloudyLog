@@ -9,7 +9,9 @@ export class RunDailyAggregate {
 
   async execute(day?: string): Promise<void> {
     const targetDay = day ?? this.clock.today();
-    const aggregate = await this.cloudings.computeDailyAggregate(targetDay);
-    await this.cloudings.saveAggregate(aggregate);
+    const aggregates = await this.cloudings.computeDailyAggregates(targetDay);
+    for (const aggregate of aggregates) {
+      await this.cloudings.saveAggregate(aggregate);
+    }
   }
 }

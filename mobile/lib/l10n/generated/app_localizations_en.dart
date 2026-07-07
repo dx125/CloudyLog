@@ -9,384 +9,428 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'CloudyLog';
+  String get appTitle => 'Puff';
 
   @override
-  String get homeTitle => 'Clouding Tracker';
+  String get navHome => 'Home';
 
   @override
-  String greeting(String name) {
-    return 'Hello, $name!';
+  String get navStats => 'Stats';
+
+  @override
+  String get navDuels => 'Duels';
+
+  @override
+  String get navYou => 'You';
+
+  @override
+  String streakPill(int days) {
+    return '$days-day streak';
   }
 
   @override
-  String get todaysCloudingsLabel => 'Today\'s Cloudings';
+  String get tootsToday => 'toots today';
 
   @override
-  String recommendedLabel(int count) {
-    return 'Recommended: $count';
+  String get tapHint => 'Tap when it happens';
+
+  @override
+  String tapSemantics(int count) {
+    return 'Log a toot, $count today';
   }
 
   @override
-  String progressLabel(int current, int goal) {
-    return '$current / $goal';
+  String get worldAvgQuiet => 'world average 10–20 · all quiet so far';
+
+  @override
+  String get worldAvgOnPace => 'world average 10–20 · you\'re on pace';
+
+  @override
+  String get worldAvgBreezy => 'world average 10–20 · breezy day';
+
+  @override
+  String get thisWeek => 'This week';
+
+  @override
+  String weekTotal(int count) {
+    return '$count total';
   }
 
   @override
-  String progressPercentLabel(int percent) {
-    return '$percent%';
-  }
+  String get tagSilent => 'Silent';
 
   @override
-  String get goalReached => 'Goal reached!';
+  String get tagSqueaky => 'Squeaky';
 
   @override
-  String goalExceeded(int over) {
-    return '$over over goal';
-  }
+  String get tagThunder => 'Thunder';
 
   @override
-  String get incrementButton => 'Clouding!';
+  String get tagSbd => 'SBD';
 
   @override
-  String get incrementTooltip => 'Add one Clouding';
+  String get tagWindy => 'Windy';
 
   @override
-  String get shareButton => 'Share';
+  String get tagOops => 'Oops';
 
   @override
-  String get shareTooltip => 'Share your results with friends';
+  String get addTagButton => '+ tag';
 
   @override
-  String get shareSubject => 'My Clouding results';
+  String get addTagTitle => 'Your own tag';
 
   @override
-  String shareMessage(int count, int goal) {
-    return 'I did $count Cloudings today (goal: $goal). Join me on CloudyLog!';
-  }
+  String get addTagHint => 'Name your wind';
 
   @override
-  String get settingsTitle => 'Settings';
-
-  @override
-  String get settingsTooltip => 'Open settings';
-
-  @override
-  String get recommendedCountSetting => 'Recommended daily Cloudings';
-
-  @override
-  String get recommendedCountHint => 'Enter a positive number';
-
-  @override
-  String get languageSetting => 'Language';
-
-  @override
-  String get displayNameSetting => 'Displayed user name';
-
-  @override
-  String get displayNameHint => 'Your display name';
-
-  @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageSpanish => 'Spanish';
-
-  @override
-  String get saveButton => 'Save';
+  String get addButton => 'Add';
 
   @override
   String get cancelButton => 'Cancel';
 
   @override
-  String get resetTodayButton => 'Reset today\'s count';
+  String get statsTitle => 'Stats';
 
   @override
-  String get resetConfirmTitle => 'Reset today\'s Cloudings?';
+  String get statsTodayVsWorld => 'Today vs the world';
 
   @override
-  String get resetConfirmMessage =>
-      'This will set today\'s count back to zero.';
+  String get statsWorldRange => 'Most people land between 10 and 20 a day.';
 
   @override
-  String get invalidNumberError => 'Please enter a number greater than 0';
+  String statsPercentile(int percent) {
+    return 'Ahead of $percent% of tooters';
+  }
 
   @override
-  String get loginTitle => 'Sign in';
+  String statsParticipants(int count) {
+    return '$count tooters counted · updated daily';
+  }
 
   @override
-  String get loginWelcome => 'Welcome to CloudyLog';
+  String get statsNoGlobalData =>
+      'Not enough wind data yet — check back tomorrow.';
 
   @override
-  String get loginSubtitle =>
-      'Sign in so your Cloudings can sync to your account.';
+  String get statsHistory => 'History';
 
   @override
-  String get usernameLabel => 'Username or email';
+  String get statsTimeOfDay => 'Time of day';
 
   @override
-  String get passwordLabel => 'Password';
+  String get statsTimeOfDayHint => 'When the wind blows, last 30 days';
 
   @override
-  String get usernameRequired => 'Username is required';
+  String get statsWeekday => 'Weekday patterns';
 
   @override
-  String get passwordRequired => 'Password is required';
+  String get statsWeekdayHint => 'Average per weekday, last 8 weeks';
 
   @override
-  String get signUpTitle => 'Create account';
+  String get statsEmptyDay => 'All quiet on the wind front.';
 
   @override
-  String get createAccountButton => 'Create account';
+  String get historyLockedNote =>
+      'Free keeps the last 7 days on this phone. Pro remembers everything.';
 
   @override
-  String get haveAccountSignIn => 'Already have an account? Sign in';
+  String get lockedProCard => 'Unlock with Pro';
 
   @override
-  String get noAccountSignUp => 'No account? Create one';
+  String get proChip => 'PRO';
 
   @override
-  String get emailLabel => 'Email';
+  String get disclaimer =>
+      'Patterns, not diagnoses — Puff isn\'t medical advice.';
 
   @override
-  String get emailRequired => 'Enter a valid email';
+  String get duelsComingSoon => 'Duels are coming soon';
 
   @override
-  String get displayNameRequired => 'Display name is required';
+  String get duelsComingSoonBody =>
+      'Challenge a friend to a head-to-head week. Gust is stretching.';
 
   @override
-  String get errorInvalidCredentials => 'Wrong email or password.';
+  String get youTitle => 'You';
 
   @override
-  String get errorEmailAlreadyRegistered => 'This email is already registered.';
+  String totalToots(int count) {
+    return '$count toots all time';
+  }
 
   @override
-  String get errorNetwork =>
-      'Could not reach the server. Check your connection.';
+  String bestDayLabel(int count) {
+    return 'best day · $count';
+  }
 
   @override
-  String get googleSignInUnavailable => 'Google sign-in isn\'t available yet.';
+  String get badgesHeader => 'Badges';
 
   @override
-  String get proTitle => 'Account & Pro';
+  String get badgeFirstPuff => 'First puff';
 
   @override
-  String get proTooltip => 'Account & Pro';
+  String get badgeFirstPuffDesc => 'Logged your very first toot';
 
   @override
-  String get upgradeButton => 'Upgrade to Pro';
+  String get badgeDoubleDigits => 'Double digits';
+
+  @override
+  String get badgeDoubleDigitsDesc => '10 in a single day';
+
+  @override
+  String get badgeStreak3 => 'Warm front';
+
+  @override
+  String get badgeStreak3Desc => '3-day streak';
+
+  @override
+  String get badgeStreak7 => 'Jet stream';
+
+  @override
+  String get badgeStreak7Desc => '7-day streak';
+
+  @override
+  String get badgeStreak30 => 'Trade winds';
+
+  @override
+  String get badgeStreak30Desc => '30-day streak';
+
+  @override
+  String get badgeCentury => 'Century club';
+
+  @override
+  String get badgeCenturyDesc => '100 toots all time';
+
+  @override
+  String get badgeGaleForce => 'Gale force';
+
+  @override
+  String get badgeGaleForceDesc => '20 or more in one day';
+
+  @override
+  String get badgeTagCollector => 'Connoisseur';
+
+  @override
+  String get badgeTagCollectorDesc => 'Used all four classic tags';
+
+  @override
+  String get badgeRegular => 'Regular';
+
+  @override
+  String get badgeRegularDesc => 'Logged on 14 different days';
+
+  @override
+  String get wrappedButton => 'Your year in wind';
+
+  @override
+  String wrappedTitle(int year) {
+    return '$year, wrapped';
+  }
+
+  @override
+  String wrappedTotal(int count) {
+    return '$count toots';
+  }
+
+  @override
+  String wrappedBestDay(int count) {
+    return 'best day · $count';
+  }
+
+  @override
+  String wrappedStreak(int days) {
+    return 'longest streak · $days days';
+  }
+
+  @override
+  String wrappedTopTag(String tag) {
+    return 'signature move · $tag';
+  }
+
+  @override
+  String get wrappedNoData => 'Nothing logged yet — your wind year starts now.';
+
+  @override
+  String get shareButton => 'Share';
+
+  @override
+  String get closeButton => 'Close';
+
+  @override
+  String shareCardStreakHeadline(int days) {
+    return '$days days of dedication';
+  }
+
+  @override
+  String get shareCardFooter => 'puff · every toot counts';
+
+  @override
+  String shareStreakText(int days) {
+    return 'My $days-day streak on Puff. Every toot counts.';
+  }
+
+  @override
+  String shareBadgeText(String badge) {
+    return 'Just earned \"$badge\" on Puff. Every toot counts.';
+  }
+
+  @override
+  String get shareWrappedText => 'My year in wind, by Puff.';
+
+  @override
+  String get proHeader => 'Puff Pro';
+
+  @override
+  String get goProButton => 'Go Pro';
+
+  @override
+  String get maybeLaterButton => 'Maybe later';
+
+  @override
+  String get paywallLead =>
+      'Keep every day, see your patterns, back it all up.';
+
+  @override
+  String get paywallBenefitHistory => 'Unlimited history, synced to the cloud';
+
+  @override
+  String get paywallBenefitStats =>
+      'Percentiles, heatmaps and weekday patterns';
+
+  @override
+  String get paywallBenefitBadges => 'The full badge collection';
+
+  @override
+  String get paywallBenefitSoon => 'Coming soon: the trigger food detective';
+
+  @override
+  String get paywallPrice =>
+      '\$2.49 a month or \$17.99 a year — under \$1.50 a month.';
+
+  @override
+  String get paywallDevNote =>
+      'Development build: purchases are simulated, no real charge.';
+
+  @override
+  String get purchaseSuccess => 'You\'re Pro. Gust salutes you.';
+
+  @override
+  String get purchaseFailed => 'That didn\'t go through. Try again?';
+
+  @override
+  String get proStatusActive => 'Pro — active';
+
+  @override
+  String get proStatusCanceled => 'Pro — canceled, runs until expiry';
+
+  @override
+  String proValidUntil(String date) {
+    return 'valid until $date';
+  }
+
+  @override
+  String get cancelProButton => 'Cancel subscription';
+
+  @override
+  String get cancelProConfirmTitle => 'Cancel Pro?';
+
+  @override
+  String get cancelProConfirmBody =>
+      'Pro keeps working until the expiry date. Your data stays on this phone either way.';
+
+  @override
+  String get proCanceledMessage => 'Canceled. Pro runs until the expiry date.';
 
   @override
   String get accountHeader => 'Account';
 
   @override
-  String signedInAs(String email) {
+  String get accountAnonymous => 'Anonymous — your data lives on this phone';
+
+  @override
+  String get accountUpgradeHint =>
+      'Add an email so Pro and backups survive a lost phone.';
+
+  @override
+  String get createAccountButton => 'Create account';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get emailInvalid => 'Enter a valid email';
+
+  @override
+  String get passwordTooShort => 'At least 8 characters';
+
+  @override
+  String get accountCreated => 'Account linked. Same you, safer data.';
+
+  @override
+  String accountEmail(String email) {
     return 'Signed in as $email';
   }
 
   @override
-  String get notSignedIn => 'Not signed in';
-
-  @override
-  String get freeTierNote =>
-      'The free version keeps everything on this device.';
-
-  @override
-  String get proBenefitsTitle => 'Go Pro';
-
-  @override
-  String get proBenefitStorage => 'Back up your history to the cloud';
-
-  @override
-  String get proBenefitCompare =>
-      'Compare your stats with your country and the world';
-
-  @override
-  String get proBenefitFriends => 'Add friends and share your results';
-
-  @override
-  String get proPriceNote =>
-      'Development build: the purchase is simulated — no real charge.';
-
-  @override
-  String get subscribeButton => 'Activate Pro';
-
-  @override
-  String get signInRequiredForPro =>
-      'Pro needs an account so your data can sync.';
-
-  @override
-  String get purchaseSuccess =>
-      'You\'re Pro now! Your history is syncing to the cloud.';
-
-  @override
-  String get purchaseFailed => 'Purchase failed. Please try again.';
-
-  @override
-  String get manageSubscriptionTitle => 'Your subscription';
-
-  @override
-  String get subscriptionStatusActive => 'Pro — active';
-
-  @override
-  String get subscriptionStatusCanceled =>
-      'Pro — canceled (active until expiry)';
-
-  @override
-  String expiresOn(String date) {
-    return 'Valid until $date';
-  }
-
-  @override
-  String get cancelSubscriptionButton => 'Cancel subscription';
-
-  @override
-  String get cancelSubscriptionConfirmTitle => 'Cancel Pro?';
-
-  @override
-  String get cancelSubscriptionConfirmMessage =>
-      'Pro stays active until the expiry date, then the app returns to the free tier. Your data stays on this device.';
-
-  @override
-  String get subscriptionCanceledMessage =>
-      'Subscription canceled. Pro stays active until the expiry date.';
+  String get accountUpgradeFailed =>
+      'Couldn\'t link the account. Try again online.';
 
   @override
   String get syncNowButton => 'Sync now';
 
   @override
-  String get proRequiredMessage =>
-      'This feature needs an active Pro subscription.';
+  String get syncDone => 'Synced.';
 
   @override
-  String get statsTitle => 'Compare';
+  String get restoreButton => 'Restore from cloud';
 
   @override
-  String get statsTooltip => 'Compare with others';
+  String get restoreDone => 'History restored.';
 
   @override
-  String get statsWorldwide => 'Worldwide';
+  String get deleteAccountButton => 'Delete my cloud data';
 
   @override
-  String statsCountry(String country) {
-    return 'Your country ($country)';
-  }
+  String get deleteConfirmTitle => 'Delete everything?';
 
   @override
-  String get statsCountryUnknown => 'Your country';
+  String get deleteConfirmBody =>
+      'Cloud data and account: gone forever. Data on this phone stays unless you uninstall.';
 
   @override
-  String statsYourCountToday(int count) {
-    return 'Your Cloudings today: $count';
-  }
+  String get deleteDone => 'Cloud data deleted.';
 
   @override
-  String statsPercentile(int percentile) {
-    return 'Ahead of $percentile% of participants';
-  }
+  String get settingsHeader => 'Settings';
 
   @override
-  String statsParticipants(int count) {
-    return '$count participants today';
-  }
+  String get themeSetting => 'Theme';
 
   @override
-  String get statsNoData => 'No comparison data yet. Check back later.';
+  String get themeSystem => 'System';
 
   @override
-  String get statsCountryNotSet =>
-      'Set your country in Settings to see country rankings.';
+  String get themeLight => 'Light';
 
   @override
-  String get friendsTitle => 'Friends';
+  String get themeDark => 'Dark';
 
   @override
-  String get friendsTooltip => 'Friends';
+  String get soundSetting => 'Tap sound';
 
   @override
-  String get friendsTodayHeader => 'Today\'s Cloudings';
+  String get soundSettingHint => 'One tasteful pop. Off by default.';
 
   @override
-  String get friendsEmpty => 'No friends yet. Send a request above!';
+  String get privacyNote =>
+      'Free Puff never leaves your phone. Cloud sync is Pro-only, world stats are anonymous aggregates, and deleting your data is one tap.';
 
   @override
-  String get friendRequestsHeader => 'Pending requests';
-
-  @override
-  String get addFriendLabel => 'Add a friend by email';
-
-  @override
-  String get sendRequestButton => 'Send';
-
-  @override
-  String get friendRequestSent => 'Friend request sent.';
-
-  @override
-  String get friendUserNotFound => 'No user with that email.';
-
-  @override
-  String get friendCannotAddSelf => 'You can\'t add yourself.';
-
-  @override
-  String get acceptButton => 'Accept';
-
-  @override
-  String get declineButton => 'Decline';
-
-  @override
-  String get countrySetting => 'Country (2-letter code)';
-
-  @override
-  String get countryHint => 'e.g. US';
-
-  @override
-  String get invalidCountryError => 'Enter a 2-letter country code';
-
-  @override
-  String get signInButton => 'Sign in';
-
-  @override
-  String get signInWithGoogleButton => 'Continue with Google';
-
-  @override
-  String get orDivider => 'OR';
-
-  @override
-  String get signOutButton => 'Sign out';
-
-  @override
-  String get signOutTooltip => 'Sign out';
-
-  @override
-  String get settingsSaved => 'Settings saved';
-
-  @override
-  String get loginFailed => 'Sign in failed. Please try again.';
-
-  @override
-  String get calendarTitle => 'History';
-
-  @override
-  String get calendarTooltip => 'Open history calendar';
-
-  @override
-  String get legendGoalReached => 'Goal reached';
-
-  @override
-  String get legendGoalClose => 'Close to goal';
-
-  @override
-  String get legendGoalLow => 'Less than half';
-
-  @override
-  String get statusGoalReached => 'Goal reached. Nice work!';
-
-  @override
-  String get statusGoalClose => 'Close — over halfway there.';
-
-  @override
-  String get statusGoalLow => 'Less than half of the goal.';
-
-  @override
-  String get statusGoalNone => 'No Cloudings logged this day.';
+  String get errorNetwork =>
+      'Couldn\'t reach the cloud. Everything still counts — it\'s saved on your phone.';
 }

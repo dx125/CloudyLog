@@ -1,90 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
-import 'data/api/api_client.dart';
-import 'data/api/api_gateways.dart';
-import 'data/auth_repository.dart';
-import 'data/clouding_repository.dart';
-import 'data/config_repository.dart';
+import 'data/drift/drift_event_store.dart';
+import 'data/drift/puff_database.dart';
+import 'data/event_store.dart';
 import 'data/gateways.dart';
-import 'data/subscription_repository.dart';
-import 'services/clouding_service.dart';
-import 'services/config_service.dart';
-import 'services/login_service.dart';
+import 'data/settings_repository.dart';
+import 'data/supabase/supabase_gateways.dart';
+import 'services/auth_service.dart';
+import 'services/entitlement_service.dart';
+import 'services/settings_service.dart';
 import 'services/share_service.dart';
-import 'services/subscription_service.dart';
+import 'services/stats_service.dart';
 import 'services/sync_service.dart';
+import 'services/tap_service.dart';
+
+/// Supabase endpoint. Provide with:
+/// flutter run --dart-define=PUFF_SUPABASE_URL=... --dart-define=PUFF_SUPABASE_ANON_KEY=...
+/// Left empty, the app runs 100% on-device — the free tier needs no cloud at
+/// all, and Pro flows degrade to "try again online".
+const String _supabaseUrl = String.fromEnvironment('PUFF_SUPABASE_URL');
+const String _supabaseAnonKey =
+    String.fromEnvironment('PUFF_SUPABASE_ANON_KEY');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final prefs = await SharedPreferences.getInstance();
+  final settingsRepo = SharedPrefsSettingsRepository(prefs);
+  final EventStore store = DriftEventStore(PuffDatabase(openPuffDatabase()));
 
-  final cloudingRepo = SharedPrefsCloudingRepository(prefs);
-  final configRepo = SharedPrefsConfigRepository(prefs);
-  final authRepo = SharedPrefsAuthRepository(prefs);
-  final subscriptionRepo = SharedPrefsSubscriptionRepository(prefs);
+  // The cloud is optional at startup — never a dependency of the core loop.
+  SupabaseClient? supabase;
+  if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
+    try {
+      await Supabase.initialize(
+        url: _supabaseUrl,
+        publishableKey: _supabaseAnonKey,
+      );
+      supabase = Supabase.instance.client;
+    } catch (_) {
+      supabase = null; // Offline/misconfigured: free tier is unaffected.
+    }
+  }
 
-  final api = ApiClient();
-  final statsGateway = ApiStatsGateway(api);
-  final friendsGateway = ApiFriendsGateway(api);
-
-  final cloudingService = CloudingService(cloudingRepo);
-  final configService = ConfigService(configRepo);
-  final loginService = LoginService(
-    authRepo,
-    ApiAuthGateway(api),
-    ApiProfileGateway(api),
-    api,
+  final settingsService = SettingsService(settingsRepo);
+  final authService = AuthService(SupabaseAuthGateway(supabase));
+  final entitlementService = EntitlementService(
+    settingsRepo,
+    SupabasePurchaseGateway(supabase),
   );
-  final subscriptionService = SubscriptionService(
-    subscriptionRepo,
-    ApiSubscriptionGateway(api),
+  final tapService = TapService(store, deviceId: await settingsRepo.deviceId());
+  final statsService = StatsService(store);
+  final syncService = SyncService(
+    store,
+    SupabaseEventsSyncGateway(supabase),
+    shouldSync: () => entitlementService.isPro && authService.hasSession,
   );
-  final syncService = SyncService(ApiCloudingSyncGateway(api), cloudingRepo);
 
   await Future.wait([
-    configService.load(),
-    loginService.load(),
-    subscriptionService.load(),
-    // Free tier needs no account: device data lives under the local profile.
-    cloudingService.loadFor(kLocalProfileId),
+    settingsService.load(),
+    entitlementService.load(),
+    tapService.load(),
   ]);
 
-  // Mirror local changes to the cloud for signed-in Pro users. pushToday is
-  // an absolute write and deduplicates, so notifying on loads is harmless.
-  cloudingService.addListener(() {
-    if (loginService.isLoggedIn && subscriptionService.isPro) {
-      syncService.pushToday(cloudingService.today, cloudingService.todayCount);
-    }
-  });
+  // Mirror local changes to the cloud for Pro users. schedulePush debounces
+  // past the quick-tag window so a tag edit rides along with its tap.
+  tapService.addListener(syncService.schedulePush);
 
-  // Signed-in Pro users reconcile with the server in the background at start.
-  if (loginService.isLoggedIn && subscriptionService.isPro) {
-    Future(() async {
-      await subscriptionService.refresh();
-      if (!subscriptionService.isPro) return;
-      final changed = await syncService.syncAll(kLocalProfileId);
-      if (changed) await cloudingService.loadFor(kLocalProfileId);
-    });
-  }
+  // Background cloud warm-up: session, fresh entitlement, pending events.
+  Future(() async {
+    await authService.ensureSession();
+    if (!authService.hasSession) return;
+    await entitlementService.refresh();
+    if (entitlementService.isPro) await syncService.pushPending();
+  });
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<CloudingService>.value(value: cloudingService),
-        ChangeNotifierProvider<ConfigService>.value(value: configService),
-        ChangeNotifierProvider<LoginService>.value(value: loginService),
-        ChangeNotifierProvider<SubscriptionService>.value(
-          value: subscriptionService,
+        ChangeNotifierProvider<SettingsService>.value(value: settingsService),
+        ChangeNotifierProvider<AuthService>.value(value: authService),
+        ChangeNotifierProvider<EntitlementService>.value(
+          value: entitlementService,
         ),
+        ChangeNotifierProvider<TapService>.value(value: tapService),
         ChangeNotifierProvider<SyncService>.value(value: syncService),
+        Provider<StatsService>.value(value: statsService),
         Provider<ShareService>.value(value: const SharePlusShareService()),
-        Provider<StatsGateway>.value(value: statsGateway),
-        Provider<FriendsGateway>.value(value: friendsGateway),
+        Provider<GlobalStatsGateway>.value(
+          value: SupabaseGlobalStatsGateway(supabase),
+        ),
       ],
-      child: const CloudyLogApp(),
+      child: const PuffApp(),
     ),
   );
 }

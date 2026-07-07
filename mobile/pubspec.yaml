@@ -1,5 +1,5 @@
-name: cloudy_log
-description: Manually count your daily Clouding actions.
+name: puff
+description: The gut health tracker that doesn't take itself seriously. Every toot counts.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -12,17 +12,29 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  http: ^1.2.2
   intl: any
   provider: ^6.1.2
   shared_preferences: ^2.3.2
   share_plus: ^10.0.2
-  table_calendar: ^3.1.2
+  supabase_flutter: ^2.8.0
+  drift: ^2.20.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  uuid: ^4.5.1
+  google_fonts: ^6.2.1
+
+# drift_dev 2.34 breaks against sqlparser 0.44.6 (DartPlaceholder.when was
+# removed within the ^0.44 range). Pin until a fixed drift_dev ships.
+dependency_overrides:
+  sqlparser: 0.44.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  drift_dev: ^2.20.0
+  build_runner: ^2.4.13
 
 flutter:
   uses-material-design: true

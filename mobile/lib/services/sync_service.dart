@@ -1,52 +1,68 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
-import '../data/api/api_client.dart';
-import '../data/clouding_repository.dart';
+import '../data/event_store.dart';
 import '../data/gateways.dart';
 
-/// Two-way reconciliation between on-device history and the Pro cloud store.
-///
-/// - [syncAll]: uploads the full local history; the server merges by keeping
-///   the larger count per day and returns the merged view, which is written
-///   back locally. Run on upgrade to Pro and on app start for Pro users.
-/// - [pushToday]: absolute write of today's count after each local change
-///   (the device is the source of truth for the user's own taps, so resets
-///   propagate too). Failures are swallowed; the next syncAll reconciles.
+/// The lightweight sync worker (handoff §7): batches unsynced events to the
+/// cloud when online. Client-generated UUIDs make every push idempotent, so
+/// retries are free. The local store is the source of truth — sync is a
+/// mirror, never a dependency of the core loop.
 class SyncService extends ChangeNotifier {
-  SyncService(this._gateway, this._localRepository);
+  SyncService(
+    this._store,
+    this._gateway, {
+    required this.shouldSync,
+    Duration debounce = const Duration(seconds: 15),
+  }) : _debounce = debounce;
 
-  final CloudingSyncGateway _gateway;
-  final CloudingRepository _localRepository;
+  static const int _batchSize = 500;
 
+  final EventStore _store;
+  final EventsSyncGateway _gateway;
+
+  /// Sync is Pro-only and needs a session; the composition root supplies
+  /// this check so the worker stays policy-free.
+  final bool Function() shouldSync;
+
+  final Duration _debounce;
+  Timer? _pending;
   bool _syncing = false;
   DateTime? _lastSyncedAt;
-  String? _lastPushKey;
 
   bool get isSyncing => _syncing;
   DateTime? get lastSyncedAt => _lastSyncedAt;
 
-  /// Returns true when the sync completed. Local entries never shrink: the
-  /// merge keeps the max of local and server per day.
-  Future<bool> syncAll(String localUserId) async {
-    if (_syncing) return false;
+  /// Debounced push — called after every local change. The delay outlasts the
+  /// quick-tag window so a tag edit rides along with its tap.
+  void schedulePush() {
+    if (!shouldSync()) return;
+    _pending?.cancel();
+    _pending = Timer(_debounce, () {
+      pushPending();
+    });
+  }
+
+  /// Pushes all unsynced events in batches. Returns true when everything
+  /// pending went out.
+  Future<bool> pushPending() async {
+    if (_syncing || !shouldSync()) return false;
     _syncing = true;
     notifyListeners();
     try {
-      final local = await _localRepository.getAllEntries(localUserId);
-      final merged = await _gateway.syncHistory(local);
-      for (final entry in merged.entries) {
-        final localCount = local[entry.key] ?? 0;
-        if (entry.value != localCount) {
-          await _localRepository.setCountFor(
-            localUserId,
-            entry.key,
-            entry.value,
-          );
-        }
+      while (true) {
+        final batch = await _store.unsynced(_batchSize);
+        if (batch.isEmpty) break;
+        await _gateway.push(batch);
+        await _store.markSynced(
+          [for (final e in batch) e.id],
+          DateTime.now(),
+        );
       }
       _lastSyncedAt = DateTime.now();
       return true;
-    } on ApiException {
+    } on CloudUnavailable {
       return false;
     } finally {
       _syncing = false;
@@ -54,17 +70,28 @@ class SyncService extends ChangeNotifier {
     }
   }
 
-  /// Fire-and-forget push of today's absolute count. Deduplicates repeat
-  /// pushes of the same value (e.g. rebuild-triggered notifications).
-  Future<void> pushToday(DateTime day, int count) async {
-    final key = '${day.year}-${day.month}-${day.day}|$count';
-    if (key == _lastPushKey) return;
-    _lastPushKey = key;
+  /// Restore-onto-a-new-device: pulls the full cloud log and merges it into
+  /// the local store (same ids collapse; nothing local is lost).
+  Future<bool> restoreFromCloud() async {
+    if (_syncing) return false;
+    _syncing = true;
+    notifyListeners();
     try {
-      await _gateway.setToday(count);
-    } on ApiException {
-      // Offline or gated; forget the key so a later change retries.
-      _lastPushKey = null;
+      final remote = await _gateway.pullAll();
+      await _store.upsertAll(remote, synced: true);
+      _lastSyncedAt = DateTime.now();
+      return true;
+    } on CloudUnavailable {
+      return false;
+    } finally {
+      _syncing = false;
+      notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _pending?.cancel();
+    super.dispose();
   }
 }

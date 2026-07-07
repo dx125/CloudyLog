@@ -1,50 +1,79 @@
-import 'models/auth_user.dart';
-import 'models/friend_models.dart';
-import 'models/subscription_status.dart';
-import 'models/today_stats.dart';
+import '../domain/entitlement.dart';
+import '../domain/puff_event.dart';
 
-/// Backend auth. Implementations throw [ApiException]-style errors; services
-/// translate them into user-facing results.
-abstract class AuthGateway {
-  Future<AuthSession> signIn({required String email, required String password});
-  Future<AuthSession> signUp({
-    required String email,
-    required String password,
-    required String displayName,
-    String? country,
+/// Thrown by any gateway when the cloud can't be reached or isn't configured.
+/// The app is offline-first: callers catch this and carry on — a tap must
+/// register in airplane mode, in a basement, forever.
+class CloudUnavailable implements Exception {
+  const CloudUnavailable([this.message = 'cloud unavailable']);
+
+  final String message;
+
+  @override
+  String toString() => 'CloudUnavailable($message)';
+}
+
+class AuthAccount {
+  const AuthAccount({
+    required this.id,
+    required this.isAnonymous,
+    this.email,
   });
+
+  final String id;
+  final bool isAnonymous;
+  final String? email;
 }
 
-abstract class ProfileGateway {
-  Future<AuthUser> updateProfile({String? displayName, String? country});
+/// Supabase auth: every user starts as an anonymous session and is upgraded
+/// in place (same user id, so data continuity is free).
+abstract class AuthGateway {
+  /// True when a Supabase URL/key were provided at build time.
+  bool get isConfigured;
+
+  AuthAccount? get current;
+
+  /// Signs in anonymously when no session exists. Safe to call repeatedly.
+  Future<AuthAccount?> ensureSession();
+
+  /// Attaches email+password credentials to the anonymous user.
+  Future<AuthAccount> upgrade({required String email, required String password});
+
+  /// Deletes the auth user and everything cascading from it, then drops the
+  /// local session ("deletion is one tap and total").
+  Future<void> deleteAccount();
 }
 
-abstract class SubscriptionGateway {
-  Future<SubscriptionStatus> fetch();
-
-  /// Development billing: activates Pro through the backend's mock provider.
-  /// Swapped for store-receipt validation when real billing lands.
-  Future<SubscriptionStatus> activateMock();
-  Future<SubscriptionStatus> cancel();
+/// The RevenueCat-shaped seam (handoff §7: payments go through RevenueCat;
+/// don't hand-roll receipts). The dev implementation calls the backend's mock
+/// RPCs; the RevenueCat implementation replaces this one class later.
+abstract class PurchaseGateway {
+  Future<Entitlement?> fetch();
+  Future<Entitlement> purchasePro();
+  Future<Entitlement> cancelPro();
 }
 
-abstract class CloudingSyncGateway {
-  /// Uploads local history; the server merges by keeping the larger count
-  /// per day and returns the full merged history.
-  Future<Map<DateTime, int>> syncHistory(Map<DateTime, int> entries);
+abstract class EventsSyncGateway {
+  /// Idempotent upsert by client-generated UUID.
+  Future<void> push(List<PuffEvent> events);
 
-  /// Absolute write of today's count (source of truth is this device).
-  Future<void> setToday(int count);
+  /// Full pull for restore-onto-a-new-device.
+  Future<List<PuffEvent>> pullAll();
 }
 
-abstract class StatsGateway {
-  /// [scope] is 'worldwide' or 'country'.
-  Future<TodayStats> today(String scope);
+class GlobalDailyStats {
+  const GlobalDailyStats({
+    required this.day,
+    required this.totalUsers,
+    required this.distribution,
+  });
+
+  final DateTime day;
+  final int totalUsers;
+  final Map<String, int> distribution;
 }
 
-abstract class FriendsGateway {
-  Future<List<FriendToday>> friendsToday();
-  Future<List<PendingFriendRequest>> pendingRequests();
-  Future<void> sendRequest(String email);
-  Future<void> respond({required String requesterId, required bool accept});
+abstract class GlobalStatsGateway {
+  /// Latest anonymous aggregate snapshot; null when none exists yet.
+  Future<GlobalDailyStats?> latest();
 }

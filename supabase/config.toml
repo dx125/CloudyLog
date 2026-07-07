@@ -1,0 +1,15 @@
+# Puff — Supabase project configuration (local dev via `supabase start`).
+# The hosted project is linked with `supabase link`; migrations are applied
+# with `supabase db push`.
+
+project_id = "puff"
+
+[auth]
+# Every user starts as an anonymous session and is upgraded in place
+# (email today; Apple/Google later) when they buy Pro or join a duel.
+enable_anonymous_sign_ins = true
+
+[auth.email]
+enable_signup = true
+# Local dev: skip inbox round-trips. Hosted: turn confirmations on.
+enable_confirmations = false

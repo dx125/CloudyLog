@@ -1,195 +1,180 @@
-import 'package:cloudy_log/data/api/api_client.dart';
-import 'package:cloudy_log/data/auth_repository.dart';
-import 'package:cloudy_log/data/clouding_repository.dart';
-import 'package:cloudy_log/data/gateways.dart';
-import 'package:cloudy_log/data/models/auth_user.dart';
-import 'package:cloudy_log/data/models/subscription_status.dart';
-import 'package:cloudy_log/data/subscription_repository.dart';
+import 'package:puff/data/event_store.dart';
+import 'package:puff/data/gateways.dart';
+import 'package:puff/data/settings_repository.dart';
+import 'package:puff/domain/entitlement.dart';
+import 'package:puff/domain/puff_event.dart';
 
-class InMemoryAuthRepository implements AuthRepository {
-  AuthUser? user;
-  String? token;
+class InMemoryEventStore implements EventStore {
+  final Map<String, PuffEvent> events = {};
 
   @override
-  Future<AuthUser?> loadUser() async => user;
-
-  @override
-  Future<void> saveUser(AuthUser value) async => user = value;
-
-  @override
-  Future<String?> loadToken() async => token;
-
-  @override
-  Future<void> saveToken(String value) async => token = value;
-
-  @override
-  Future<void> clear() async {
-    user = null;
-    token = null;
-  }
-}
-
-class InMemorySubscriptionRepository implements SubscriptionRepository {
-  SubscriptionStatus? status;
-
-  @override
-  Future<SubscriptionStatus?> load() async => status;
-
-  @override
-  Future<void> save(SubscriptionStatus value) async => status = value;
-
-  @override
-  Future<void> clear() async => status = null;
-}
-
-class InMemoryCloudingRepository implements CloudingRepository {
-  final Map<String, Map<DateTime, int>> store = {};
-
-  Map<DateTime, int> _forUser(String userId) =>
-      store.putIfAbsent(userId, () => {});
-
-  static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
-
-  @override
-  Future<int> getCountFor(String userId, DateTime date) async =>
-      _forUser(userId)[_day(date)] ?? 0;
-
-  @override
-  Future<void> setCountFor(String userId, DateTime date, int count) async {
-    _forUser(userId)[_day(date)] = count;
+  Future<void> insert(PuffEvent event) async {
+    events[event.id] = event;
   }
 
   @override
-  Future<Map<DateTime, int>> getAllEntries(String userId) async =>
-      Map.of(_forUser(userId));
-}
-
-class FakeAuthGateway implements AuthGateway {
-  ApiException? failWith;
-  int signInCalls = 0;
-  int signUpCalls = 0;
-  String? lastCountry;
-
-  @override
-  Future<AuthSession> signIn({
-    required String email,
-    required String password,
-  }) async {
-    signInCalls++;
-    final error = failWith;
-    if (error != null) throw error;
-    return AuthSession(
-      user: AuthUser(
-        id: 'u1',
-        displayName: 'Alice',
-        email: email,
-        provider: AuthProvider.credentials,
-        country: 'US',
-      ),
-      token: 'token-1',
-    );
-  }
-
-  @override
-  Future<AuthSession> signUp({
-    required String email,
-    required String password,
-    required String displayName,
-    String? country,
-  }) async {
-    signUpCalls++;
-    lastCountry = country;
-    final error = failWith;
-    if (error != null) throw error;
-    return AuthSession(
-      user: AuthUser(
-        id: 'u2',
-        displayName: displayName,
-        email: email,
-        provider: AuthProvider.credentials,
-        country: country,
-      ),
-      token: 'token-2',
-    );
-  }
-}
-
-class FakeProfileGateway implements ProfileGateway {
-  String? lastCountry;
-
-  @override
-  Future<AuthUser> updateProfile({
-    String? displayName,
-    String? country,
-  }) async {
-    lastCountry = country;
-    return AuthUser(
-      id: 'u1',
-      displayName: displayName ?? 'Alice',
-      email: 'a@b.c',
-      provider: AuthProvider.credentials,
-      country: country,
-    );
-  }
-}
-
-class FakeSubscriptionGateway implements SubscriptionGateway {
-  SubscriptionStatus remote = SubscriptionStatus.free;
-  ApiException? failWith;
-
-  @override
-  Future<SubscriptionStatus> fetch() async {
-    final error = failWith;
-    if (error != null) throw error;
-    return remote;
-  }
-
-  @override
-  Future<SubscriptionStatus> activateMock() async {
-    final error = failWith;
-    if (error != null) throw error;
-    remote = SubscriptionStatus(
-      tier: 'pro',
-      status: 'active',
-      expiresAt: DateTime.now().add(const Duration(days: 30)),
-    );
-    return remote;
-  }
-
-  @override
-  Future<SubscriptionStatus> cancel() async {
-    final error = failWith;
-    if (error != null) throw error;
-    remote = SubscriptionStatus(
-      tier: 'pro',
-      status: 'canceled',
-      expiresAt: remote.expiresAt,
-    );
-    return remote;
-  }
-}
-
-class FakeCloudingSyncGateway implements CloudingSyncGateway {
-  final Map<DateTime, int> server = {};
-  ApiException? failWith;
-  final List<int> pushedTodayCounts = [];
-
-  @override
-  Future<Map<DateTime, int>> syncHistory(Map<DateTime, int> entries) async {
-    final error = failWith;
-    if (error != null) throw error;
-    for (final entry in entries.entries) {
-      if (entry.value == 0) continue;
-      final existing = server[entry.key] ?? 0;
-      server[entry.key] = entry.value > existing ? entry.value : existing;
+  Future<void> upsertAll(List<PuffEvent> incoming, {required bool synced}) async {
+    for (final event in incoming) {
+      events[event.id] =
+          event.copyWith(syncedAt: synced ? DateTime.now() : null);
     }
-    return Map.of(server);
   }
 
   @override
-  Future<void> setToday(int count) async {
-    final error = failWith;
-    if (error != null) throw error;
-    pushedTodayCounts.add(count);
+  Future<void> updateTags(String id, List<String> tags) async {
+    final existing = events[id];
+    if (existing == null) return;
+    events[id] = PuffEvent(
+      id: existing.id,
+      occurredAt: existing.occurredAt,
+      type: existing.type,
+      tags: tags,
+      deviceId: existing.deviceId,
+    );
+  }
+
+  @override
+  Future<PuffEvent?> byId(String id) async => events[id];
+
+  @override
+  Future<int> countForDay(DateTime day) async {
+    final target = dayOf(day);
+    return events.values
+        .where((e) => e.type == kTootType && dayOf(e.occurredAt) == target)
+        .length;
+  }
+
+  @override
+  Future<List<PuffEvent>> eventsBetween(DateTime from, DateTime to) async {
+    final list = events.values
+        .where((e) =>
+            !e.occurredAt.isBefore(from) && e.occurredAt.isBefore(to))
+        .toList()
+      ..sort((a, b) => a.occurredAt.compareTo(b.occurredAt));
+    return list;
+  }
+
+  @override
+  Future<List<PuffEvent>> allEvents() async {
+    final list = events.values.toList()
+      ..sort((a, b) => a.occurredAt.compareTo(b.occurredAt));
+    return list;
+  }
+
+  @override
+  Future<List<PuffEvent>> unsynced(int limit) async {
+    final list = events.values.where((e) => e.syncedAt == null).toList()
+      ..sort((a, b) => a.occurredAt.compareTo(b.occurredAt));
+    return list.take(limit).toList();
+  }
+
+  @override
+  Future<void> markSynced(List<String> ids, DateTime at) async {
+    for (final id in ids) {
+      final event = events[id];
+      if (event != null) events[id] = event.copyWith(syncedAt: at);
+    }
+  }
+
+  @override
+  Future<Map<DateTime, int>> countsByDay() async {
+    final counts = <DateTime, int>{};
+    for (final event in events.values) {
+      if (event.type != kTootType) continue;
+      final day = dayOf(event.occurredAt);
+      counts[day] = (counts[day] ?? 0) + 1;
+    }
+    return counts;
+  }
+}
+
+class InMemorySettingsRepository implements SettingsRepository {
+  String theme = 'system';
+  bool sound = false;
+  List<String> tags = [];
+  Entitlement? entitlement;
+
+  @override
+  Future<String> deviceId() async => 'test-device';
+
+  @override
+  Future<String> themeMode() async => theme;
+
+  @override
+  Future<void> setThemeMode(String mode) async => theme = mode;
+
+  @override
+  Future<bool> soundEnabled() async => sound;
+
+  @override
+  Future<void> setSoundEnabled(bool value) async => sound = value;
+
+  @override
+  Future<List<String>> customTags() async => tags;
+
+  @override
+  Future<void> setCustomTags(List<String> value) async => tags = value;
+
+  @override
+  Future<Entitlement?> cachedEntitlement() async => entitlement;
+
+  @override
+  Future<void> cacheEntitlement(Entitlement? value) async =>
+      entitlement = value;
+}
+
+class FakePurchaseGateway implements PurchaseGateway {
+  Entitlement? remote;
+  bool offline = false;
+  DateTime Function() now = DateTime.now;
+
+  void _checkOnline() {
+    if (offline) throw const CloudUnavailable();
+  }
+
+  @override
+  Future<Entitlement?> fetch() async {
+    _checkOnline();
+    return remote;
+  }
+
+  @override
+  Future<Entitlement> purchasePro() async {
+    _checkOnline();
+    remote = Entitlement(
+      status: 'active',
+      expiresAt: now().add(const Duration(days: 30)),
+    );
+    return remote!;
+  }
+
+  @override
+  Future<Entitlement> cancelPro() async {
+    _checkOnline();
+    final current = remote;
+    if (current == null) throw const CloudUnavailable('no subscription');
+    remote = Entitlement(status: 'canceled', expiresAt: current.expiresAt);
+    return remote!;
+  }
+}
+
+class FakeEventsSyncGateway implements EventsSyncGateway {
+  final Map<String, PuffEvent> server = {};
+  bool offline = false;
+  int pushCalls = 0;
+
+  @override
+  Future<void> push(List<PuffEvent> events) async {
+    if (offline) throw const CloudUnavailable();
+    pushCalls++;
+    for (final event in events) {
+      server[event.id] = event;
+    }
+  }
+
+  @override
+  Future<List<PuffEvent>> pullAll() async {
+    if (offline) throw const CloudUnavailable();
+    return server.values.toList();
   }
 }

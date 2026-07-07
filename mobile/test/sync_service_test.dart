@@ -1,66 +1,85 @@
-import 'package:cloudy_log/data/api/api_client.dart';
-import 'package:cloudy_log/services/sync_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:puff/domain/puff_event.dart';
+import 'package:puff/services/sync_service.dart';
 
 import 'fakes.dart';
 
 void main() {
   group('SyncService', () {
-    late FakeCloudingSyncGateway gateway;
-    late InMemoryCloudingRepository local;
+    late InMemoryEventStore store;
+    late FakeEventsSyncGateway gateway;
+    late bool proAndSignedIn;
     late SyncService service;
 
-    final d1 = DateTime(2026, 7, 1);
-    final d2 = DateTime(2026, 7, 2);
-
     setUp(() {
-      gateway = FakeCloudingSyncGateway();
-      local = InMemoryCloudingRepository();
-      service = SyncService(gateway, local);
+      store = InMemoryEventStore();
+      gateway = FakeEventsSyncGateway();
+      proAndSignedIn = true;
+      service = SyncService(
+        store,
+        gateway,
+        shouldSync: () => proAndSignedIn,
+        debounce: Duration.zero,
+      );
     });
 
-    test('syncAll uploads local history and pulls the merged view', () async {
-      await local.setCountFor('local', d1, 10);
-      gateway.server[d2] = 40; // server-only day
+    tearDown(() => service.dispose());
 
-      final ok = await service.syncAll('local');
+    PuffEvent event(String id, {DateTime? at}) =>
+        PuffEvent(id: id, occurredAt: at ?? DateTime(2026, 7, 7, 9));
 
-      expect(ok, isTrue);
-      expect(gateway.server[d1], 10);
-      expect(await local.getCountFor('local', d2), 40);
-      expect(service.lastSyncedAt, isNotNull);
+    test('pushes unsynced events and marks them synced', () async {
+      await store.insert(event('a'));
+      await store.insert(event('b'));
+
+      expect(await service.pushPending(), isTrue);
+      expect(gateway.server.keys, containsAll(['a', 'b']));
+      expect((await store.unsynced(10)), isEmpty);
     });
 
-    test('merge keeps the larger count per day', () async {
-      await local.setCountFor('local', d1, 5);
-      gateway.server[d1] = 20;
-
-      await service.syncAll('local');
-
-      expect(await local.getCountFor('local', d1), 20);
-      expect(gateway.server[d1], 20);
+    test('does nothing for free users', () async {
+      proAndSignedIn = false;
+      await store.insert(event('a'));
+      expect(await service.pushPending(), isFalse);
+      expect(gateway.server, isEmpty);
     });
 
-    test('syncAll reports failure when offline', () async {
-      gateway.failWith = const ApiException.network();
-      expect(await service.syncAll('local'), isFalse);
+    test('offline push fails without losing anything', () async {
+      gateway.offline = true;
+      await store.insert(event('a'));
+      expect(await service.pushPending(), isFalse);
+      expect((await store.unsynced(10)).length, 1);
     });
 
-    test('pushToday deduplicates identical pushes', () async {
-      final today = DateTime(2026, 7, 6);
-      await service.pushToday(today, 3);
-      await service.pushToday(today, 3);
-      await service.pushToday(today, 4);
-      expect(gateway.pushedTodayCounts, [3, 4]);
+    test('a tag edit clears synced state and is pushed again', () async {
+      await store.insert(event('a'));
+      await service.pushPending();
+      expect((await store.unsynced(10)), isEmpty);
+
+      await store.updateTags('a', ['thunder']);
+      expect((await store.unsynced(10)).length, 1);
+
+      await service.pushPending();
+      expect(gateway.server['a']!.tags, ['thunder']);
     });
 
-    test('pushToday retries after a failed push', () async {
-      final today = DateTime(2026, 7, 6);
-      gateway.failWith = const ApiException.network();
-      await service.pushToday(today, 3);
-      gateway.failWith = null;
-      await service.pushToday(today, 3);
-      expect(gateway.pushedTodayCounts, [3]);
+    test('restore merges cloud events into the local store', () async {
+      await store.insert(event('local'));
+      gateway.server['remote'] = event('remote');
+
+      expect(await service.restoreFromCloud(), isTrue);
+      expect(store.events.keys, containsAll(['local', 'remote']));
+      // Restored events are already synced; local unsynced one remains.
+      expect((await store.unsynced(10)).map((e) => e.id), ['local']);
+    });
+
+    test('push is idempotent across retries', () async {
+      await store.insert(event('a'));
+      await service.pushPending();
+      await store.updateTags('a', ['sbd']);
+      await service.pushPending();
+      expect(gateway.server.length, 1);
+      expect(gateway.pushCalls, 2);
     });
   });
 }

@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
-import 'app_localizations_es.dart';
 
 // ignore_for_file: type=lint
 
@@ -93,160 +92,151 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('es')
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'CloudyLog'**
+  /// **'Puff'**
   String get appTitle;
 
-  /// No description provided for @homeTitle.
+  /// No description provided for @navHome.
   ///
   /// In en, this message translates to:
-  /// **'Clouding Tracker'**
-  String get homeTitle;
+  /// **'Home'**
+  String get navHome;
 
-  /// No description provided for @greeting.
+  /// No description provided for @navStats.
   ///
   /// In en, this message translates to:
-  /// **'Hello, {name}!'**
-  String greeting(String name);
+  /// **'Stats'**
+  String get navStats;
 
-  /// No description provided for @todaysCloudingsLabel.
+  /// No description provided for @navDuels.
   ///
   /// In en, this message translates to:
-  /// **'Today\'s Cloudings'**
-  String get todaysCloudingsLabel;
+  /// **'Duels'**
+  String get navDuels;
 
-  /// No description provided for @recommendedLabel.
+  /// No description provided for @navYou.
   ///
   /// In en, this message translates to:
-  /// **'Recommended: {count}'**
-  String recommendedLabel(int count);
+  /// **'You'**
+  String get navYou;
 
-  /// No description provided for @progressLabel.
+  /// No description provided for @streakPill.
   ///
   /// In en, this message translates to:
-  /// **'{current} / {goal}'**
-  String progressLabel(int current, int goal);
+  /// **'{days}-day streak'**
+  String streakPill(int days);
 
-  /// No description provided for @progressPercentLabel.
+  /// No description provided for @tootsToday.
   ///
   /// In en, this message translates to:
-  /// **'{percent}%'**
-  String progressPercentLabel(int percent);
+  /// **'toots today'**
+  String get tootsToday;
 
-  /// No description provided for @goalReached.
+  /// No description provided for @tapHint.
   ///
   /// In en, this message translates to:
-  /// **'Goal reached!'**
-  String get goalReached;
+  /// **'Tap when it happens'**
+  String get tapHint;
 
-  /// No description provided for @goalExceeded.
+  /// No description provided for @tapSemantics.
   ///
   /// In en, this message translates to:
-  /// **'{over} over goal'**
-  String goalExceeded(int over);
+  /// **'Log a toot, {count} today'**
+  String tapSemantics(int count);
 
-  /// No description provided for @incrementButton.
+  /// No description provided for @worldAvgQuiet.
   ///
   /// In en, this message translates to:
-  /// **'Clouding!'**
-  String get incrementButton;
+  /// **'world average 10–20 · all quiet so far'**
+  String get worldAvgQuiet;
 
-  /// No description provided for @incrementTooltip.
+  /// No description provided for @worldAvgOnPace.
   ///
   /// In en, this message translates to:
-  /// **'Add one Clouding'**
-  String get incrementTooltip;
+  /// **'world average 10–20 · you\'re on pace'**
+  String get worldAvgOnPace;
 
-  /// No description provided for @shareButton.
+  /// No description provided for @worldAvgBreezy.
   ///
   /// In en, this message translates to:
-  /// **'Share'**
-  String get shareButton;
+  /// **'world average 10–20 · breezy day'**
+  String get worldAvgBreezy;
 
-  /// No description provided for @shareTooltip.
+  /// No description provided for @thisWeek.
   ///
   /// In en, this message translates to:
-  /// **'Share your results with friends'**
-  String get shareTooltip;
+  /// **'This week'**
+  String get thisWeek;
 
-  /// No description provided for @shareSubject.
+  /// No description provided for @weekTotal.
   ///
   /// In en, this message translates to:
-  /// **'My Clouding results'**
-  String get shareSubject;
+  /// **'{count} total'**
+  String weekTotal(int count);
 
-  /// No description provided for @shareMessage.
+  /// No description provided for @tagSilent.
   ///
   /// In en, this message translates to:
-  /// **'I did {count} Cloudings today (goal: {goal}). Join me on CloudyLog!'**
-  String shareMessage(int count, int goal);
+  /// **'Silent'**
+  String get tagSilent;
 
-  /// No description provided for @settingsTitle.
+  /// No description provided for @tagSqueaky.
   ///
   /// In en, this message translates to:
-  /// **'Settings'**
-  String get settingsTitle;
+  /// **'Squeaky'**
+  String get tagSqueaky;
 
-  /// No description provided for @settingsTooltip.
+  /// No description provided for @tagThunder.
   ///
   /// In en, this message translates to:
-  /// **'Open settings'**
-  String get settingsTooltip;
+  /// **'Thunder'**
+  String get tagThunder;
 
-  /// No description provided for @recommendedCountSetting.
+  /// No description provided for @tagSbd.
   ///
   /// In en, this message translates to:
-  /// **'Recommended daily Cloudings'**
-  String get recommendedCountSetting;
+  /// **'SBD'**
+  String get tagSbd;
 
-  /// No description provided for @recommendedCountHint.
+  /// No description provided for @tagWindy.
   ///
   /// In en, this message translates to:
-  /// **'Enter a positive number'**
-  String get recommendedCountHint;
+  /// **'Windy'**
+  String get tagWindy;
 
-  /// No description provided for @languageSetting.
+  /// No description provided for @tagOops.
   ///
   /// In en, this message translates to:
-  /// **'Language'**
-  String get languageSetting;
+  /// **'Oops'**
+  String get tagOops;
 
-  /// No description provided for @displayNameSetting.
+  /// No description provided for @addTagButton.
   ///
   /// In en, this message translates to:
-  /// **'Displayed user name'**
-  String get displayNameSetting;
+  /// **'+ tag'**
+  String get addTagButton;
 
-  /// No description provided for @displayNameHint.
+  /// No description provided for @addTagTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your display name'**
-  String get displayNameHint;
+  /// **'Your own tag'**
+  String get addTagTitle;
 
-  /// No description provided for @languageEnglish.
+  /// No description provided for @addTagHint.
   ///
   /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
+  /// **'Name your wind'**
+  String get addTagHint;
 
-  /// No description provided for @languageSpanish.
+  /// No description provided for @addButton.
   ///
   /// In en, this message translates to:
-  /// **'Spanish'**
-  String get languageSpanish;
-
-  /// No description provided for @saveButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get saveButton;
+  /// **'Add'**
+  String get addButton;
 
   /// No description provided for @cancelButton.
   ///
@@ -254,155 +244,443 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancelButton;
 
-  /// No description provided for @resetTodayButton.
+  /// No description provided for @statsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Reset today\'s count'**
-  String get resetTodayButton;
+  /// **'Stats'**
+  String get statsTitle;
 
-  /// No description provided for @resetConfirmTitle.
+  /// No description provided for @statsTodayVsWorld.
   ///
   /// In en, this message translates to:
-  /// **'Reset today\'s Cloudings?'**
-  String get resetConfirmTitle;
+  /// **'Today vs the world'**
+  String get statsTodayVsWorld;
 
-  /// No description provided for @resetConfirmMessage.
+  /// No description provided for @statsWorldRange.
   ///
   /// In en, this message translates to:
-  /// **'This will set today\'s count back to zero.'**
-  String get resetConfirmMessage;
+  /// **'Most people land between 10 and 20 a day.'**
+  String get statsWorldRange;
 
-  /// No description provided for @invalidNumberError.
+  /// No description provided for @statsPercentile.
   ///
   /// In en, this message translates to:
-  /// **'Please enter a number greater than 0'**
-  String get invalidNumberError;
+  /// **'Ahead of {percent}% of tooters'**
+  String statsPercentile(int percent);
 
-  /// No description provided for @loginTitle.
+  /// No description provided for @statsParticipants.
   ///
   /// In en, this message translates to:
-  /// **'Sign in'**
-  String get loginTitle;
+  /// **'{count} tooters counted · updated daily'**
+  String statsParticipants(int count);
 
-  /// No description provided for @loginWelcome.
+  /// No description provided for @statsNoGlobalData.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to CloudyLog'**
-  String get loginWelcome;
+  /// **'Not enough wind data yet — check back tomorrow.'**
+  String get statsNoGlobalData;
 
-  /// No description provided for @loginSubtitle.
+  /// No description provided for @statsHistory.
   ///
   /// In en, this message translates to:
-  /// **'Sign in so your Cloudings can sync to your account.'**
-  String get loginSubtitle;
+  /// **'History'**
+  String get statsHistory;
 
-  /// No description provided for @usernameLabel.
+  /// No description provided for @statsTimeOfDay.
   ///
   /// In en, this message translates to:
-  /// **'Username or email'**
-  String get usernameLabel;
+  /// **'Time of day'**
+  String get statsTimeOfDay;
 
-  /// No description provided for @passwordLabel.
+  /// No description provided for @statsTimeOfDayHint.
   ///
   /// In en, this message translates to:
-  /// **'Password'**
-  String get passwordLabel;
+  /// **'When the wind blows, last 30 days'**
+  String get statsTimeOfDayHint;
 
-  /// No description provided for @usernameRequired.
+  /// No description provided for @statsWeekday.
   ///
   /// In en, this message translates to:
-  /// **'Username is required'**
-  String get usernameRequired;
+  /// **'Weekday patterns'**
+  String get statsWeekday;
 
-  /// No description provided for @passwordRequired.
+  /// No description provided for @statsWeekdayHint.
   ///
   /// In en, this message translates to:
-  /// **'Password is required'**
-  String get passwordRequired;
+  /// **'Average per weekday, last 8 weeks'**
+  String get statsWeekdayHint;
 
-  /// No description provided for @signUpTitle.
+  /// No description provided for @statsEmptyDay.
   ///
   /// In en, this message translates to:
-  /// **'Create account'**
-  String get signUpTitle;
+  /// **'All quiet on the wind front.'**
+  String get statsEmptyDay;
 
-  /// No description provided for @createAccountButton.
+  /// No description provided for @historyLockedNote.
   ///
   /// In en, this message translates to:
-  /// **'Create account'**
-  String get createAccountButton;
+  /// **'Free keeps the last 7 days on this phone. Pro remembers everything.'**
+  String get historyLockedNote;
 
-  /// No description provided for @haveAccountSignIn.
+  /// No description provided for @lockedProCard.
   ///
   /// In en, this message translates to:
-  /// **'Already have an account? Sign in'**
-  String get haveAccountSignIn;
+  /// **'Unlock with Pro'**
+  String get lockedProCard;
 
-  /// No description provided for @noAccountSignUp.
+  /// No description provided for @proChip.
   ///
   /// In en, this message translates to:
-  /// **'No account? Create one'**
-  String get noAccountSignUp;
+  /// **'PRO'**
+  String get proChip;
 
-  /// No description provided for @emailLabel.
+  /// No description provided for @disclaimer.
   ///
   /// In en, this message translates to:
-  /// **'Email'**
-  String get emailLabel;
+  /// **'Patterns, not diagnoses — Puff isn\'t medical advice.'**
+  String get disclaimer;
 
-  /// No description provided for @emailRequired.
+  /// No description provided for @duelsComingSoon.
   ///
   /// In en, this message translates to:
-  /// **'Enter a valid email'**
-  String get emailRequired;
+  /// **'Duels are coming soon'**
+  String get duelsComingSoon;
 
-  /// No description provided for @displayNameRequired.
+  /// No description provided for @duelsComingSoonBody.
   ///
   /// In en, this message translates to:
-  /// **'Display name is required'**
-  String get displayNameRequired;
+  /// **'Challenge a friend to a head-to-head week. Gust is stretching.'**
+  String get duelsComingSoonBody;
 
-  /// No description provided for @errorInvalidCredentials.
+  /// No description provided for @youTitle.
   ///
   /// In en, this message translates to:
-  /// **'Wrong email or password.'**
-  String get errorInvalidCredentials;
+  /// **'You'**
+  String get youTitle;
 
-  /// No description provided for @errorEmailAlreadyRegistered.
+  /// No description provided for @totalToots.
   ///
   /// In en, this message translates to:
-  /// **'This email is already registered.'**
-  String get errorEmailAlreadyRegistered;
+  /// **'{count} toots all time'**
+  String totalToots(int count);
 
-  /// No description provided for @errorNetwork.
+  /// No description provided for @bestDayLabel.
   ///
   /// In en, this message translates to:
-  /// **'Could not reach the server. Check your connection.'**
-  String get errorNetwork;
+  /// **'best day · {count}'**
+  String bestDayLabel(int count);
 
-  /// No description provided for @googleSignInUnavailable.
+  /// No description provided for @badgesHeader.
   ///
   /// In en, this message translates to:
-  /// **'Google sign-in isn\'t available yet.'**
-  String get googleSignInUnavailable;
+  /// **'Badges'**
+  String get badgesHeader;
 
-  /// No description provided for @proTitle.
+  /// No description provided for @badgeFirstPuff.
   ///
   /// In en, this message translates to:
-  /// **'Account & Pro'**
-  String get proTitle;
+  /// **'First puff'**
+  String get badgeFirstPuff;
 
-  /// No description provided for @proTooltip.
+  /// No description provided for @badgeFirstPuffDesc.
   ///
   /// In en, this message translates to:
-  /// **'Account & Pro'**
-  String get proTooltip;
+  /// **'Logged your very first toot'**
+  String get badgeFirstPuffDesc;
 
-  /// No description provided for @upgradeButton.
+  /// No description provided for @badgeDoubleDigits.
   ///
   /// In en, this message translates to:
-  /// **'Upgrade to Pro'**
-  String get upgradeButton;
+  /// **'Double digits'**
+  String get badgeDoubleDigits;
+
+  /// No description provided for @badgeDoubleDigitsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'10 in a single day'**
+  String get badgeDoubleDigitsDesc;
+
+  /// No description provided for @badgeStreak3.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm front'**
+  String get badgeStreak3;
+
+  /// No description provided for @badgeStreak3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'3-day streak'**
+  String get badgeStreak3Desc;
+
+  /// No description provided for @badgeStreak7.
+  ///
+  /// In en, this message translates to:
+  /// **'Jet stream'**
+  String get badgeStreak7;
+
+  /// No description provided for @badgeStreak7Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day streak'**
+  String get badgeStreak7Desc;
+
+  /// No description provided for @badgeStreak30.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade winds'**
+  String get badgeStreak30;
+
+  /// No description provided for @badgeStreak30Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'30-day streak'**
+  String get badgeStreak30Desc;
+
+  /// No description provided for @badgeCentury.
+  ///
+  /// In en, this message translates to:
+  /// **'Century club'**
+  String get badgeCentury;
+
+  /// No description provided for @badgeCenturyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'100 toots all time'**
+  String get badgeCenturyDesc;
+
+  /// No description provided for @badgeGaleForce.
+  ///
+  /// In en, this message translates to:
+  /// **'Gale force'**
+  String get badgeGaleForce;
+
+  /// No description provided for @badgeGaleForceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'20 or more in one day'**
+  String get badgeGaleForceDesc;
+
+  /// No description provided for @badgeTagCollector.
+  ///
+  /// In en, this message translates to:
+  /// **'Connoisseur'**
+  String get badgeTagCollector;
+
+  /// No description provided for @badgeTagCollectorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Used all four classic tags'**
+  String get badgeTagCollectorDesc;
+
+  /// No description provided for @badgeRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular'**
+  String get badgeRegular;
+
+  /// No description provided for @badgeRegularDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged on 14 different days'**
+  String get badgeRegularDesc;
+
+  /// No description provided for @wrappedButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Your year in wind'**
+  String get wrappedButton;
+
+  /// No description provided for @wrappedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{year}, wrapped'**
+  String wrappedTitle(int year);
+
+  /// No description provided for @wrappedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} toots'**
+  String wrappedTotal(int count);
+
+  /// No description provided for @wrappedBestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'best day · {count}'**
+  String wrappedBestDay(int count);
+
+  /// No description provided for @wrappedStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'longest streak · {days} days'**
+  String wrappedStreak(int days);
+
+  /// No description provided for @wrappedTopTag.
+  ///
+  /// In en, this message translates to:
+  /// **'signature move · {tag}'**
+  String wrappedTopTag(String tag);
+
+  /// No description provided for @wrappedNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet — your wind year starts now.'**
+  String get wrappedNoData;
+
+  /// No description provided for @shareButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareButton;
+
+  /// No description provided for @closeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get closeButton;
+
+  /// No description provided for @shareCardStreakHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days of dedication'**
+  String shareCardStreakHeadline(int days);
+
+  /// No description provided for @shareCardFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'puff · every toot counts'**
+  String get shareCardFooter;
+
+  /// No description provided for @shareStreakText.
+  ///
+  /// In en, this message translates to:
+  /// **'My {days}-day streak on Puff. Every toot counts.'**
+  String shareStreakText(int days);
+
+  /// No description provided for @shareBadgeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Just earned \"{badge}\" on Puff. Every toot counts.'**
+  String shareBadgeText(String badge);
+
+  /// No description provided for @shareWrappedText.
+  ///
+  /// In en, this message translates to:
+  /// **'My year in wind, by Puff.'**
+  String get shareWrappedText;
+
+  /// No description provided for @proHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Puff Pro'**
+  String get proHeader;
+
+  /// No description provided for @goProButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro'**
+  String get goProButton;
+
+  /// No description provided for @maybeLaterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get maybeLaterButton;
+
+  /// No description provided for @paywallLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep every day, see your patterns, back it all up.'**
+  String get paywallLead;
+
+  /// No description provided for @paywallBenefitHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited history, synced to the cloud'**
+  String get paywallBenefitHistory;
+
+  /// No description provided for @paywallBenefitStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentiles, heatmaps and weekday patterns'**
+  String get paywallBenefitStats;
+
+  /// No description provided for @paywallBenefitBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'The full badge collection'**
+  String get paywallBenefitBadges;
+
+  /// No description provided for @paywallBenefitSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon: the trigger food detective'**
+  String get paywallBenefitSoon;
+
+  /// No description provided for @paywallPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'\$2.49 a month or \$17.99 a year — under \$1.50 a month.'**
+  String get paywallPrice;
+
+  /// No description provided for @paywallDevNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Development build: purchases are simulated, no real charge.'**
+  String get paywallDevNote;
+
+  /// No description provided for @purchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re Pro. Gust salutes you.'**
+  String get purchaseSuccess;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That didn\'t go through. Try again?'**
+  String get purchaseFailed;
+
+  /// No description provided for @proStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro — active'**
+  String get proStatusActive;
+
+  /// No description provided for @proStatusCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro — canceled, runs until expiry'**
+  String get proStatusCanceled;
+
+  /// No description provided for @proValidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'valid until {date}'**
+  String proValidUntil(String date);
+
+  /// No description provided for @cancelProButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel subscription'**
+  String get cancelProButton;
+
+  /// No description provided for @cancelProConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Pro?'**
+  String get cancelProConfirmTitle;
+
+  /// No description provided for @cancelProConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro keeps working until the expiry date. Your data stays on this phone either way.'**
+  String get cancelProConfirmBody;
+
+  /// No description provided for @proCanceledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled. Pro runs until the expiry date.'**
+  String get proCanceledMessage;
 
   /// No description provided for @accountHeader.
   ///
@@ -410,125 +688,65 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get accountHeader;
 
-  /// No description provided for @signedInAs.
+  /// No description provided for @accountAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous — your data lives on this phone'**
+  String get accountAnonymous;
+
+  /// No description provided for @accountUpgradeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an email so Pro and backups survive a lost phone.'**
+  String get accountUpgradeHint;
+
+  /// No description provided for @createAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccountButton;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get emailInvalid;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @accountCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account linked. Same you, safer data.'**
+  String get accountCreated;
+
+  /// No description provided for @accountEmail.
   ///
   /// In en, this message translates to:
   /// **'Signed in as {email}'**
-  String signedInAs(String email);
+  String accountEmail(String email);
 
-  /// No description provided for @notSignedIn.
+  /// No description provided for @accountUpgradeFailed.
   ///
   /// In en, this message translates to:
-  /// **'Not signed in'**
-  String get notSignedIn;
-
-  /// No description provided for @freeTierNote.
-  ///
-  /// In en, this message translates to:
-  /// **'The free version keeps everything on this device.'**
-  String get freeTierNote;
-
-  /// No description provided for @proBenefitsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Go Pro'**
-  String get proBenefitsTitle;
-
-  /// No description provided for @proBenefitStorage.
-  ///
-  /// In en, this message translates to:
-  /// **'Back up your history to the cloud'**
-  String get proBenefitStorage;
-
-  /// No description provided for @proBenefitCompare.
-  ///
-  /// In en, this message translates to:
-  /// **'Compare your stats with your country and the world'**
-  String get proBenefitCompare;
-
-  /// No description provided for @proBenefitFriends.
-  ///
-  /// In en, this message translates to:
-  /// **'Add friends and share your results'**
-  String get proBenefitFriends;
-
-  /// No description provided for @proPriceNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Development build: the purchase is simulated — no real charge.'**
-  String get proPriceNote;
-
-  /// No description provided for @subscribeButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Activate Pro'**
-  String get subscribeButton;
-
-  /// No description provided for @signInRequiredForPro.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro needs an account so your data can sync.'**
-  String get signInRequiredForPro;
-
-  /// No description provided for @purchaseSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re Pro now! Your history is syncing to the cloud.'**
-  String get purchaseSuccess;
-
-  /// No description provided for @purchaseFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase failed. Please try again.'**
-  String get purchaseFailed;
-
-  /// No description provided for @manageSubscriptionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Your subscription'**
-  String get manageSubscriptionTitle;
-
-  /// No description provided for @subscriptionStatusActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro — active'**
-  String get subscriptionStatusActive;
-
-  /// No description provided for @subscriptionStatusCanceled.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro — canceled (active until expiry)'**
-  String get subscriptionStatusCanceled;
-
-  /// No description provided for @expiresOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Valid until {date}'**
-  String expiresOn(String date);
-
-  /// No description provided for @cancelSubscriptionButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel subscription'**
-  String get cancelSubscriptionButton;
-
-  /// No description provided for @cancelSubscriptionConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Pro?'**
-  String get cancelSubscriptionConfirmTitle;
-
-  /// No description provided for @cancelSubscriptionConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro stays active until the expiry date, then the app returns to the free tier. Your data stays on this device.'**
-  String get cancelSubscriptionConfirmMessage;
-
-  /// No description provided for @subscriptionCanceledMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription canceled. Pro stays active until the expiry date.'**
-  String get subscriptionCanceledMessage;
+  /// **'Couldn\'t link the account. Try again online.'**
+  String get accountUpgradeFailed;
 
   /// No description provided for @syncNowButton.
   ///
@@ -536,257 +754,101 @@ abstract class AppLocalizations {
   /// **'Sync now'**
   String get syncNowButton;
 
-  /// No description provided for @proRequiredMessage.
+  /// No description provided for @syncDone.
   ///
   /// In en, this message translates to:
-  /// **'This feature needs an active Pro subscription.'**
-  String get proRequiredMessage;
+  /// **'Synced.'**
+  String get syncDone;
 
-  /// No description provided for @statsTitle.
+  /// No description provided for @restoreButton.
   ///
   /// In en, this message translates to:
-  /// **'Compare'**
-  String get statsTitle;
+  /// **'Restore from cloud'**
+  String get restoreButton;
 
-  /// No description provided for @statsTooltip.
+  /// No description provided for @restoreDone.
   ///
   /// In en, this message translates to:
-  /// **'Compare with others'**
-  String get statsTooltip;
+  /// **'History restored.'**
+  String get restoreDone;
 
-  /// No description provided for @statsWorldwide.
+  /// No description provided for @deleteAccountButton.
   ///
   /// In en, this message translates to:
-  /// **'Worldwide'**
-  String get statsWorldwide;
+  /// **'Delete my cloud data'**
+  String get deleteAccountButton;
 
-  /// No description provided for @statsCountry.
+  /// No description provided for @deleteConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your country ({country})'**
-  String statsCountry(String country);
+  /// **'Delete everything?'**
+  String get deleteConfirmTitle;
 
-  /// No description provided for @statsCountryUnknown.
+  /// No description provided for @deleteConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'Your country'**
-  String get statsCountryUnknown;
+  /// **'Cloud data and account: gone forever. Data on this phone stays unless you uninstall.'**
+  String get deleteConfirmBody;
 
-  /// No description provided for @statsYourCountToday.
+  /// No description provided for @deleteDone.
   ///
   /// In en, this message translates to:
-  /// **'Your Cloudings today: {count}'**
-  String statsYourCountToday(int count);
+  /// **'Cloud data deleted.'**
+  String get deleteDone;
 
-  /// No description provided for @statsPercentile.
+  /// No description provided for @settingsHeader.
   ///
   /// In en, this message translates to:
-  /// **'Ahead of {percentile}% of participants'**
-  String statsPercentile(int percentile);
+  /// **'Settings'**
+  String get settingsHeader;
 
-  /// No description provided for @statsParticipants.
+  /// No description provided for @themeSetting.
   ///
   /// In en, this message translates to:
-  /// **'{count} participants today'**
-  String statsParticipants(int count);
+  /// **'Theme'**
+  String get themeSetting;
 
-  /// No description provided for @statsNoData.
+  /// No description provided for @themeSystem.
   ///
   /// In en, this message translates to:
-  /// **'No comparison data yet. Check back later.'**
-  String get statsNoData;
+  /// **'System'**
+  String get themeSystem;
 
-  /// No description provided for @statsCountryNotSet.
+  /// No description provided for @themeLight.
   ///
   /// In en, this message translates to:
-  /// **'Set your country in Settings to see country rankings.'**
-  String get statsCountryNotSet;
+  /// **'Light'**
+  String get themeLight;
 
-  /// No description provided for @friendsTitle.
+  /// No description provided for @themeDark.
   ///
   /// In en, this message translates to:
-  /// **'Friends'**
-  String get friendsTitle;
+  /// **'Dark'**
+  String get themeDark;
 
-  /// No description provided for @friendsTooltip.
+  /// No description provided for @soundSetting.
   ///
   /// In en, this message translates to:
-  /// **'Friends'**
-  String get friendsTooltip;
+  /// **'Tap sound'**
+  String get soundSetting;
 
-  /// No description provided for @friendsTodayHeader.
+  /// No description provided for @soundSettingHint.
   ///
   /// In en, this message translates to:
-  /// **'Today\'s Cloudings'**
-  String get friendsTodayHeader;
+  /// **'One tasteful pop. Off by default.'**
+  String get soundSettingHint;
 
-  /// No description provided for @friendsEmpty.
+  /// No description provided for @privacyNote.
   ///
   /// In en, this message translates to:
-  /// **'No friends yet. Send a request above!'**
-  String get friendsEmpty;
+  /// **'Free Puff never leaves your phone. Cloud sync is Pro-only, world stats are anonymous aggregates, and deleting your data is one tap.'**
+  String get privacyNote;
 
-  /// No description provided for @friendRequestsHeader.
+  /// No description provided for @errorNetwork.
   ///
   /// In en, this message translates to:
-  /// **'Pending requests'**
-  String get friendRequestsHeader;
-
-  /// No description provided for @addFriendLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a friend by email'**
-  String get addFriendLabel;
-
-  /// No description provided for @sendRequestButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get sendRequestButton;
-
-  /// No description provided for @friendRequestSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Friend request sent.'**
-  String get friendRequestSent;
-
-  /// No description provided for @friendUserNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No user with that email.'**
-  String get friendUserNotFound;
-
-  /// No description provided for @friendCannotAddSelf.
-  ///
-  /// In en, this message translates to:
-  /// **'You can\'t add yourself.'**
-  String get friendCannotAddSelf;
-
-  /// No description provided for @acceptButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Accept'**
-  String get acceptButton;
-
-  /// No description provided for @declineButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Decline'**
-  String get declineButton;
-
-  /// No description provided for @countrySetting.
-  ///
-  /// In en, this message translates to:
-  /// **'Country (2-letter code)'**
-  String get countrySetting;
-
-  /// No description provided for @countryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. US'**
-  String get countryHint;
-
-  /// No description provided for @invalidCountryError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a 2-letter country code'**
-  String get invalidCountryError;
-
-  /// No description provided for @signInButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in'**
-  String get signInButton;
-
-  /// No description provided for @signInWithGoogleButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with Google'**
-  String get signInWithGoogleButton;
-
-  /// No description provided for @orDivider.
-  ///
-  /// In en, this message translates to:
-  /// **'OR'**
-  String get orDivider;
-
-  /// No description provided for @signOutButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
-  String get signOutButton;
-
-  /// No description provided for @signOutTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
-  String get signOutTooltip;
-
-  /// No description provided for @settingsSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Settings saved'**
-  String get settingsSaved;
-
-  /// No description provided for @loginFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in failed. Please try again.'**
-  String get loginFailed;
-
-  /// No description provided for @calendarTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'History'**
-  String get calendarTitle;
-
-  /// No description provided for @calendarTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Open history calendar'**
-  String get calendarTooltip;
-
-  /// No description provided for @legendGoalReached.
-  ///
-  /// In en, this message translates to:
-  /// **'Goal reached'**
-  String get legendGoalReached;
-
-  /// No description provided for @legendGoalClose.
-  ///
-  /// In en, this message translates to:
-  /// **'Close to goal'**
-  String get legendGoalClose;
-
-  /// No description provided for @legendGoalLow.
-  ///
-  /// In en, this message translates to:
-  /// **'Less than half'**
-  String get legendGoalLow;
-
-  /// No description provided for @statusGoalReached.
-  ///
-  /// In en, this message translates to:
-  /// **'Goal reached. Nice work!'**
-  String get statusGoalReached;
-
-  /// No description provided for @statusGoalClose.
-  ///
-  /// In en, this message translates to:
-  /// **'Close — over halfway there.'**
-  String get statusGoalClose;
-
-  /// No description provided for @statusGoalLow.
-  ///
-  /// In en, this message translates to:
-  /// **'Less than half of the goal.'**
-  String get statusGoalLow;
-
-  /// No description provided for @statusGoalNone.
-  ///
-  /// In en, this message translates to:
-  /// **'No Cloudings logged this day.'**
-  String get statusGoalNone;
+  /// **'Couldn\'t reach the cloud. Everything still counts — it\'s saved on your phone.'**
+  String get errorNetwork;
 }
 
 class _AppLocalizationsDelegate
@@ -800,7 +862,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+      <String>['en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -811,8 +873,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
-    case 'es':
-      return AppLocalizationsEs();
   }
 
   throw FlutterError(

@@ -1,112 +1,76 @@
 # CLAUDE.md
 
-Guidance for Claude Code working in the CloudyLog repo.
+Guidance for Claude Code working in the Puff repo.
 
 ## What it is
 
-CloudyLog tracks daily "Clouding" actions against a configurable goal (default 35). Users can share results and view history on a color-coded calendar.
+**Puff** — the gut health tracker that doesn't take itself seriously. One giant button counts your toots; underneath the joke it's a legitimate gut-health log. Product strategy, brand rules, tokens and roadmap live in `Documentation/`:
 
-**Tiers:**
-- **Free** — no account, no network. All data and history stay on the device.
-- **Pro** (subscription) — requires an account; adds cloud storage of history, country/worldwide percentile comparisons, and friends (requests + today's leaderboard). Billing is currently a **mock provider** (server grants 30 days per activation); store billing (Google Play / App Store) plugs in behind the same `PurchaseValidator` port later.
+- [puff-handoff.md](Documentation/puff-handoff.md) — positioning, free/pro split, monetization, roadmap, architecture. **Read this before product decisions.**
+- [puff-design-book.html](Documentation/puff-design-book.html) — brand, tokens, mascot construction, components, main-screen spec.
+- [TODO.md](Documentation/TODO.md) — everything deliberately deferred (Phase 2/3 + infrastructure like RevenueCat, Sentry/PostHog, push). Check here before "adding" a missing feature; it may be parked on purpose.
+
+Current build covers **Phase 0 (tap loop, local history, 7-day chart, streaks) and Phase 1 (world comparison, badges, share cards, anonymous accounts, Pro with cloud sync and full stats, basic Wrapped)**.
+
+Voice rules (enforced in review): cheeky never crude, one joke per screen, sentence case, contractions, health language is ranges/patterns only ("most people land between 10 and 20"), "toot" in all user-facing text, no brown anywhere, ever.
 
 ## Repo layout
 
-- `mobile/` — Flutter client (works fully offline on the free tier; talks to the backend for Pro features)
-- `backend/` — Cloudflare Workers API
-
-Each subfolder is an independent project with its own tooling.
+- `mobile/` — Flutter app (package `puff`). Offline-first; fully functional with zero cloud config.
+- `supabase/` — Supabase project: `config.toml` + SQL migrations. RLS is the whole security model.
 
 ## mobile/ — Flutter app
 
-**Stack:** Flutter ≥3.22 / Dart ^3.4, Provider, `http`, `shared_preferences`, `share_plus`, `table_calendar`, ARB localization (English + Spanish).
+**Stack:** Flutter ≥3.22 / Dart ^3.4, Provider, Drift (SQLite), `supabase_flutter`, `google_fonts` (Baloo 2 + Nunito), `share_plus`, `shared_preferences`, `uuid` (v7), ARB l10n (English only — more locales are Phase 3).
 
 **Commands (run from `mobile/`):**
 - `flutter pub get`
-- `flutter gen-l10n` — regenerate `lib/l10n/generated/app_localizations.dart` after editing ARB files (auto-runs on `flutter run` because `generate: true`)
-- `flutter run --dart-define=CLOUDYLOG_API_URL=http://10.0.2.2:8787` (defaults to `http://localhost:8787`; Android emulators need `10.0.2.2`)
-- `flutter test`
+- `dart run build_runner build --delete-conflicting-outputs` — regenerate Drift code after editing `lib/data/drift/puff_database.dart`
+- `flutter gen-l10n` — after editing `lib/l10n/app_en.arb`
+- `flutter run --dart-define=PUFF_SUPABASE_URL=http://localhost:54321 --dart-define=PUFF_SUPABASE_ANON_KEY=<key from 'supabase start'>` — omit the defines to run 100% on-device
+- `flutter test`, `flutter analyze`
 
-**Layered architecture under `lib/`:**
+Note: `pubspec.yaml` pins `sqlparser: 0.44.5` in `dependency_overrides` — drift_dev 2.34 breaks against sqlparser 0.44.6. Drop the pin when drift_dev ships a fix.
 
-| Layer | Folders | Responsibility |
+**Architecture (offline-first — the one non-negotiable):** the Drift store is the source of truth; the server is a sync target and stats engine, never a dependency of the core loop. A tap must register in under 100 ms in airplane mode. Haptics/animation fire on the raw gesture handler (in `TapButton`), before any DB write.
+
+| Layer | Folders | Contents |
 |---|---|---|
-| Presentation | `presentation/screens`, `presentation/widgets`, `presentation/utils` | Widgets, navigation, per-screen logic |
-| Service | `services/` | `CloudingService`, `ConfigService`, `LoginService`, `SubscriptionService`, `SyncService`, `ShareService` — ChangeNotifier state |
-| Data | `data/`, `data/models`, `data/api` | Repository + gateway interfaces; `SharedPrefs*` impls; `ApiClient` + `Api*Gateway` impls |
+| Domain | `lib/domain/` | `PuffEvent` (append-only event model, uuidv7), streaks, badges, percentile, world range, entitlement — pure Dart |
+| Data | `lib/data/` | `EventStore` interface + Drift impl (`data/drift/`), `SettingsRepository` (prefs), gateway interfaces (`gateways.dart`) + Supabase impls (`data/supabase/`) |
+| Services | `lib/services/` | `TapService` (core loop + 10 s quick-tag window), `StatsService` (derives everything from events), `EntitlementService`, `AuthService`, `SyncService` (debounced push, restore pull), `SettingsService`, `ShareService` |
+| Presentation | `lib/presentation/` | Shell nav (Home/Stats/Duels/You) in `app.dart`; screens + widgets (`TapButton`, `PillButton`, `WeekChart`, paywall sheet, share cards) |
+| Brand | `lib/theme/puff_theme.dart`, `lib/branding/gust.dart` | Design-book tokens (light+dark, `PuffColors` ThemeExtension), Gust mascot painter (one ellipse + three circles, always) |
 
-`main.dart` builds the object graph (repos → `ApiClient` → gateways → services) and a `MultiProvider`; `app.dart` opens straight into `HomeScreen` (free tier needs no login) and binds `MaterialApp.locale` to `ConfigService.locale`.
+**Key invariants:**
+- Events are append-only; **never store or update counters** — counts, streaks, badges, charts, Wrapped all derive from events. Only `tags` may change (10 s window), which clears `syncedAt` so the edit re-pushes.
+- Client-generated UUIDv7 ids make sync idempotent (server upsert, last-write-wins).
+- Cloud sync is Pro-only and additionally enforced server-side by RLS.
+- No drop shadows; depth = pillow offsets and surface steps. Coral appears at most once per screen (Pro markers, streaks, celebrations).
+- Never hardcode user-visible strings; add to [app_en.arb](mobile/lib/l10n/app_en.arb) and regenerate.
+- Repositories/gateways are interfaces; services take them via constructor (+ injectable `clock` for time-dependent logic); tests use fakes from [test/fakes.dart](mobile/test/fakes.dart).
+- Reduced motion: bobbing/puff animations off, color pulse stays, haptic always fires.
 
-**Tier flow on mobile:**
-- All Clouding data is stored on-device under the fixed profile `kLocalProfileId` (`'local'`), signed in or not. The device is the source of truth.
-- `ProScreen` (Account & Pro hub) hosts sign-in/sign-up (`LoginScreen`), the mock-purchase paywall, and subscription management (cancel keeps Pro until expiry).
-- On upgrade (or signing into an already-Pro account), `SyncService.syncAll` uploads the full local history; the server merges by **max per day** and the merged view is written back locally.
-- While Pro and signed in, a listener in `main.dart` pushes today's absolute count (`PUT /cloudings/today`) after each change — resets propagate; offline pushes are dropped and reconciled by the next `syncAll`.
-- `SubscriptionService.isPro` gates the Pro UI (stats/friends icons on Home); the cached entitlement self-downgrades past `expiresAt` even offline.
-- Country defaults from the device locale at sign-up and is editable in Settings (PATCH `/me`).
+## supabase/ — backend
 
-**Conventions:**
-- Never hardcode user-visible strings. Add to [app_en.arb](mobile/lib/l10n/app_en.arb) and [app_es.arb](mobile/lib/l10n/app_es.arb), regenerate.
-- Repositories/gateways are abstract interfaces; services depend on the interface, tests supply in-memory fakes (see [test/fakes.dart](mobile/test/fakes.dart)).
-- Services extend `ChangeNotifier` and call `notifyListeners()` after mutations.
-- Clouding counts are stored per-day under SharedPreferences keys `clouding_count_<profileId>_YYYY-MM-DD`.
+**Commands (run from `supabase/`'s parent or with `--workdir`):**
+- `supabase start` — local stack (Docker); prints the anon key for `--dart-define`
+- `supabase db reset` — replay migrations locally
+- `supabase link` + `supabase db push` — apply migrations to the hosted project
 
-**Calendar coloring rules** ([goal_status.dart](mobile/lib/domain/goal_status.dart)):
-- `count >= goal` → green (reached)
-- `count >= 50% of goal` → orange (close)
-- `0 < count < 50%` → red (low)
-- No stored entry → no color
+**Migrations:**
+- `0001_profiles.sql` — profiles auto-created per auth user (anonymous included) via trigger; RLS own-row.
+- `0002_entitlements.sql` — entitlement mirror; readable own-row, writable **only** through security-definer RPCs `activate_mock_pro()` / `cancel_mock_pro()` (dev billing; RevenueCat webhook replaces them later) and `delete_my_account()` (one-tap total deletion). `has_active_pro()` is the single entitlement predicate.
+- `0003_events.sql` — cloud mirror of the device event log; RLS: select/delete own always, insert/update own **and** `has_active_pro()`.
+- `0004_global_stats.sql` — anonymous `daily_global_stats` (histogram + percentiles), computed by `refresh_global_stats()` via pg_cron (03:10 UTC daily, hourly later); clients read aggregates only, never raw population data.
 
-## backend/ — Cloudflare Workers API
+**Conventions:** auth flow is anonymous-first (`enable_anonymous_sign_ins = true`), upgraded in place via `auth.updateUser`. Every new table gets RLS in the same migration that creates it — no exceptions. Client API calls should go against tables-with-RLS or definer functions, never assume service_role.
 
-**Stack:** TypeScript ESM, Hono router, Drizzle ORM, Neon serverless Postgres (HTTP driver), `jose` (JWT + Google ID-token verification), PBKDF2 via Web Crypto.
+## Testing
 
-**Commands (run from `backend/`):**
-- `npm install`
-- `cp .env.example .dev.vars` and fill `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`
-- `npm run db:generate` — drizzle-kit → `backend/drizzle/*.sql`
-- `npm run db:migrate` — apply SQL to Neon
-- `npm run dev` — wrangler dev locally
-- `npm run typecheck`, `npm test`
-- `npm run deploy` (after `wrangler secret put ...` for prod)
+- Mobile: `flutter test` — domain rules (streaks/badges/percentile) and services against in-memory fakes; no DB or network in tests.
+- Backend: no test harness yet; migrations are verified by `supabase db reset` on the local stack.
 
-**Layered architecture under `src/`:**
+## Payments (current state)
 
-| Layer | Folder | Notes |
-|---|---|---|
-| Domain | `domain/` | Pure types + rules (`subscription.ts` holds the entitlement rule), zero deps |
-| Application | `application/ports`, `application/use-cases` | Interfaces + one class per use case |
-| Infrastructure | `infrastructure/db`, `infrastructure/auth`, `infrastructure/billing`, `infrastructure/clock` | Drizzle repos, PBKDF2 hasher, JWT issuer, Google verifier, `MockPurchaseValidator`, system clock |
-| Presentation | `presentation/app.ts`, `presentation/routes`, `presentation/middleware` | Hono app, routes, `requireAuth` + `requirePro` middleware |
-| Composition root | `composition.ts` | Wires interfaces → concrete impls (swap billing here) |
-| Entry point | `worker.ts` | Fetch + scheduled (cron) handlers |
-
-**Data model** (see [schema.ts](backend/src/infrastructure/db/schema.ts)):
-- `users` (id, email UNIQUE, display_name, password_hash, country, created_at) — country is ISO 3166-1 alpha-2 or null
-- `auth_identities` (user_id, provider, provider_subject) — one user, many providers
-- `subscriptions` (user_id PK, status, provider, started_at, expires_at, updated_at) — status `active|canceled`; entitlement = `expires_at > now` regardless of status
-- `clouding_entries` (user_id, day, count, updated_at) — PK `(user_id, day)`
-- `friendships` (requester_id, addressee_id, status, created_at)
-- `daily_aggregates` (day, country, total_users, p50, p75, p90, distribution JSONB, computed_at) — PK `(day, country)`; country `'*'` is the worldwide row
-
-**API surface (JSON, Bearer auth except `/auth/*` and `/healthz`; ★ = also requires an active Pro subscription, else 403 `pro_required`):**
-- `POST /auth/signup` (accepts optional `country`), `POST /auth/signin`, `POST /auth/google`
-- `GET /me`, `PATCH /me` — profile + subscription snapshot; update displayName/country
-- `GET /subscription`, `POST /subscription/activate` (`{provider:'mock', receipt}`), `POST /subscription/cancel`
-- ★ `POST /cloudings/today/increment`, `PUT /cloudings/today` (absolute count), `GET /cloudings`, `POST /cloudings/sync` (bulk upload, max-merge per day, returns merged history)
-- ★ `GET /stats/today?scope=worldwide|country` → `{day, scope, country, count, percentile, totalUsers}` (400 `country_not_set` if scope=country and no country)
-- ★ `POST /friends/requests`, `GET /friends/requests` (pending), `POST /friends/requests/:requesterId/respond`, `GET /friends/today`
-
-**Conventions:**
-- Use-cases accept dependencies via constructor. No singletons, no globals.
-- Infra classes are named `<Technology><Role>` (e.g. `DrizzleUserRepository`, `JwtTokenIssuer`, `MockPurchaseValidator`).
-- Edge-compatible only — no Node-only APIs. Stick to Fetch + Web Crypto so the worker runs on the free tier without `nodejs_compat`.
-- The cron trigger recomputes `daily_aggregates` (worldwide + per country) every 6 hours (see [wrangler.toml](backend/wrangler.toml)); `GetTodayStats` reads the cached snapshot rather than recomputing per request.
-- Test fakes for ports live in [fakes.test-helpers.ts](backend/src/application/use-cases/fakes.test-helpers.ts).
-
-## Known gaps
-
-- **Billing is mocked**: `MockPurchaseValidator` accepts any receipt for provider `'mock'` and grants 30 days. Real store billing = implement `PurchaseValidator` for Play/App Store receipts, swap in `composition.ts`, and use `in_app_purchase` on mobile behind `SubscriptionGateway.activateMock`'s replacement.
-- Google Sign-In on mobile is unavailable (no `google_sign_in` package); the backend `/auth/google` endpoint is ready and `LoginService.signInWithGoogle` returns `googleUnavailable` until wired.
-- `PUT /cloudings/today` uses the server's UTC day; a device near midnight in a distant timezone can write to the adjacent UTC day. Acceptable for now; fix by sending the client's day.
-- No token refresh: JWTs last 30 days; an expired token surfaces as failed Pro calls until the user signs in again.
+Mock only: `PurchaseGateway` (client seam) → `activate_mock_pro` RPC → `entitlements` row (30 days/activation, cancel keeps Pro until expiry). Real billing = RevenueCat SDK + webhook Edge Function; see TODO.md. Prices from the handoff: $2.49/mo, $17.99/yr, $29.99 lifetime.

@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/api/api_client.dart';
 import '../../data/gateways.dart';
-import '../../data/models/today_stats.dart';
+import '../../domain/percentile.dart';
+import '../../domain/puff_event.dart';
 import '../../l10n/generated/app_localizations.dart';
-import '../../services/login_service.dart';
+import '../../services/entitlement_service.dart';
+import '../../services/stats_service.dart';
+import '../../services/tap_service.dart';
+import '../../theme/puff_theme.dart';
+import '../widgets/paywall_sheet.dart';
+import '../widgets/week_chart.dart';
 
-/// Pro feature: compares today's count with the user's country and the world
-/// using the server's cached daily aggregates.
+/// Free: week chart, the sourced world range, 7 days of history. Pro adds
+/// percentiles, the full history heatmap, time-of-day and weekday patterns.
+/// Locked charts are the paywall's "earned curiosity" moments.
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
 
@@ -16,159 +22,498 @@ class StatsScreen extends StatefulWidget {
   State<StatsScreen> createState() => _StatsScreenState();
 }
 
-class _ScopeResult {
-  const _ScopeResult({this.stats, this.errorCode});
-
-  final TodayStats? stats;
-  final String? errorCode;
-}
-
 class _StatsScreenState extends State<StatsScreen> {
-  late Future<List<_ScopeResult>> _future;
+  late Future<StatsSnapshot> _snapshotFuture;
+  late Future<List<int>> _hoursFuture;
+  late Future<List<double>> _weekdaysFuture;
+  Future<GlobalDailyStats?>? _globalFuture;
+  TapService? _tapService;
 
   @override
-  void initState() {
-    super.initState();
-    _future = _load();
-  }
-
-  Future<List<_ScopeResult>> _load() {
-    final gateway = context.read<StatsGateway>();
-    return Future.wait([
-      _fetch(gateway, 'worldwide'),
-      _fetch(gateway, 'country'),
-    ]);
-  }
-
-  Future<_ScopeResult> _fetch(StatsGateway gateway, String scope) async {
-    try {
-      return _ScopeResult(stats: await gateway.today(scope));
-    } on ApiException catch (e) {
-      return _ScopeResult(errorCode: e.code);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final tap = context.read<TapService>();
+    if (tap != _tapService) {
+      _tapService?.removeListener(_reload);
+      _tapService = tap..addListener(_reload);
+      _reload();
     }
   }
 
-  Future<void> _refresh() async {
-    setState(() => _future = _load());
-    await _future;
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final strings = AppLocalizations.of(context)!;
-    final country = context.watch<LoginService>().currentUser?.country;
-
-    return Scaffold(
-      appBar: AppBar(title: Text(strings.statsTitle)),
-      body: FutureBuilder<List<_ScopeResult>>(
-        future: _future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final results = snapshot.data ??
-              const [_ScopeResult(), _ScopeResult()];
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _ScopeCard(
-                  title: strings.statsWorldwide,
-                  icon: Icons.public,
-                  result: results[0],
-                ),
-                const SizedBox(height: 12),
-                _ScopeCard(
-                  title: country != null
-                      ? strings.statsCountry(country)
-                      : strings.statsCountryUnknown,
-                  icon: Icons.flag,
-                  result: results[1],
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+  void dispose() {
+    _tapService?.removeListener(_reload);
+    super.dispose();
   }
-}
 
-class _ScopeCard extends StatelessWidget {
-  const _ScopeCard({
-    required this.title,
-    required this.icon,
-    required this.result,
-  });
-
-  final String title;
-  final IconData icon;
-  final _ScopeResult result;
+  void _reload() {
+    if (!mounted) return;
+    final stats = context.read<StatsService>();
+    setState(() {
+      _snapshotFuture = stats.snapshot();
+      _hoursFuture = stats.hourHistogram();
+      _weekdaysFuture = stats.weekdayAverages();
+      _globalFuture ??= context.read<GlobalStatsGateway>().latest().then(
+            (value) => value,
+            onError: (Object _) => null,
+          );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final stats = result.stats;
+    final isPro = context.watch<EntitlementService>().isPro;
+    final todayCount = context.watch<TapService>().todayCount;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(title, style: theme.textTheme.titleMedium),
-                ),
-              ],
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+        children: [
+          Text(strings.statsTitle, style: theme.textTheme.headlineMedium),
+          const SizedBox(height: 14),
+          _WorldCard(
+            todayCount: todayCount,
+            isPro: isPro,
+            globalFuture: _globalFuture,
+          ),
+          const SizedBox(height: 12),
+          _SectionCard(
+            title: strings.thisWeek,
+            child: FutureBuilder<StatsSnapshot>(
+              future: _snapshotFuture,
+              builder: (context, snapshot) {
+                final data = snapshot.data;
+                if (data == null) return const _CardLoading();
+                if (data.weekTotal == 0) {
+                  return Text(
+                    strings.statsEmptyDay,
+                    style: theme.textTheme.bodyMedium,
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    WeekChart(counts: data.weekCounts, height: 56),
+                    const SizedBox(height: 8),
+                    Text(
+                      strings.weekTotal(data.weekTotal),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                );
+              },
             ),
-            const SizedBox(height: 12),
-            if (stats == null)
-              Text(_errorText(strings, result.errorCode))
-            else ...[
-              Text(
-                strings.statsYourCountToday(stats.count),
-                style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 12),
+          _SectionCard(
+            title: strings.statsHistory,
+            child: FutureBuilder<StatsSnapshot>(
+              future: _snapshotFuture,
+              builder: (context, snapshot) {
+                final data = snapshot.data;
+                if (data == null) return const _CardLoading();
+                return _HistoryGrid(
+                  dayCounts: data.dayCounts,
+                  isPro: isPro,
+                  lockedNote: strings.historyLockedNote,
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (isPro)
+            _SectionCard(
+              title: strings.statsTimeOfDay,
+              subtitle: strings.statsTimeOfDayHint,
+              child: FutureBuilder<List<int>>(
+                future: _hoursFuture,
+                builder: (context, snapshot) {
+                  final hours = snapshot.data;
+                  if (hours == null) return const _CardLoading();
+                  return WeekChart(
+                    counts: hours,
+                    height: 48,
+                    hotIndex: _maxIndex(hours),
+                  );
+                },
               ),
-              const SizedBox(height: 8),
-              if (stats.percentile == null)
-                Text(strings.statsNoData)
-              else ...[
-                Text(
-                  strings.statsPercentile(stats.percentile!),
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+            )
+          else
+            _LockedCard(
+              title: strings.statsTimeOfDay,
+              description: strings.statsTimeOfDayHint,
+            ),
+          const SizedBox(height: 12),
+          if (isPro)
+            _SectionCard(
+              title: strings.statsWeekday,
+              subtitle: strings.statsWeekdayHint,
+              child: FutureBuilder<List<double>>(
+                future: _weekdaysFuture,
+                builder: (context, snapshot) {
+                  final averages = snapshot.data;
+                  if (averages == null) return const _CardLoading();
+                  final scaled = [
+                    for (final avg in averages) (avg * 10).round(),
+                  ];
+                  return WeekChart(
+                    counts: scaled,
+                    height: 48,
+                    hotIndex: _maxIndex(scaled),
+                  );
+                },
+              ),
+            )
+          else
+            _LockedCard(
+              title: strings.statsWeekday,
+              description: strings.statsWeekdayHint,
+            ),
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              strings.disclaimer,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _maxIndex(List<int> values) {
+    var index = 0;
+    for (var i = 1; i < values.length; i++) {
+      if (values[i] > values[index]) index = i;
+    }
+    return index;
+  }
+}
+
+class _WorldCard extends StatelessWidget {
+  const _WorldCard({
+    required this.todayCount,
+    required this.isPro,
+    required this.globalFuture,
+  });
+
+  final int todayCount;
+  final bool isPro;
+  final Future<GlobalDailyStats?>? globalFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final puff = context.puff;
+
+    return _SectionCard(
+      title: strings.statsTodayVsWorld,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$todayCount', style: theme.textTheme.displayMedium),
+          const SizedBox(height: 4),
+          Text(strings.statsWorldRange, style: theme.textTheme.bodyLarge),
+          const SizedBox(height: 10),
+          if (!isPro)
+            _ProUnlockRow(onTap: () => showPaywall(context))
+          else
+            FutureBuilder<GlobalDailyStats?>(
+              future: globalFuture,
+              builder: (context, snapshot) {
+                final global = snapshot.data;
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const _CardLoading();
+                }
+                if (global == null || global.totalUsers == 0) {
+                  return Text(
+                    strings.statsNoGlobalData,
+                    style: theme.textTheme.bodyMedium,
+                  );
+                }
+                final percentile =
+                    percentileRankFor(todayCount, global.distribution);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 9,
+                      ),
+                      decoration: BoxDecoration(
+                        color: puff.chipSelectedBg,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        strings.statsPercentile(percentile),
+                        style: theme.textTheme.titleMedium!
+                            .copyWith(color: puff.chipSelectedBorder),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      strings.statsParticipants(global.totalUsers),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 12 weeks of history as a heat grid, most recent week at the bottom. Free
+/// sees only the last 7 days; the older cells are the day-8 paywall moment.
+class _HistoryGrid extends StatelessWidget {
+  const _HistoryGrid({
+    required this.dayCounts,
+    required this.isPro,
+    required this.lockedNote,
+  });
+
+  final Map<DateTime, int> dayCounts;
+  final bool isPro;
+  final String lockedNote;
+
+  @override
+  Widget build(BuildContext context) {
+    final puff = context.puff;
+    final theme = Theme.of(context);
+    final today = dayOf(DateTime.now());
+    // Align the grid so the last row ends on today.
+    const weeks = 12;
+    final start = today.subtract(const Duration(days: weeks * 7 - 1));
+    var max = 0;
+    for (final count in dayCounts.values) {
+      if (count > max) max = count;
+    }
+
+    final rows = <Widget>[];
+    for (var w = 0; w < weeks; w++) {
+      final cells = <Widget>[];
+      for (var d = 0; d < 7; d++) {
+        final day = start.add(Duration(days: w * 7 + d));
+        final count = dayCounts[day] ?? 0;
+        final withinFreeWindow =
+            today.difference(day).inDays < 7 && !day.isAfter(today);
+        final visible = isPro || withinFreeWindow;
+        final Color color;
+        if (!visible) {
+          color = puff.hairline.withValues(alpha: 0.55);
+        } else if (count == 0) {
+          color = puff.hairline;
+        } else {
+          color = Color.lerp(
+            puff.barIdle,
+            puff.barHot,
+            max == 0 ? 0 : count / max,
+          )!;
+        }
+        cells.add(
+          Expanded(
+            child: GestureDetector(
+              onTap: visible ? null : () => showPaywall(context),
+              child: Container(
+                height: 16,
+                margin: const EdgeInsets.all(1.5),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(5),
                 ),
-                if (stats.totalUsers != null) ...[
+              ),
+            ),
+          ),
+        );
+      }
+      rows.add(Row(children: cells));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ...rows,
+        if (!isPro) ...[
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => showPaywall(context),
+            child: Text(lockedNote, style: theme.textTheme.bodySmall),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.title,
+    required this.child,
+    this.subtitle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final puff = context.puff;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: puff.surface,
+        borderRadius: BorderRadius.circular(PuffRadius.lg),
+        border: Border.all(color: puff.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: theme.textTheme.titleLarge),
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(subtitle!, style: theme.textTheme.bodySmall),
+          ],
+          const SizedBox(height: 10),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _LockedCard extends StatelessWidget {
+  const _LockedCard({required this.title, required this.description});
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final puff = context.puff;
+    return GestureDetector(
+      onTap: () => showPaywall(context),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: puff.surface,
+          borderRadius: BorderRadius.circular(PuffRadius.lg),
+          border: Border.all(color: puff.hairline),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(title, style: theme.textTheme.titleLarge),
+                      ),
+                      const SizedBox(width: 8),
+                      _ProChip(label: strings.proChip),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(description, style: theme.textTheme.bodySmall),
                   const SizedBox(height: 4),
                   Text(
-                    strings.statsParticipants(stats.totalUsers!),
-                    style: theme.textTheme.bodySmall,
+                    strings.lockedProCard,
+                    style: theme.textTheme.bodyMedium!
+                        .copyWith(color: puff.pro, fontWeight: FontWeight.w700),
                   ),
                 ],
-              ],
-            ],
+              ),
+            ),
+            Icon(Icons.lock_outline, color: puff.textSecondary),
           ],
         ),
       ),
     );
   }
+}
 
-  String _errorText(AppLocalizations strings, String? code) {
-    switch (code) {
-      case 'country_not_set':
-        return strings.statsCountryNotSet;
-      case 'pro_required':
-        return strings.proRequiredMessage;
-      default:
-        return strings.errorNetwork;
-    }
+class _ProChip extends StatelessWidget {
+  const _ProChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final puff = context.puff;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+      decoration: BoxDecoration(
+        color: puff.pro,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
+          color: puff.onPro,
+        ),
+      ),
+    );
+  }
+}
+
+class _CardLoading extends StatelessWidget {
+  const _CardLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 12),
+      child: Center(
+        child: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProUnlockRow extends StatelessWidget {
+  const _ProUnlockRow({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final puff = context.puff;
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(Icons.lock_outline, size: 18, color: puff.textSecondary),
+          const SizedBox(width: 8),
+          Text(
+            strings.lockedProCard,
+            style: theme.textTheme.bodyMedium!
+                .copyWith(color: puff.pro, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(width: 8),
+          _ProChip(label: strings.proChip),
+        ],
+      ),
+    );
   }
 }

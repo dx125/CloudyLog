@@ -1,180 +1,214 @@
 {
   "@@locale": "en",
-  "appTitle": "CloudyLog",
-  "homeTitle": "Clouding Tracker",
-  "greeting": "Hello, {name}!",
-  "@greeting": {
+  "appTitle": "Puff",
+  "navHome": "Home",
+  "navStats": "Stats",
+  "navDuels": "Duels",
+  "navYou": "You",
+  "streakPill": "{days}-day streak",
+  "@streakPill": {
     "placeholders": {
-      "name": { "type": "String" }
+      "days": { "type": "int" }
     }
   },
-  "todaysCloudingsLabel": "Today's Cloudings",
-  "recommendedLabel": "Recommended: {count}",
-  "@recommendedLabel": {
+  "tootsToday": "toots today",
+  "tapHint": "Tap when it happens",
+  "tapSemantics": "Log a toot, {count} today",
+  "@tapSemantics": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "progressLabel": "{current} / {goal}",
-  "@progressLabel": {
+  "worldAvgQuiet": "world average 10–20 · all quiet so far",
+  "worldAvgOnPace": "world average 10–20 · you're on pace",
+  "worldAvgBreezy": "world average 10–20 · breezy day",
+  "thisWeek": "This week",
+  "weekTotal": "{count} total",
+  "@weekTotal": {
     "placeholders": {
-      "current": { "type": "int" },
-      "goal": { "type": "int" }
+      "count": { "type": "int" }
     }
   },
-  "progressPercentLabel": "{percent}%",
-  "@progressPercentLabel": {
+  "tagSilent": "Silent",
+  "tagSqueaky": "Squeaky",
+  "tagThunder": "Thunder",
+  "tagSbd": "SBD",
+  "tagWindy": "Windy",
+  "tagOops": "Oops",
+  "addTagButton": "+ tag",
+  "addTagTitle": "Your own tag",
+  "addTagHint": "Name your wind",
+  "addButton": "Add",
+  "cancelButton": "Cancel",
+  "statsTitle": "Stats",
+  "statsTodayVsWorld": "Today vs the world",
+  "statsWorldRange": "Most people land between 10 and 20 a day.",
+  "statsPercentile": "Ahead of {percent}% of tooters",
+  "@statsPercentile": {
     "placeholders": {
       "percent": { "type": "int" }
     }
   },
-  "goalReached": "Goal reached!",
-  "goalExceeded": "{over} over goal",
-  "@goalExceeded": {
-    "placeholders": {
-      "over": { "type": "int" }
-    }
-  },
-  "incrementButton": "Clouding!",
-  "incrementTooltip": "Add one Clouding",
-  "shareButton": "Share",
-  "shareTooltip": "Share your results with friends",
-  "shareSubject": "My Clouding results",
-  "shareMessage": "I did {count} Cloudings today (goal: {goal}). Join me on CloudyLog!",
-  "@shareMessage": {
-    "placeholders": {
-      "count": { "type": "int" },
-      "goal": { "type": "int" }
-    }
-  },
-  "settingsTitle": "Settings",
-  "settingsTooltip": "Open settings",
-  "recommendedCountSetting": "Recommended daily Cloudings",
-  "recommendedCountHint": "Enter a positive number",
-  "languageSetting": "Language",
-  "displayNameSetting": "Displayed user name",
-  "displayNameHint": "Your display name",
-  "languageEnglish": "English",
-  "languageSpanish": "Spanish",
-  "saveButton": "Save",
-  "cancelButton": "Cancel",
-  "resetTodayButton": "Reset today's count",
-  "resetConfirmTitle": "Reset today's Cloudings?",
-  "resetConfirmMessage": "This will set today's count back to zero.",
-  "invalidNumberError": "Please enter a number greater than 0",
-  "loginTitle": "Sign in",
-  "loginWelcome": "Welcome to CloudyLog",
-  "loginSubtitle": "Sign in so your Cloudings can sync to your account.",
-  "usernameLabel": "Username or email",
-  "passwordLabel": "Password",
-  "usernameRequired": "Username is required",
-  "passwordRequired": "Password is required",
-  "signUpTitle": "Create account",
-  "createAccountButton": "Create account",
-  "haveAccountSignIn": "Already have an account? Sign in",
-  "noAccountSignUp": "No account? Create one",
-  "emailLabel": "Email",
-  "emailRequired": "Enter a valid email",
-  "displayNameRequired": "Display name is required",
-  "errorInvalidCredentials": "Wrong email or password.",
-  "errorEmailAlreadyRegistered": "This email is already registered.",
-  "errorNetwork": "Could not reach the server. Check your connection.",
-  "googleSignInUnavailable": "Google sign-in isn't available yet.",
-  "proTitle": "Account & Pro",
-  "proTooltip": "Account & Pro",
-  "upgradeButton": "Upgrade to Pro",
-  "accountHeader": "Account",
-  "signedInAs": "Signed in as {email}",
-  "@signedInAs": {
-    "placeholders": {
-      "email": { "type": "String" }
-    }
-  },
-  "notSignedIn": "Not signed in",
-  "freeTierNote": "The free version keeps everything on this device.",
-  "proBenefitsTitle": "Go Pro",
-  "proBenefitStorage": "Back up your history to the cloud",
-  "proBenefitCompare": "Compare your stats with your country and the world",
-  "proBenefitFriends": "Add friends and share your results",
-  "proPriceNote": "Development build: the purchase is simulated — no real charge.",
-  "subscribeButton": "Activate Pro",
-  "signInRequiredForPro": "Pro needs an account so your data can sync.",
-  "purchaseSuccess": "You're Pro now! Your history is syncing to the cloud.",
-  "purchaseFailed": "Purchase failed. Please try again.",
-  "manageSubscriptionTitle": "Your subscription",
-  "subscriptionStatusActive": "Pro — active",
-  "subscriptionStatusCanceled": "Pro — canceled (active until expiry)",
-  "expiresOn": "Valid until {date}",
-  "@expiresOn": {
-    "placeholders": {
-      "date": { "type": "String" }
-    }
-  },
-  "cancelSubscriptionButton": "Cancel subscription",
-  "cancelSubscriptionConfirmTitle": "Cancel Pro?",
-  "cancelSubscriptionConfirmMessage": "Pro stays active until the expiry date, then the app returns to the free tier. Your data stays on this device.",
-  "subscriptionCanceledMessage": "Subscription canceled. Pro stays active until the expiry date.",
-  "syncNowButton": "Sync now",
-  "proRequiredMessage": "This feature needs an active Pro subscription.",
-  "statsTitle": "Compare",
-  "statsTooltip": "Compare with others",
-  "statsWorldwide": "Worldwide",
-  "statsCountry": "Your country ({country})",
-  "@statsCountry": {
-    "placeholders": {
-      "country": { "type": "String" }
-    }
-  },
-  "statsCountryUnknown": "Your country",
-  "statsYourCountToday": "Your Cloudings today: {count}",
-  "@statsYourCountToday": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "statsPercentile": "Ahead of {percentile}% of participants",
-  "@statsPercentile": {
-    "placeholders": {
-      "percentile": { "type": "int" }
-    }
-  },
-  "statsParticipants": "{count} participants today",
+  "statsParticipants": "{count} tooters counted · updated daily",
   "@statsParticipants": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "statsNoData": "No comparison data yet. Check back later.",
-  "statsCountryNotSet": "Set your country in Settings to see country rankings.",
-  "friendsTitle": "Friends",
-  "friendsTooltip": "Friends",
-  "friendsTodayHeader": "Today's Cloudings",
-  "friendsEmpty": "No friends yet. Send a request above!",
-  "friendRequestsHeader": "Pending requests",
-  "addFriendLabel": "Add a friend by email",
-  "sendRequestButton": "Send",
-  "friendRequestSent": "Friend request sent.",
-  "friendUserNotFound": "No user with that email.",
-  "friendCannotAddSelf": "You can't add yourself.",
-  "acceptButton": "Accept",
-  "declineButton": "Decline",
-  "countrySetting": "Country (2-letter code)",
-  "countryHint": "e.g. US",
-  "invalidCountryError": "Enter a 2-letter country code",
-  "signInButton": "Sign in",
-  "signInWithGoogleButton": "Continue with Google",
-  "orDivider": "OR",
-  "signOutButton": "Sign out",
-  "signOutTooltip": "Sign out",
-  "settingsSaved": "Settings saved",
-  "loginFailed": "Sign in failed. Please try again.",
-  "calendarTitle": "History",
-  "calendarTooltip": "Open history calendar",
-  "legendGoalReached": "Goal reached",
-  "legendGoalClose": "Close to goal",
-  "legendGoalLow": "Less than half",
-  "statusGoalReached": "Goal reached. Nice work!",
-  "statusGoalClose": "Close — over halfway there.",
-  "statusGoalLow": "Less than half of the goal.",
-  "statusGoalNone": "No Cloudings logged this day."
+  "statsNoGlobalData": "Not enough wind data yet — check back tomorrow.",
+  "statsHistory": "History",
+  "statsTimeOfDay": "Time of day",
+  "statsTimeOfDayHint": "When the wind blows, last 30 days",
+  "statsWeekday": "Weekday patterns",
+  "statsWeekdayHint": "Average per weekday, last 8 weeks",
+  "statsEmptyDay": "All quiet on the wind front.",
+  "historyLockedNote": "Free keeps the last 7 days on this phone. Pro remembers everything.",
+  "lockedProCard": "Unlock with Pro",
+  "proChip": "PRO",
+  "disclaimer": "Patterns, not diagnoses — Puff isn't medical advice.",
+  "duelsComingSoon": "Duels are coming soon",
+  "duelsComingSoonBody": "Challenge a friend to a head-to-head week. Gust is stretching.",
+  "youTitle": "You",
+  "totalToots": "{count} toots all time",
+  "@totalToots": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "bestDayLabel": "best day · {count}",
+  "@bestDayLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "badgesHeader": "Badges",
+  "badgeFirstPuff": "First puff",
+  "badgeFirstPuffDesc": "Logged your very first toot",
+  "badgeDoubleDigits": "Double digits",
+  "badgeDoubleDigitsDesc": "10 in a single day",
+  "badgeStreak3": "Warm front",
+  "badgeStreak3Desc": "3-day streak",
+  "badgeStreak7": "Jet stream",
+  "badgeStreak7Desc": "7-day streak",
+  "badgeStreak30": "Trade winds",
+  "badgeStreak30Desc": "30-day streak",
+  "badgeCentury": "Century club",
+  "badgeCenturyDesc": "100 toots all time",
+  "badgeGaleForce": "Gale force",
+  "badgeGaleForceDesc": "20 or more in one day",
+  "badgeTagCollector": "Connoisseur",
+  "badgeTagCollectorDesc": "Used all four classic tags",
+  "badgeRegular": "Regular",
+  "badgeRegularDesc": "Logged on 14 different days",
+  "wrappedButton": "Your year in wind",
+  "wrappedTitle": "{year}, wrapped",
+  "@wrappedTitle": {
+    "placeholders": {
+      "year": { "type": "int" }
+    }
+  },
+  "wrappedTotal": "{count} toots",
+  "@wrappedTotal": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "wrappedBestDay": "best day · {count}",
+  "@wrappedBestDay": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "wrappedStreak": "longest streak · {days} days",
+  "@wrappedStreak": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "wrappedTopTag": "signature move · {tag}",
+  "@wrappedTopTag": {
+    "placeholders": {
+      "tag": { "type": "String" }
+    }
+  },
+  "wrappedNoData": "Nothing logged yet — your wind year starts now.",
+  "shareButton": "Share",
+  "closeButton": "Close",
+  "shareCardStreakHeadline": "{days} days of dedication",
+  "@shareCardStreakHeadline": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "shareCardFooter": "puff · every toot counts",
+  "shareStreakText": "My {days}-day streak on Puff. Every toot counts.",
+  "@shareStreakText": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "shareBadgeText": "Just earned \"{badge}\" on Puff. Every toot counts.",
+  "@shareBadgeText": {
+    "placeholders": {
+      "badge": { "type": "String" }
+    }
+  },
+  "shareWrappedText": "My year in wind, by Puff.",
+  "proHeader": "Puff Pro",
+  "goProButton": "Go Pro",
+  "maybeLaterButton": "Maybe later",
+  "paywallLead": "Keep every day, see your patterns, back it all up.",
+  "paywallBenefitHistory": "Unlimited history, synced to the cloud",
+  "paywallBenefitStats": "Percentiles, heatmaps and weekday patterns",
+  "paywallBenefitBadges": "The full badge collection",
+  "paywallBenefitSoon": "Coming soon: the trigger food detective",
+  "paywallPrice": "$2.49 a month or $17.99 a year — under $1.50 a month.",
+  "paywallDevNote": "Development build: purchases are simulated, no real charge.",
+  "purchaseSuccess": "You're Pro. Gust salutes you.",
+  "purchaseFailed": "That didn't go through. Try again?",
+  "proStatusActive": "Pro — active",
+  "proStatusCanceled": "Pro — canceled, runs until expiry",
+  "proValidUntil": "valid until {date}",
+  "@proValidUntil": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "cancelProButton": "Cancel subscription",
+  "cancelProConfirmTitle": "Cancel Pro?",
+  "cancelProConfirmBody": "Pro keeps working until the expiry date. Your data stays on this phone either way.",
+  "proCanceledMessage": "Canceled. Pro runs until the expiry date.",
+  "accountHeader": "Account",
+  "accountAnonymous": "Anonymous — your data lives on this phone",
+  "accountUpgradeHint": "Add an email so Pro and backups survive a lost phone.",
+  "createAccountButton": "Create account",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "emailInvalid": "Enter a valid email",
+  "passwordTooShort": "At least 8 characters",
+  "accountCreated": "Account linked. Same you, safer data.",
+  "accountEmail": "Signed in as {email}",
+  "@accountEmail": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "accountUpgradeFailed": "Couldn't link the account. Try again online.",
+  "syncNowButton": "Sync now",
+  "syncDone": "Synced.",
+  "restoreButton": "Restore from cloud",
+  "restoreDone": "History restored.",
+  "deleteAccountButton": "Delete my cloud data",
+  "deleteConfirmTitle": "Delete everything?",
+  "deleteConfirmBody": "Cloud data and account: gone forever. Data on this phone stays unless you uninstall.",
+  "deleteDone": "Cloud data deleted.",
+  "settingsHeader": "Settings",
+  "themeSetting": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "soundSetting": "Tap sound",
+  "soundSettingHint": "One tasteful pop. Off by default.",
+  "privacyNote": "Free Puff never leaves your phone. Cloud sync is Pro-only, world stats are anonymous aggregates, and deleting your data is one tap.",
+  "errorNetwork": "Couldn't reach the cloud. Everything still counts — it's saved on your phone."
 }

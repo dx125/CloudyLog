@@ -17,7 +17,7 @@ Voice rules (enforced in review): cheeky never crude, one joke per screen, sente
 ## Repo layout
 
 - `mobile/` — Flutter app (package `puff`). Offline-first; fully functional with zero cloud config.
-- `supabase/` — Supabase project: `config.toml` + SQL migrations. RLS is the whole security model.
+- `supabase/` — Supabase project: `config.toml`, SQL migrations, and edge functions (the app's only backend API). RLS is the security model; the functions are the API surface on top of it.
 
 ## mobile/ — Flutter app
 
@@ -27,7 +27,7 @@ Voice rules (enforced in review): cheeky never crude, one joke per screen, sente
 - `flutter pub get`
 - `dart run build_runner build --delete-conflicting-outputs` — regenerate Drift code after editing `lib/data/drift/puff_database.dart`
 - `flutter gen-l10n` — after editing `lib/l10n/app_en.arb`
-- `flutter run --dart-define=PUFF_SUPABASE_URL=http://localhost:54321 --dart-define=PUFF_SUPABASE_ANON_KEY=<key from 'supabase start'>` — omit the defines to run 100% on-device
+- `flutter run --dart-define-from-file=.env` — cloud-connected run; copy `mobile/.env.example` to `mobile/.env` and fill in the Supabase URL + anon key (`.env` is gitignored). Equivalent long form: `--dart-define=PUFF_SUPABASE_URL=... --dart-define=PUFF_SUPABASE_ANON_KEY=...`. Omit entirely to run 100% on-device.
 - `flutter test`, `flutter analyze`
 
 Note: `pubspec.yaml` pins `sqlparser: 0.44.5` in `dependency_overrides` — drift_dev 2.34 breaks against sqlparser 0.44.6. Drop the pin when drift_dev ships a fix.
@@ -54,9 +54,10 @@ Note: `pubspec.yaml` pins `sqlparser: 0.44.5` in `dependency_overrides` — drif
 ## supabase/ — backend
 
 **Commands (run from `supabase/`'s parent or with `--workdir`):**
-- `supabase start` — local stack (Docker); prints the anon key for `--dart-define`
+- `supabase start` — local stack (Docker); prints the anon key for `--dart-define` and serves edge functions at `/functions/v1/<name>`
 - `supabase db reset` — replay migrations locally
-- `supabase link` + `supabase db push` — apply migrations to the hosted project
+- `supabase functions serve` — hot-reload edge functions during development
+- `supabase link` + `supabase db push` + `supabase functions deploy` — apply migrations and functions to the hosted project
 
 **Migrations:**
 - `0001_profiles.sql` — profiles auto-created per auth user (anonymous included) via trigger; RLS own-row.
@@ -64,7 +65,13 @@ Note: `pubspec.yaml` pins `sqlparser: 0.44.5` in `dependency_overrides` — drif
 - `0003_events.sql` — cloud mirror of the device event log; RLS: select/delete own always, insert/update own **and** `has_active_pro()`.
 - `0004_global_stats.sql` — anonymous `daily_global_stats` (histogram + percentiles), computed by `refresh_global_stats()` via pg_cron (03:10 UTC daily, hourly later); clients read aggregates only, never raw population data.
 
-**Conventions:** auth flow is anonymous-first (`enable_anonymous_sign_ins = true`), upgraded in place via `auth.updateUser`. Every new table gets RLS in the same migration that creates it — no exceptions. Client API calls should go against tables-with-RLS or definer functions, never assume service_role.
+**Edge functions (`functions/`)** — the app's entire backend API; the client **never** queries tables or RPCs directly (the only non-function API is Supabase Auth itself). Each function forwards the caller's JWT (`_shared/edge.ts` → `userClient`), so RLS and definer functions keep applying — functions are the API surface, not a privilege bypass; no service_role anywhere.
+- `sync-events` — POST idempotent event upsert (Pro-gated by RLS → 403), GET full pull for restore.
+- `entitlements` — GET entitlement; POST `{action: purchase|cancel}` → mock billing RPCs.
+- `global-stats` — GET latest anonymous aggregate row.
+- `account` — DELETE → `delete_my_account()`.
+
+**Conventions:** auth flow is anonymous-first (`enable_anonymous_sign_ins = true`), upgraded in place via `auth.updateUser`. Every new table gets RLS in the same migration that creates it — no exceptions. New backend capabilities get an edge function, not a client-side table/RPC call; inside functions use the caller's JWT, never assume service_role.
 
 ## Testing
 
@@ -73,4 +80,4 @@ Note: `pubspec.yaml` pins `sqlparser: 0.44.5` in `dependency_overrides` — drif
 
 ## Payments (current state)
 
-Mock only: `PurchaseGateway` (client seam) → `activate_mock_pro` RPC → `entitlements` row (30 days/activation, cancel keeps Pro until expiry). Real billing = RevenueCat SDK + webhook Edge Function; see TODO.md. Prices from the handoff: $2.49/mo, $17.99/yr, $29.99 lifetime.
+Mock only: `PurchaseGateway` (client seam) → `entitlements` edge function → `activate_mock_pro` RPC → `entitlements` row (30 days/activation, cancel keeps Pro until expiry). Real billing = RevenueCat SDK + webhook Edge Function; see TODO.md. Prices from the handoff: $2.49/mo, $17.99/yr, $29.99 lifetime.

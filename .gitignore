@@ -7,6 +7,12 @@
 .buildlog/
 .history
 
+# Build-time secrets baked in via --dart-define-from-file. Real values stay
+# local; the committed template is .env.example.
+.env
+.env.local
+!.env.example
+
 
 
 # Flutter repo-specific

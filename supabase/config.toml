@@ -13,3 +13,17 @@ enable_anonymous_sign_ins = true
 enable_signup = true
 # Local dev: skip inbox round-trips. Hosted: turn confirmations on.
 enable_confirmations = false
+
+# Edge functions are the app's entire backend API — the client never queries
+# tables or RPCs directly. verify_jwt is the default; stated here for intent.
+[functions.sync-events]
+verify_jwt = true
+
+[functions.entitlements]
+verify_jwt = true
+
+[functions.global-stats]
+verify_jwt = true
+
+[functions.account]
+verify_jwt = true

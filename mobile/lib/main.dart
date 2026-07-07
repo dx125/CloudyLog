@@ -18,8 +18,9 @@ import 'services/stats_service.dart';
 import 'services/sync_service.dart';
 import 'services/tap_service.dart';
 
-/// Supabase endpoint. Provide with:
-/// flutter run --dart-define=PUFF_SUPABASE_URL=... --dart-define=PUFF_SUPABASE_ANON_KEY=...
+/// Supabase endpoint, compiled in at build time. Provide via an env file
+/// (copy `.env.example` to `.env`, then `--dart-define-from-file=.env`) or
+/// pass the keys directly with `--dart-define=PUFF_SUPABASE_URL=...`.
 /// Left empty, the app runs 100% on-device — the free tier needs no cloud at
 /// all, and Pro flows degrade to "try again online".
 const String _supabaseUrl = String.fromEnvironment('PUFF_SUPABASE_URL');

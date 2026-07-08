@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/entitlement.dart';
 import '../../domain/puff_event.dart';
+import '../diagnostics_store.dart';
 import '../gateways.dart';
 
 /// All backend communication goes through the server API — Supabase Edge
@@ -9,31 +10,42 @@ import '../gateways.dart';
 /// RPCs directly; the one exception is the Supabase Auth API itself
 /// (anonymous sign-in, upgrade, sign-out), which is already a server API.
 
-/// Wraps any Supabase/network error into [CloudUnavailable] so services stay
-/// transport-agnostic.
-Future<T> _guard<T>(Future<T> Function() action) async {
-  try {
-    return await action();
-  } on CloudUnavailable {
-    rethrow;
-  } catch (e) {
-    throw CloudUnavailable(e.toString());
-  }
-}
-
-class SupabaseAuthGateway implements AuthGateway {
-  SupabaseAuthGateway(this._client);
+/// Shared plumbing: the null-client guard and error wrapping. Services stay
+/// transport-agnostic (they see only [CloudUnavailable]), but real failures
+/// are first reported through [onError] so they land in Settings →
+/// Diagnostics instead of vanishing into the offline-first fallbacks.
+/// Running without cloud config is a supported mode, not an error — the
+/// "not configured" throw is never recorded.
+abstract class _SupabaseGateway {
+  _SupabaseGateway(this._client, this._onError);
 
   final SupabaseClient? _client;
-
-  @override
-  bool get isConfigured => _client != null;
+  final DiagnosticsRecorder? _onError;
 
   SupabaseClient get _c {
     final client = _client;
     if (client == null) throw const CloudUnavailable('not configured');
     return client;
   }
+
+  Future<T> _guard<T>(String source, Future<T> Function() action) async {
+    try {
+      return await action();
+    } on CloudUnavailable {
+      rethrow;
+    } catch (e, stack) {
+      _onError?.call(source, e, stack);
+      throw CloudUnavailable(e.toString());
+    }
+  }
+}
+
+class SupabaseAuthGateway extends _SupabaseGateway implements AuthGateway {
+  SupabaseAuthGateway(SupabaseClient? client, {DiagnosticsRecorder? onError})
+      : super(client, onError);
+
+  @override
+  bool get isConfigured => _client != null;
 
   @override
   AuthAccount? get current {
@@ -47,7 +59,7 @@ class SupabaseAuthGateway implements AuthGateway {
   }
 
   @override
-  Future<AuthAccount?> ensureSession() => _guard(() async {
+  Future<AuthAccount?> ensureSession() => _guard('auth.ensureSession', () async {
         if (_c.auth.currentSession == null) {
           await _c.auth.signInAnonymously();
         }
@@ -59,7 +71,7 @@ class SupabaseAuthGateway implements AuthGateway {
     required String email,
     required String password,
   }) =>
-      _guard(() async {
+      _guard('auth.upgrade', () async {
         await ensureSession();
         await _c.auth.updateUser(
           UserAttributes(email: email, password: password),
@@ -68,25 +80,19 @@ class SupabaseAuthGateway implements AuthGateway {
       });
 
   @override
-  Future<void> deleteAccount() => _guard(() async {
+  Future<void> deleteAccount() => _guard('auth.deleteAccount', () async {
         await _c.functions.invoke('account', method: HttpMethod.delete);
         await _c.auth.signOut();
       });
 }
 
-class SupabasePurchaseGateway implements PurchaseGateway {
-  SupabasePurchaseGateway(this._client);
-
-  final SupabaseClient? _client;
-
-  SupabaseClient get _c {
-    final client = _client;
-    if (client == null) throw const CloudUnavailable('not configured');
-    return client;
-  }
+class SupabasePurchaseGateway extends _SupabaseGateway
+    implements PurchaseGateway {
+  SupabasePurchaseGateway(SupabaseClient? client, {DiagnosticsRecorder? onError})
+      : super(client, onError);
 
   @override
-  Future<Entitlement?> fetch() => _guard(() async {
+  Future<Entitlement?> fetch() => _guard('purchases.fetch', () async {
         final res =
             await _c.functions.invoke('entitlements', method: HttpMethod.get);
         final row = (res.data as Map<String, dynamic>)['entitlement'];
@@ -101,7 +107,8 @@ class SupabasePurchaseGateway implements PurchaseGateway {
   @override
   Future<Entitlement> cancelPro() => _act('cancel');
 
-  Future<Entitlement> _act(String action) => _guard(() async {
+  Future<Entitlement> _act(String action) =>
+      _guard('purchases.$action', () async {
         final res = await _c.functions
             .invoke('entitlements', body: {'action': action});
         final row = (res.data as Map<String, dynamic>)['entitlement'];
@@ -115,19 +122,14 @@ class SupabasePurchaseGateway implements PurchaseGateway {
       );
 }
 
-class SupabaseEventsSyncGateway implements EventsSyncGateway {
-  SupabaseEventsSyncGateway(this._client);
-
-  final SupabaseClient? _client;
-
-  SupabaseClient get _c {
-    final client = _client;
-    if (client == null) throw const CloudUnavailable('not configured');
-    return client;
-  }
+class SupabaseEventsSyncGateway extends _SupabaseGateway
+    implements EventsSyncGateway {
+  SupabaseEventsSyncGateway(SupabaseClient? client,
+      {DiagnosticsRecorder? onError})
+      : super(client, onError);
 
   @override
-  Future<void> push(List<PuffEvent> events) => _guard(() async {
+  Future<void> push(List<PuffEvent> events) => _guard('sync.push', () async {
         if (events.isEmpty) return;
         await _c.functions.invoke('sync-events', body: {
           'events': [
@@ -144,7 +146,7 @@ class SupabaseEventsSyncGateway implements EventsSyncGateway {
       });
 
   @override
-  Future<List<PuffEvent>> pullAll() => _guard(() async {
+  Future<List<PuffEvent>> pullAll() => _guard('sync.pullAll', () async {
         final res =
             await _c.functions.invoke('sync-events', method: HttpMethod.get);
         final rows =
@@ -164,19 +166,14 @@ class SupabaseEventsSyncGateway implements EventsSyncGateway {
       });
 }
 
-class SupabaseGlobalStatsGateway implements GlobalStatsGateway {
-  SupabaseGlobalStatsGateway(this._client);
-
-  final SupabaseClient? _client;
-
-  SupabaseClient get _c {
-    final client = _client;
-    if (client == null) throw const CloudUnavailable('not configured');
-    return client;
-  }
+class SupabaseGlobalStatsGateway extends _SupabaseGateway
+    implements GlobalStatsGateway {
+  SupabaseGlobalStatsGateway(SupabaseClient? client,
+      {DiagnosticsRecorder? onError})
+      : super(client, onError);
 
   @override
-  Future<GlobalDailyStats?> latest() => _guard(() async {
+  Future<GlobalDailyStats?> latest() => _guard('stats.latest', () async {
         final res =
             await _c.functions.invoke('global-stats', method: HttpMethod.get);
         final row = (res.data as Map<String, dynamic>)['stats'];
@@ -188,5 +185,16 @@ class SupabaseGlobalStatsGateway implements GlobalStatsGateway {
           distribution: (stats['distribution'] as Map<String, dynamic>)
               .map((k, v) => MapEntry(k, (v as num).toInt())),
         );
+      });
+
+  @override
+  Future<void> reportDaily(List<DailyTootCount> days) =>
+      _guard('stats.report', () async {
+        if (days.isEmpty) return;
+        await _c.functions.invoke('report-stats', body: {
+          'days': [
+            for (final d in days) {'day': dayKey(d.day), 'count': d.count},
+          ],
+        });
       });
 }

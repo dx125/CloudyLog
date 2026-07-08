@@ -427,8 +427,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get soundSettingHint => 'One tasteful pop. Off by default.';
 
   @override
+  String get diagnosticsSetting => 'Diagnostics';
+
+  @override
+  String get diagnosticsSettingHint =>
+      'Errors the app caught quietly, kept for debugging';
+
+  @override
+  String get diagnosticsTitle => 'Diagnostics';
+
+  @override
+  String get diagnosticsIntro =>
+      'When something fails quietly — a sync, a fetch, a crash — it lands here with its stack trace. Nothing in this log leaves your phone unless you share it.';
+
+  @override
+  String get diagnosticsEmpty => 'Squeaky clean — nothing has gone wrong yet.';
+
+  @override
+  String diagnosticsCount(int count) {
+    return '$count recorded';
+  }
+
+  @override
+  String diagnosticsCountTruncated(int total, int shown) {
+    return '$total recorded · showing the newest $shown';
+  }
+
+  @override
+  String get diagnosticsCopied => 'Copied to clipboard.';
+
+  @override
+  String get diagnosticsCleared => 'Log cleared.';
+
+  @override
+  String get diagnosticsShareText => 'Puff diagnostics log';
+
+  @override
+  String get copyButton => 'Copy';
+
+  @override
+  String get clearButton => 'Clear';
+
+  @override
   String get privacyNote =>
-      'Free Puff never leaves your phone. Cloud sync is Pro-only, world stats are anonymous aggregates, and deleting your data is one tap.';
+      'Your log lives on this phone. World stats use one anonymous number a day — your daily count, nothing else. Cloud sync is Pro-only, and deleting your data is one tap.';
 
   @override
   String get errorNetwork =>

@@ -73,7 +73,20 @@ class GlobalDailyStats {
   final Map<String, int> distribution;
 }
 
+/// One local day's toot total — the entirety of what a stats report shares.
+class DailyTootCount {
+  const DailyTootCount({required this.day, required this.count});
+
+  final DateTime day;
+  final int count;
+}
+
 abstract class GlobalStatsGateway {
   /// Latest anonymous aggregate snapshot; null when none exists yet.
   Future<GlobalDailyStats?> latest();
+
+  /// Upserts this user's per-day counts into the world aggregate input.
+  /// Free and Pro alike — the histogram needs everyone (raw event sync stays
+  /// Pro-only; this is one number per day, not sync).
+  Future<void> reportDaily(List<DailyTootCount> days);
 }

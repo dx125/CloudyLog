@@ -838,10 +838,82 @@ abstract class AppLocalizations {
   /// **'One tasteful pop. Off by default.'**
   String get soundSettingHint;
 
+  /// No description provided for @diagnosticsSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get diagnosticsSetting;
+
+  /// No description provided for @diagnosticsSettingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Errors the app caught quietly, kept for debugging'**
+  String get diagnosticsSettingHint;
+
+  /// No description provided for @diagnosticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get diagnosticsTitle;
+
+  /// No description provided for @diagnosticsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'When something fails quietly — a sync, a fetch, a crash — it lands here with its stack trace. Nothing in this log leaves your phone unless you share it.'**
+  String get diagnosticsIntro;
+
+  /// No description provided for @diagnosticsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Squeaky clean — nothing has gone wrong yet.'**
+  String get diagnosticsEmpty;
+
+  /// No description provided for @diagnosticsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recorded'**
+  String diagnosticsCount(int count);
+
+  /// No description provided for @diagnosticsCountTruncated.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} recorded · showing the newest {shown}'**
+  String diagnosticsCountTruncated(int total, int shown);
+
+  /// No description provided for @diagnosticsCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard.'**
+  String get diagnosticsCopied;
+
+  /// No description provided for @diagnosticsCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Log cleared.'**
+  String get diagnosticsCleared;
+
+  /// No description provided for @diagnosticsShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Puff diagnostics log'**
+  String get diagnosticsShareText;
+
+  /// No description provided for @copyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyButton;
+
+  /// No description provided for @clearButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearButton;
+
   /// No description provided for @privacyNote.
   ///
   /// In en, this message translates to:
-  /// **'Free Puff never leaves your phone. Cloud sync is Pro-only, world stats are anonymous aggregates, and deleting your data is one tap.'**
+  /// **'Your log lives on this phone. World stats use one anonymous number a day — your daily count, nothing else. Cloud sync is Pro-only, and deleting your data is one tap.'**
   String get privacyNote;
 
   /// No description provided for @errorNetwork.

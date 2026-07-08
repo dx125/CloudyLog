@@ -46,3 +46,9 @@ const Duration kQuickTagWindow = Duration(seconds: 10);
 
 DateTime dayOf(DateTime moment) =>
     DateTime(moment.year, moment.month, moment.day);
+
+/// Canonical 'YYYY-MM-DD' key for a local day — prefs markers and the wire
+/// format of stat reports.
+String dayKey(DateTime day) => '${day.year.toString().padLeft(4, '0')}-'
+    '${day.month.toString().padLeft(2, '0')}-'
+    '${day.day.toString().padLeft(2, '0')}';

@@ -209,6 +209,29 @@
   "themeDark": "Dark",
   "soundSetting": "Tap sound",
   "soundSettingHint": "One tasteful pop. Off by default.",
-  "privacyNote": "Free Puff never leaves your phone. Cloud sync is Pro-only, world stats are anonymous aggregates, and deleting your data is one tap.",
+  "diagnosticsSetting": "Diagnostics",
+  "diagnosticsSettingHint": "Errors the app caught quietly, kept for debugging",
+  "diagnosticsTitle": "Diagnostics",
+  "diagnosticsIntro": "When something fails quietly — a sync, a fetch, a crash — it lands here with its stack trace. Nothing in this log leaves your phone unless you share it.",
+  "diagnosticsEmpty": "Squeaky clean — nothing has gone wrong yet.",
+  "diagnosticsCount": "{count} recorded",
+  "@diagnosticsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "diagnosticsCountTruncated": "{total} recorded · showing the newest {shown}",
+  "@diagnosticsCountTruncated": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "shown": { "type": "int" }
+    }
+  },
+  "diagnosticsCopied": "Copied to clipboard.",
+  "diagnosticsCleared": "Log cleared.",
+  "diagnosticsShareText": "Puff diagnostics log",
+  "copyButton": "Copy",
+  "clearButton": "Clear",
+  "privacyNote": "Your log lives on this phone. World stats use one anonymous number a day — your daily count, nothing else. Cloud sync is Pro-only, and deleting your data is one tap.",
   "errorNetwork": "Couldn't reach the cloud. Everything still counts — it's saved on your phone."
 }

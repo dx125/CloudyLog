@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entitlement.dart';
+import 'diagnostics_store.dart';
 
 /// Small device-local settings + caches. Event data never lives here — that's
 /// the Drift store's job.
@@ -16,20 +17,31 @@ abstract class SettingsRepository {
   Future<void> setCustomTags(List<String> tags);
   Future<Entitlement?> cachedEntitlement();
   Future<void> cacheEntitlement(Entitlement? entitlement);
+
+  /// 'YYYY-MM-DD' of the last successful world-stats report; null when the
+  /// device has never reported.
+  Future<String?> lastStatsReportDay();
+  Future<void> setLastStatsReportDay(String day);
 }
 
 class SharedPrefsSettingsRepository implements SettingsRepository {
-  SharedPrefsSettingsRepository(this._prefs, {String Function()? newId})
-      : _newId = newId ?? _defaultNewId;
+  SharedPrefsSettingsRepository(
+    this._prefs, {
+    String Function()? newId,
+    DiagnosticsRecorder? onError,
+  })  : _newId = newId ?? _defaultNewId,
+        _onError = onError;
 
   static const _keyDeviceId = 'device_id';
   static const _keyTheme = 'theme_mode';
   static const _keySound = 'sound_enabled';
   static const _keyCustomTags = 'custom_tags';
   static const _keyEntitlement = 'entitlement_cache';
+  static const _keyLastStatsReport = 'last_stats_report_day';
 
   final SharedPreferences _prefs;
   final String Function() _newId;
+  final DiagnosticsRecorder? _onError;
 
   static String _defaultNewId() =>
       DateTime.now().microsecondsSinceEpoch.toRadixString(36);
@@ -74,7 +86,8 @@ class SharedPrefsSettingsRepository implements SettingsRepository {
     if (raw == null || raw.isEmpty) return null;
     try {
       return Entitlement.fromJson(jsonDecode(raw) as Map<String, Object?>);
-    } catch (_) {
+    } catch (e, stack) {
+      _onError?.call('settings.entitlementCache', e, stack);
       await _prefs.remove(_keyEntitlement);
       return null;
     }
@@ -87,5 +100,14 @@ class SharedPrefsSettingsRepository implements SettingsRepository {
     } else {
       await _prefs.setString(_keyEntitlement, jsonEncode(entitlement.toJson()));
     }
+  }
+
+  @override
+  Future<String?> lastStatsReportDay() async =>
+      _prefs.getString(_keyLastStatsReport);
+
+  @override
+  Future<void> setLastStatsReportDay(String day) async {
+    await _prefs.setString(_keyLastStatsReport, day);
   }
 }

@@ -8,6 +8,10 @@ import 'package:share_plus/share_plus.dart';
 abstract class ShareService {
   Future<void> shareText(String text);
   Future<void> shareImage(Uint8List pngBytes, {required String text});
+
+  /// Shares existing files straight from disk — no in-memory copy, so even a
+  /// large diagnostics log exports fine.
+  Future<void> shareFiles(List<String> paths, {String? text});
 }
 
 class SharePlusShareService implements ShareService {
@@ -22,6 +26,14 @@ class SharePlusShareService implements ShareService {
   Future<void> shareImage(Uint8List pngBytes, {required String text}) async {
     await Share.shareXFiles(
       [XFile.fromData(pngBytes, mimeType: 'image/png', name: 'puff.png')],
+      text: text,
+    );
+  }
+
+  @override
+  Future<void> shareFiles(List<String> paths, {String? text}) async {
+    await Share.shareXFiles(
+      [for (final path in paths) XFile(path, mimeType: 'text/plain')],
       text: text,
     );
   }

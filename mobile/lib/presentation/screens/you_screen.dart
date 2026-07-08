@@ -15,6 +15,7 @@ import '../../theme/puff_theme.dart';
 import '../widgets/paywall_sheet.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/share_cards.dart';
+import 'diagnostics_screen.dart';
 
 /// Profile hub: streaks and totals, the badge collection, Wrapped, Pro
 /// management, account (anonymous → email upgrade), settings and the privacy
@@ -559,6 +560,26 @@ class _YouScreenState extends State<YouScreen> {
                   ),
                   value: settings.soundEnabled,
                   onChanged: settings.setSoundEnabled,
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    strings.diagnosticsSetting,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  subtitle: Text(
+                    strings.diagnosticsSettingHint,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: puff.textSecondary,
+                  ),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const DiagnosticsScreen(),
+                    ),
+                  ),
                 ),
               ],
             ),

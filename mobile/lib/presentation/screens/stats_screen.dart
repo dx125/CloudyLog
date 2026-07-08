@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/gateways.dart';
 import '../../domain/percentile.dart';
 import '../../domain/puff_event.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../services/entitlement_service.dart';
+import '../../services/global_stats_service.dart';
 import '../../services/stats_service.dart';
 import '../../services/tap_service.dart';
 import '../../theme/puff_theme.dart';
 import '../widgets/paywall_sheet.dart';
 import '../widgets/week_chart.dart';
 
-/// Free: week chart, the sourced world range, 7 days of history. Pro adds
-/// percentiles, the full history heatmap, time-of-day and weekday patterns.
-/// Locked charts are the paywall's "earned curiosity" moments.
+/// Free: week chart, the live world comparison, 7 days of history. Pro adds
+/// the full history heatmap, time-of-day and weekday patterns. Locked charts
+/// are the paywall's "earned curiosity" moments.
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
 
@@ -26,7 +26,6 @@ class _StatsScreenState extends State<StatsScreen> {
   late Future<StatsSnapshot> _snapshotFuture;
   late Future<List<int>> _hoursFuture;
   late Future<List<double>> _weekdaysFuture;
-  Future<GlobalDailyStats?>? _globalFuture;
   TapService? _tapService;
 
   @override
@@ -49,14 +48,13 @@ class _StatsScreenState extends State<StatsScreen> {
   void _reload() {
     if (!mounted) return;
     final stats = context.read<StatsService>();
+    // TTL-guarded; a failed fetch is recorded at the gateway and the card
+    // degrades to the sourced range.
+    context.read<GlobalStatsService>().refresh();
     setState(() {
       _snapshotFuture = stats.snapshot();
       _hoursFuture = stats.hourHistogram();
       _weekdaysFuture = stats.weekdayAverages();
-      _globalFuture ??= context.read<GlobalStatsGateway>().latest().then(
-            (value) => value,
-            onError: (Object _) => null,
-          );
     });
   }
 
@@ -73,11 +71,7 @@ class _StatsScreenState extends State<StatsScreen> {
         children: [
           Text(strings.statsTitle, style: theme.textTheme.headlineMedium),
           const SizedBox(height: 14),
-          _WorldCard(
-            todayCount: todayCount,
-            isPro: isPro,
-            globalFuture: _globalFuture,
-          ),
+          _WorldCard(todayCount: todayCount),
           const SizedBox(height: 12),
           _SectionCard(
             title: strings.thisWeek,
@@ -193,22 +187,21 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 }
 
+/// Live world comparison — free tier included: the backend aggregate is
+/// anonymous and every client contributes its daily count, so everyone gets
+/// to see where they land.
 class _WorldCard extends StatelessWidget {
-  const _WorldCard({
-    required this.todayCount,
-    required this.isPro,
-    required this.globalFuture,
-  });
+  const _WorldCard({required this.todayCount});
 
   final int todayCount;
-  final bool isPro;
-  final Future<GlobalDailyStats?>? globalFuture;
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final puff = context.puff;
+    final globalStats = context.watch<GlobalStatsService>();
+    final global = globalStats.latest;
 
     return _SectionCard(
       title: strings.statsTodayVsWorld,
@@ -219,51 +212,37 @@ class _WorldCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(strings.statsWorldRange, style: theme.textTheme.bodyLarge),
           const SizedBox(height: 10),
-          if (!isPro)
-            _ProUnlockRow(onTap: () => showPaywall(context))
-          else
-            FutureBuilder<GlobalDailyStats?>(
-              future: globalFuture,
-              builder: (context, snapshot) {
-                final global = snapshot.data;
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const _CardLoading();
-                }
-                if (global == null || global.totalUsers == 0) {
-                  return Text(
-                    strings.statsNoGlobalData,
-                    style: theme.textTheme.bodyMedium,
-                  );
-                }
-                final percentile =
-                    percentileRankFor(todayCount, global.distribution);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 9,
-                      ),
-                      decoration: BoxDecoration(
-                        color: puff.chipSelectedBg,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        strings.statsPercentile(percentile),
-                        style: theme.textTheme.titleMedium!
-                            .copyWith(color: puff.chipSelectedBorder),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      strings.statsParticipants(global.totalUsers),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                );
-              },
+          if (global == null && globalStats.isLoading)
+            const _CardLoading()
+          else if (global == null || global.totalUsers == 0)
+            Text(
+              strings.statsNoGlobalData,
+              style: theme.textTheme.bodyMedium,
+            )
+          else ...[
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                color: puff.chipSelectedBg,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                strings.statsPercentile(
+                  percentileRankFor(todayCount, global.distribution),
+                ),
+                style: theme.textTheme.titleMedium!
+                    .copyWith(color: puff.chipSelectedBorder),
+              ),
             ),
+            const SizedBox(height: 6),
+            Text(
+              strings.statsParticipants(global.totalUsers),
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
         ],
       ),
     );
@@ -489,31 +468,3 @@ class _CardLoading extends StatelessWidget {
   }
 }
 
-class _ProUnlockRow extends StatelessWidget {
-  const _ProUnlockRow({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final puff = context.puff;
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(Icons.lock_outline, size: 18, color: puff.textSecondary),
-          const SizedBox(width: 8),
-          Text(
-            strings.lockedProCard,
-            style: theme.textTheme.bodyMedium!
-                .copyWith(color: puff.pro, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(width: 8),
-          _ProChip(label: strings.proChip),
-        ],
-      ),
-    );
-  }
-}

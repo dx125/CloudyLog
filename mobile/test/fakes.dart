@@ -1,3 +1,4 @@
+import 'package:puff/data/diagnostics_store.dart';
 import 'package:puff/data/event_store.dart';
 import 'package:puff/data/gateways.dart';
 import 'package:puff/data/settings_repository.dart';
@@ -93,6 +94,7 @@ class InMemorySettingsRepository implements SettingsRepository {
   bool sound = false;
   List<String> tags = [];
   Entitlement? entitlement;
+  String? lastReportDay;
 
   @override
   Future<String> deviceId() async => 'test-device';
@@ -121,6 +123,13 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> cacheEntitlement(Entitlement? value) async =>
       entitlement = value;
+
+  @override
+  Future<String?> lastStatsReportDay() async => lastReportDay;
+
+  @override
+  Future<void> setLastStatsReportDay(String day) async =>
+      lastReportDay = day;
 }
 
 class FakePurchaseGateway implements PurchaseGateway {
@@ -177,4 +186,50 @@ class FakeEventsSyncGateway implements EventsSyncGateway {
     if (offline) throw const CloudUnavailable();
     return server.values.toList();
   }
+}
+
+class FakeGlobalStatsGateway implements GlobalStatsGateway {
+  GlobalDailyStats? stats;
+  bool offline = false;
+  int latestCalls = 0;
+  final List<List<DailyTootCount>> reports = [];
+
+  @override
+  Future<GlobalDailyStats?> latest() async {
+    if (offline) throw const CloudUnavailable();
+    latestCalls++;
+    return stats;
+  }
+
+  @override
+  Future<void> reportDaily(List<DailyTootCount> days) async {
+    if (offline) throw const CloudUnavailable();
+    reports.add(days);
+  }
+}
+
+class InMemoryDiagnosticsStore implements DiagnosticsStore {
+  final List<DiagnosticsEntry> entries = [];
+
+  @override
+  Future<void> append(DiagnosticsEntry entry) async => entries.add(entry);
+
+  @override
+  Future<List<DiagnosticsEntry>> tail(int limit) async =>
+      entries.length <= limit
+          ? List.of(entries)
+          : entries.sublist(entries.length - limit);
+
+  @override
+  Future<int> totalCount() async => entries.length;
+
+  @override
+  Future<String> fullText() async =>
+      [for (final e in entries) e.format()].join('\n\n');
+
+  @override
+  Future<List<String>> exportFilePaths() async => const [];
+
+  @override
+  Future<void> clear() async => entries.clear();
 }

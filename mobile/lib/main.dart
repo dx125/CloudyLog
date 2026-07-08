@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,11 +8,13 @@ import 'app.dart';
 import 'data/drift/drift_event_store.dart';
 import 'data/drift/puff_database.dart';
 import 'data/event_store.dart';
-import 'data/gateways.dart';
+import 'data/file_diagnostics_store.dart';
 import 'data/settings_repository.dart';
 import 'data/supabase/supabase_gateways.dart';
 import 'services/auth_service.dart';
+import 'services/diagnostics_service.dart';
 import 'services/entitlement_service.dart';
+import 'services/global_stats_service.dart';
 import 'services/settings_service.dart';
 import 'services/share_service.dart';
 import 'services/stats_service.dart';
@@ -30,8 +33,23 @@ const String _supabaseAnonKey =
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Diagnostics first: every silent failure from here on — framework errors,
+  // uncaught async errors, cloud hiccups — is recorded and visible under
+  // Settings → Diagnostics.
+  final diagnostics = DiagnosticsService(FileDiagnosticsStore());
+  FlutterError.onError = (details) {
+    diagnostics.record('flutter', details.exception, details.stack);
+    FlutterError.presentError(details);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    diagnostics.record('uncaught', error, stack);
+    debugPrint('Uncaught: $error');
+    return true;
+  };
+
   final prefs = await SharedPreferences.getInstance();
-  final settingsRepo = SharedPrefsSettingsRepository(prefs);
+  final settingsRepo =
+      SharedPrefsSettingsRepository(prefs, onError: diagnostics.record);
   final EventStore store = DriftEventStore(PuffDatabase(openPuffDatabase()));
 
   // The cloud is optional at startup — never a dependency of the core loop.
@@ -43,41 +61,52 @@ Future<void> main() async {
         publishableKey: _supabaseAnonKey,
       );
       supabase = Supabase.instance.client;
-    } catch (_) {
+    } catch (e, stack) {
+      diagnostics.record('supabase.init', e, stack);
       supabase = null; // Offline/misconfigured: free tier is unaffected.
     }
   }
 
   final settingsService = SettingsService(settingsRepo);
-  final authService = AuthService(SupabaseAuthGateway(supabase));
+  final authService =
+      AuthService(SupabaseAuthGateway(supabase, onError: diagnostics.record));
   final entitlementService = EntitlementService(
     settingsRepo,
-    SupabasePurchaseGateway(supabase),
+    SupabasePurchaseGateway(supabase, onError: diagnostics.record),
   );
   final tapService = TapService(store, deviceId: await settingsRepo.deviceId());
   final statsService = StatsService(store);
   final syncService = SyncService(
     store,
-    SupabaseEventsSyncGateway(supabase),
+    SupabaseEventsSyncGateway(supabase, onError: diagnostics.record),
     shouldSync: () => entitlementService.isPro && authService.hasSession,
+  );
+  final globalStatsService = GlobalStatsService(
+    SupabaseGlobalStatsGateway(supabase, onError: diagnostics.record),
+    store,
+    settingsRepo,
   );
 
   await Future.wait([
     settingsService.load(),
     entitlementService.load(),
     tapService.load(),
+    diagnostics.load(),
   ]);
 
   // Mirror local changes to the cloud for Pro users. schedulePush debounces
   // past the quick-tag window so a tag edit rides along with its tap.
   tapService.addListener(syncService.schedulePush);
 
-  // Background cloud warm-up: session, fresh entitlement, pending events.
+  // Background cloud warm-up: session, fresh entitlement, pending events,
+  // then the free-and-Pro daily stats report and a warm world aggregate.
   Future(() async {
     await authService.ensureSession();
     if (!authService.hasSession) return;
     await entitlementService.refresh();
     if (entitlementService.isPro) await syncService.pushPending();
+    await globalStatsService.reportIfDue();
+    await globalStatsService.refresh();
   });
 
   runApp(
@@ -90,11 +119,12 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<TapService>.value(value: tapService),
         ChangeNotifierProvider<SyncService>.value(value: syncService),
+        ChangeNotifierProvider<GlobalStatsService>.value(
+          value: globalStatsService,
+        ),
+        ChangeNotifierProvider<DiagnosticsService>.value(value: diagnostics),
         Provider<StatsService>.value(value: statsService),
         Provider<ShareService>.value(value: const SharePlusShareService()),
-        Provider<GlobalStatsGateway>.value(
-          value: SupabaseGlobalStatsGateway(supabase),
-        ),
       ],
       child: const PuffApp(),
     ),

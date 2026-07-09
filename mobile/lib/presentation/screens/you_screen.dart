@@ -12,7 +12,7 @@ import '../../services/stats_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/tap_service.dart';
 import '../../theme/puff_theme.dart';
-import '../widgets/create_account_dialog.dart';
+import '../widgets/auth_dialog.dart';
 import '../widgets/paywall_sheet.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/share_cards.dart';
@@ -119,6 +119,40 @@ class _YouScreenState extends State<YouScreen> {
     }
   }
 
+  Future<void> _logOut() async {
+    final strings = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(strings.signOutConfirmTitle),
+        content: Text(strings.signOutConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(strings.cancelButton),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(strings.logOutButton),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final auth = context.read<AuthService>();
+    final entitlements = context.read<EntitlementService>();
+    final ok = await auth.signOut();
+    if (!mounted) return;
+    if (ok) {
+      // Pro is account-bound; drop the local mirror so the fresh anonymous
+      // session isn't still shown as Pro.
+      await entitlements.clearLocal();
+      if (mounted) _snack(strings.signOutDone);
+    } else {
+      _snack(strings.errorNetwork);
+    }
+  }
+
   Future<void> _deleteCloudData() async {
     final strings = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
@@ -209,6 +243,7 @@ class _YouScreenState extends State<YouScreen> {
     final settings = context.watch<SettingsService>();
     final sync = context.watch<SyncService>();
     final isPro = entitlements.isPro;
+    final accountEmail = auth.account?.email;
     final localeTag = Localizations.localeOf(context).toLanguageTag();
 
     return SafeArea(
@@ -425,31 +460,45 @@ class _YouScreenState extends State<YouScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  auth.account?.email != null
-                      ? strings.accountEmail(auth.account!.email!)
+                  accountEmail != null
+                      ? strings.accountEmail(accountEmail)
                       : strings.accountAnonymous,
                   style: theme.textTheme.bodyLarge,
                 ),
-                if (auth.account?.email == null) ...[
+                // Free/anonymous users don't need an account (an account only
+                // exists to carry Pro to another phone), so offer log-in — not
+                // "create account", which belongs to the Go Pro flow.
+                if (accountEmail == null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    strings.accountUpgradeHint,
+                    strings.accountNoAccountHint,
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
-                    onPressed: () => showCreateAccountDialog(context),
-                    icon: const Icon(Icons.person_add_alt, size: 18),
-                    label: Text(strings.createAccountButton),
+                    onPressed: () =>
+                        showAuthDialog(context, initial: AuthIntent.signIn),
+                    icon: const Icon(Icons.login, size: 18),
+                    label: Text(strings.logInButton),
                   ),
-                ],
-                if (auth.hasSession) ...[
-                  const SizedBox(height: 8),
-                  TextButton.icon(
-                    onPressed: _deleteCloudData,
-                    style: TextButton.styleFrom(foregroundColor: puff.pro),
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    label: Text(strings.deleteAccountButton),
+                ] else ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: _logOut,
+                        icon: const Icon(Icons.logout, size: 18),
+                        label: Text(strings.logOutButton),
+                      ),
+                      TextButton.icon(
+                        onPressed: _deleteCloudData,
+                        style: TextButton.styleFrom(foregroundColor: puff.pro),
+                        icon: const Icon(Icons.delete_outline, size: 18),
+                        label: Text(strings.deleteAccountButton),
+                      ),
+                    ],
                   ),
                 ],
               ],

@@ -7,7 +7,7 @@ import '../../services/auth_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/sync_service.dart';
 import '../../theme/puff_theme.dart';
-import 'create_account_dialog.dart';
+import 'auth_dialog.dart';
 import 'pill_button.dart';
 
 /// The paywall. Appears only at moments of earned curiosity — never between
@@ -40,16 +40,30 @@ class _PaywallSheetState extends State<_PaywallSheet> {
     setState(() => _busy = true);
     // Purchases are account-bound. First make sure a session exists, then make
     // sure it's a *real* one: an anonymous user can't own a subscription, so a
-    // still-anonymous purchaser signs in (email + password) before we charge.
+    // still-anonymous purchaser signs in or creates an account before we charge.
     final hasSession = await auth.ensureSession();
     if (!mounted) return;
     if (hasSession && auth.isAnonymous) {
-      final created = await showCreateAccountDialog(context);
+      final signedIn =
+          await showAuthDialog(context, initial: AuthIntent.createAccount);
       if (!mounted) return;
-      if (!created) {
+      if (!signedIn) {
         // No account, no subscription. The dialog already reported any
-        // failure, and cancelling is a normal choice — bail quietly.
+        // failure, and backing out is a normal choice — bail quietly.
         setState(() => _busy = false);
+        return;
+      }
+      // They may have signed into an existing account that is already Pro —
+      // adopt it instead of charging again.
+      await entitlements.refresh();
+      if (!mounted) return;
+      if (entitlements.isPro) {
+        setState(() => _busy = false);
+        sync.schedulePush();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(strings.purchaseSuccess)),
+        );
+        Navigator.of(context).pop(true);
         return;
       }
     }
@@ -78,7 +92,9 @@ class _PaywallSheetState extends State<_PaywallSheet> {
     final puff = context.puff;
 
     return SafeArea(
-      child: Padding(
+      // Scrollable so an on-screen keyboard (e.g. the sign-in dialog behind a
+      // small screen) can't overflow the fixed-height benefit list.
+      child: SingleChildScrollView(
         padding: EdgeInsets.only(
           left: 24,
           right: 24,

@@ -80,6 +80,24 @@ class SupabaseAuthGateway extends _SupabaseGateway implements AuthGateway {
       });
 
   @override
+  Future<AuthAccount> signIn({
+    required String email,
+    required String password,
+  }) =>
+      _guard('auth.signIn', () async {
+        await _c.auth.signInWithPassword(email: email, password: password);
+        return current!;
+      });
+
+  @override
+  Future<void> signOut() => _guard('auth.signOut', () async {
+        await _c.auth.signOut();
+        // Drop straight back onto an anonymous session so the app stays
+        // cloud-capable (world-stats reporting) without a real account.
+        await _c.auth.signInAnonymously();
+      });
+
+  @override
   Future<void> deleteAccount() => _guard('auth.deleteAccount', () async {
         await _c.functions.invoke('account', method: HttpMethod.delete);
         await _c.auth.signOut();

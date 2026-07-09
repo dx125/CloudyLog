@@ -39,6 +39,14 @@ abstract class AuthGateway {
   /// Attaches email+password credentials to the anonymous user.
   Future<AuthAccount> upgrade({required String email, required String password});
 
+  /// Signs in to an existing email account, replacing the current session
+  /// (e.g. reclaiming Pro on a new phone).
+  Future<AuthAccount> signIn({required String email, required String password});
+
+  /// Ends the current session and starts a fresh anonymous one, so the core
+  /// loop and world-stats reporting keep working after sign-out.
+  Future<void> signOut();
+
   /// Deletes the auth user and everything cascading from it, then drops the
   /// local session ("deletion is one tap and total").
   Future<void> deleteAccount();

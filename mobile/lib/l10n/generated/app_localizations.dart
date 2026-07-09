@@ -691,20 +691,44 @@ abstract class AppLocalizations {
   /// No description provided for @accountAnonymous.
   ///
   /// In en, this message translates to:
-  /// **'Anonymous — your data lives on this phone'**
+  /// **'No account — your toots live on this phone'**
   String get accountAnonymous;
 
-  /// No description provided for @accountUpgradeHint.
+  /// No description provided for @accountNoAccountHint.
   ///
   /// In en, this message translates to:
-  /// **'Add an email so Pro and backups survive a lost phone.'**
-  String get accountUpgradeHint;
+  /// **'You don\'t need an account to track toots. Log in to bring Puff Pro to a new phone.'**
+  String get accountNoAccountHint;
 
   /// No description provided for @createAccountButton.
   ///
   /// In en, this message translates to:
   /// **'Create account'**
   String get createAccountButton;
+
+  /// No description provided for @logInButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get logInButton;
+
+  /// No description provided for @logOutButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logOutButton;
+
+  /// No description provided for @authHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Log in'**
+  String get authHaveAccount;
+
+  /// No description provided for @authNeedAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'New here? Create an account'**
+  String get authNeedAccount;
 
   /// No description provided for @emailLabel.
   ///
@@ -742,11 +766,47 @@ abstract class AppLocalizations {
   /// **'Passwords don\'t match'**
   String get passwordMismatch;
 
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get passwordRequired;
+
   /// No description provided for @accountCreated.
   ///
   /// In en, this message translates to:
   /// **'Account linked. Same you, safer data.'**
   String get accountCreated;
+
+  /// No description provided for @signInSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back!'**
+  String get signInSuccess;
+
+  /// No description provided for @signInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t sign in. Check your email and password.'**
+  String get signInFailed;
+
+  /// No description provided for @signOutConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out?'**
+  String get signOutConfirmTitle;
+
+  /// No description provided for @signOutConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your toots stay on this phone. Sign back in anytime to sync. Pro features pause until you do.'**
+  String get signOutConfirmBody;
+
+  /// No description provided for @signOutDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out.'**
+  String get signOutDone;
 
   /// No description provided for @accountEmail.
   ///

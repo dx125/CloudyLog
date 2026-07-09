@@ -39,6 +39,31 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  /// Signs in to an existing account (reclaiming Pro on a new phone). Returns
+  /// false when the cloud is unreachable or the credentials are rejected.
+  Future<bool> signIn({required String email, required String password}) async {
+    try {
+      await _gateway.signIn(email: email, password: password);
+      notifyListeners();
+      return true;
+    } on CloudUnavailable {
+      return false;
+    }
+  }
+
+  /// Ends the session; a fresh anonymous one takes its place so the core loop
+  /// keeps working. Pro is account-bound, so callers drop the local
+  /// entitlement mirror alongside this.
+  Future<bool> signOut() async {
+    try {
+      await _gateway.signOut();
+      notifyListeners();
+      return true;
+    } on CloudUnavailable {
+      return false;
+    }
+  }
+
   /// Total cloud deletion (account + everything cascading from it).
   Future<bool> deleteAccount() async {
     try {

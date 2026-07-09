@@ -7,6 +7,9 @@
 .buildlog/
 .history
 
+# Claude Code personal (machine-specific) permission allowlist — not shared.
+.claude/settings.local.json
+
 # Build-time secrets baked in via --dart-define-from-file. Real values stay
 # local; the committed template is .env.example.
 .env

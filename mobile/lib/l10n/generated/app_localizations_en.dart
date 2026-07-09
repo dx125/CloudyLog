@@ -347,14 +347,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountHeader => 'Account';
 
   @override
-  String get accountAnonymous => 'Anonymous — your data lives on this phone';
+  String get accountAnonymous => 'No account — your toots live on this phone';
 
   @override
-  String get accountUpgradeHint =>
-      'Add an email so Pro and backups survive a lost phone.';
+  String get accountNoAccountHint =>
+      'You don\'t need an account to track toots. Log in to bring Puff Pro to a new phone.';
 
   @override
   String get createAccountButton => 'Create account';
+
+  @override
+  String get logInButton => 'Log in';
+
+  @override
+  String get logOutButton => 'Log out';
+
+  @override
+  String get authHaveAccount => 'Already have an account? Log in';
+
+  @override
+  String get authNeedAccount => 'New here? Create an account';
 
   @override
   String get emailLabel => 'Email';
@@ -375,7 +387,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordMismatch => 'Passwords don\'t match';
 
   @override
+  String get passwordRequired => 'Enter your password';
+
+  @override
   String get accountCreated => 'Account linked. Same you, safer data.';
+
+  @override
+  String get signInSuccess => 'Welcome back!';
+
+  @override
+  String get signInFailed =>
+      'Couldn\'t sign in. Check your email and password.';
+
+  @override
+  String get signOutConfirmTitle => 'Log out?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Your toots stay on this phone. Sign back in anytime to sync. Pro features pause until you do.';
+
+  @override
+  String get signOutDone => 'Signed out.';
 
   @override
   String accountEmail(String email) {

@@ -718,6 +718,12 @@ abstract class AppLocalizations {
   /// **'Password'**
   String get passwordLabel;
 
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat password'**
+  String get confirmPasswordLabel;
+
   /// No description provided for @emailInvalid.
   ///
   /// In en, this message translates to:
@@ -729,6 +735,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'At least 8 characters'**
   String get passwordTooShort;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords don\'t match'**
+  String get passwordMismatch;
 
   /// No description provided for @accountCreated.
   ///

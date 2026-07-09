@@ -12,6 +12,7 @@ import '../../services/stats_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/tap_service.dart';
 import '../../theme/puff_theme.dart';
+import '../widgets/create_account_dialog.dart';
 import '../widgets/paywall_sheet.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/share_cards.dart';
@@ -90,69 +91,6 @@ class _YouScreenState extends State<YouScreen> {
       lines: [strings.shareBadgeText(name)],
       shareText: strings.shareBadgeText(name),
     );
-  }
-
-  Future<void> _createAccount() async {
-    final strings = AppLocalizations.of(context)!;
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    final submitted = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(strings.createAccountButton),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(labelText: strings.emailLabel),
-                validator: (v) =>
-                    (v ?? '').contains('@') ? null : strings.emailInvalid,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: strings.passwordLabel),
-                validator: (v) =>
-                    (v ?? '').length >= 8 ? null : strings.passwordTooShort,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(strings.cancelButton),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (formKey.currentState?.validate() ?? false) {
-                Navigator.of(ctx).pop(true);
-              }
-            },
-            child: Text(strings.createAccountButton),
-          ),
-        ],
-      ),
-    );
-
-    if (submitted == true && mounted) {
-      final ok = await context.read<AuthService>().upgrade(
-            email: emailController.text.trim(),
-            password: passwordController.text,
-          );
-      if (mounted) {
-        _snack(ok ? strings.accountCreated : strings.accountUpgradeFailed);
-      }
-    }
-    emailController.dispose();
-    passwordController.dispose();
   }
 
   Future<void> _cancelPro() async {
@@ -500,7 +438,7 @@ class _YouScreenState extends State<YouScreen> {
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
-                    onPressed: _createAccount,
+                    onPressed: () => showCreateAccountDialog(context),
                     icon: const Icon(Icons.person_add_alt, size: 18),
                     label: Text(strings.createAccountButton),
                   ),

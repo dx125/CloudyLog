@@ -184,8 +184,10 @@
   "createAccountButton": "Create account",
   "emailLabel": "Email",
   "passwordLabel": "Password",
+  "confirmPasswordLabel": "Repeat password",
   "emailInvalid": "Enter a valid email",
   "passwordTooShort": "At least 8 characters",
+  "passwordMismatch": "Passwords don't match",
   "accountCreated": "Account linked. Same you, safer data.",
   "accountEmail": "Signed in as {email}",
   "@accountEmail": {

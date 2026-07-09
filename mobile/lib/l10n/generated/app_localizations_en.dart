@@ -363,10 +363,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordLabel => 'Password';
 
   @override
+  String get confirmPasswordLabel => 'Repeat password';
+
+  @override
   String get emailInvalid => 'Enter a valid email';
 
   @override
   String get passwordTooShort => 'At least 8 characters';
+
+  @override
+  String get passwordMismatch => 'Passwords don\'t match';
 
   @override
   String get accountCreated => 'Account linked. Same you, safer data.';

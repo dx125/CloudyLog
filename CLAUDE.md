@@ -27,7 +27,7 @@ Voice rules (enforced in review): cheeky never crude, one joke per screen, sente
 - `flutter pub get`
 - `dart run build_runner build --delete-conflicting-outputs` — regenerate Drift code after editing `lib/data/drift/puff_database.dart`
 - `flutter gen-l10n` — after editing `lib/l10n/app_en.arb`
-- `flutter run --dart-define-from-file=.env` — cloud-connected run; copy `mobile/.env.example` to `mobile/.env` and fill in the Supabase URL + anon key (`.env` is gitignored). Equivalent long form: `--dart-define=PUFF_SUPABASE_URL=... --dart-define=PUFF_SUPABASE_ANON_KEY=...`. Omit entirely to run 100% on-device.
+- `flutter run --dart-define-from-file=.env` — cloud-connected run; copy `mobile/.env.example` to `mobile/.env` and fill in the Supabase URL + publishable key (`.env` is gitignored). Equivalent long form: `--dart-define=PUFF_SUPABASE_URL=... --dart-define=PUFF_SUPABASE_PUBLISHABLE_KEY=...`. Omit entirely to run 100% on-device.
 - `flutter test`, `flutter analyze`
 
 Note: `pubspec.yaml` pins `sqlparser: 0.44.5` in `dependency_overrides` — drift_dev 2.34 breaks against sqlparser 0.44.6. Drop the pin when drift_dev ships a fix.

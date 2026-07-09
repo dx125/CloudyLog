@@ -48,13 +48,19 @@ class _StatsScreenState extends State<StatsScreen> {
   void _reload() {
     if (!mounted) return;
     final stats = context.read<StatsService>();
-    // TTL-guarded; a failed fetch is recorded at the gateway and the card
-    // degrades to the sourced range.
-    context.read<GlobalStatsService>().refresh();
+    final globalStats = context.read<GlobalStatsService>();
     setState(() {
       _snapshotFuture = stats.snapshot();
       _hoursFuture = stats.hourHistogram();
       _weekdaysFuture = stats.weekdayAverages();
+    });
+    // refresh() notifies listeners; _reload runs from didChangeDependencies
+    // (and the shell's IndexedStack builds every tab eagerly), so calling it
+    // inline would fire notifyListeners during build. Defer past the frame.
+    // TTL-guarded; a failed fetch is recorded at the gateway and the card
+    // degrades to the sourced range.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) globalStats.refresh();
     });
   }
 

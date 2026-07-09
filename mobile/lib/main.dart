@@ -27,8 +27,8 @@ import 'services/tap_service.dart';
 /// Left empty, the app runs 100% on-device — the free tier needs no cloud at
 /// all, and Pro flows degrade to "try again online".
 const String _supabaseUrl = String.fromEnvironment('PUFF_SUPABASE_URL');
-const String _supabaseAnonKey =
-    String.fromEnvironment('PUFF_SUPABASE_ANON_KEY');
+const String _supabasePublishableKey =
+    String.fromEnvironment('PUFF_SUPABASE_PUBLISHABLE_KEY');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,11 +54,11 @@ Future<void> main() async {
 
   // The cloud is optional at startup — never a dependency of the core loop.
   SupabaseClient? supabase;
-  if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
+  if (_supabaseUrl.isNotEmpty && _supabasePublishableKey.isNotEmpty) {
     try {
       await Supabase.initialize(
         url: _supabaseUrl,
-        publishableKey: _supabaseAnonKey,
+        publishableKey: _supabasePublishableKey,
       );
       supabase = Supabase.instance.client;
     } catch (e, stack) {

@@ -18,6 +18,7 @@ What gets applied either way:
 | `0003_events.sql` | `events` cloud mirror (insert/update Pro-gated by RLS) |
 | `0004_global_stats.sql` | anonymous `daily_global_stats` + `refresh_global_stats()` + pg_cron job |
 | `0005_stat_reports.sql` | `user_daily_stats` (every tier reports one `(day, count)` row/day); repoints the aggregate at it |
+| `0006_api_grants.sql` | explicit table `GRANT`s to the `authenticated` role (RLS still constrains rows) — so the backend doesn't rely on Supabase's implicit default privileges |
 
 Functions: `sync-events`, `entitlements`, `global-stats`, `report-stats`,
 `account`. All have `verify_jwt = true`, so every request needs an
@@ -63,7 +64,7 @@ None use `service_role`; they run with the caller's JWT.
 5. **Wire the app** — copy `mobile/.env.example` to `mobile/.env` and fill in:
    ```
    PUFF_SUPABASE_URL=http://localhost:54321
-   PUFF_SUPABASE_ANON_KEY=<anon key from step 2>
+   PUFF_SUPABASE_PUBLISHABLE_KEY=<anon key from step 2>   # local prints an anon key; the var accepts either
    ```
    From the **Android emulator** use `http://10.0.2.2:54321` (localhost there
    is the emulator itself). Then:
@@ -135,7 +136,7 @@ None use `service_role`; they run with the caller's JWT.
 9. **Wire the release build** — `mobile/.env` with the hosted values:
    ```
    PUFF_SUPABASE_URL=https://<ref>.supabase.co
-   PUFF_SUPABASE_ANON_KEY=<Dashboard → Project Settings → API → anon/public key>
+   PUFF_SUPABASE_PUBLISHABLE_KEY=<Dashboard → Project Settings → API Keys → publishable (sb_publishable_…)>
    ```
    Build with `flutter build <target> --dart-define-from-file=.env`.
 
@@ -170,6 +171,12 @@ Point the app at the backend and:
 - **`pg_cron` is hosted-only.** Locally, compute aggregates by hand with
   `select refresh_global_stats();`.
 - **Email confirmations**: off locally, on for hosted.
+- **`permission denied for table <name>` (HTTP 500 from a function)** means the
+  `authenticated` role lacks a base table `GRANT` — a privilege check that
+  happens *before* RLS (so it's an error, not just empty rows). Migration
+  `0006_api_grants.sql` grants these explicitly; if you see this, you're missing
+  0006 (or it hasn't been pushed) — run `supabase db push`. The app doesn't
+  crash: the failures land in **You → Settings → Diagnostics** with stack traces.
 - **Free-tier stats reporting is on by default** — every tier sends one
   anonymous `(day, count)` row per day via `report-stats`. The app's privacy
   note discloses it; a client-side opt-out is parked in

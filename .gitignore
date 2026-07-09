@@ -52,6 +52,17 @@ linked_*.ds
 unlinked.ds
 unlinked_spec.ds
 
+# Generated mobile platform scaffold. This repo is lib-only — the native host
+# projects are recreated on demand with `flutter create --platforms=…`, so they
+# never belong in version control. Ignoring the whole tree keeps a stray
+# `git add` from pulling the generated scaffold in.
+/mobile/android/
+/mobile/ios/
+/mobile/linux/
+/mobile/macos/
+/mobile/windows/
+/mobile/.metadata
+
 # Android related
 **/android/**/gradle-wrapper.jar
 .gradle/

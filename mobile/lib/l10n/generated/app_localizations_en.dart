@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Puff';
 
   @override
+  String get splashTagline => 'Every toot counts.';
+
+  @override
   String get navHome => 'Home';
 
   @override

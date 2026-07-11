@@ -100,6 +100,12 @@ abstract class AppLocalizations {
   /// **'Puff'**
   String get appTitle;
 
+  /// Tagline shown under the wordmark on the launch splash screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Every toot counts.'**
+  String get splashTagline;
+
   /// No description provided for @navHome.
   ///
   /// In en, this message translates to:

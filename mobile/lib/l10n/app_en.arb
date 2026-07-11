@@ -1,6 +1,10 @@
 {
   "@@locale": "en",
   "appTitle": "Puff",
+  "splashTagline": "Every toot counts.",
+  "@splashTagline": {
+    "description": "Tagline shown under the wordmark on the launch splash screen."
+  },
   "navHome": "Home",
   "navStats": "Stats",
   "navDuels": "Duels",

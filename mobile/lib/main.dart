@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -87,16 +89,21 @@ Future<void> main() async {
     settingsRepo,
   );
 
-  await Future.wait([
+  // Local initialization the launch splash covers (Design Book §09, stage two).
+  // Not awaited here: runApp starts immediately so the splash can render while
+  // this runs, then hand off to home. Local-only — never gated on the network.
+  final initialization = Future.wait([
     settingsService.load(),
     entitlementService.load(),
     tapService.load(),
     diagnostics.load(),
   ]);
 
-  // Mirror local changes to the cloud for Pro users. schedulePush debounces
-  // past the quick-tag window so a tag edit rides along with its tap.
-  tapService.addListener(syncService.schedulePush);
+  // Mirror local changes to the cloud for Pro users, once events are loaded.
+  // schedulePush debounces past the quick-tag window so a tag edit rides along
+  // with its tap.
+  unawaited(initialization
+      .then((_) => tapService.addListener(syncService.schedulePush)));
 
   // Background cloud warm-up: session, fresh entitlement, pending events,
   // then the free-and-Pro daily stats report and a warm world aggregate.
@@ -126,7 +133,7 @@ Future<void> main() async {
         Provider<StatsService>.value(value: statsService),
         Provider<ShareService>.value(value: const SharePlusShareService()),
       ],
-      child: const PuffApp(),
+      child: PuffApp(initialization: initialization),
     ),
   );
 }

@@ -55,13 +55,19 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/branding/icon_foreground.png"
   adaptive_icon_monochrome: "assets/branding/icon_monochrome.png"
 
-# Launch splash — Gust centered on the canvas. Pre-Android-12 honors light/dark
-# (cloud / ink-deep); Android 12+ shows the mint-on-ink icon identity.
+# Launch splash — Design Book §09, stage one: the native launch image the OS
+# shows before Flutter boots. Just the Gust mark on the exact canvas color
+# (#F4FAF6 light / #141D28 dark) so there's no seam into the in-app stage-two
+# splash (SplashScreen), which carries the wordmark, tagline and loading dots.
+# Pre-Android-12 honors light/dark; Android 12+ shows the mint-on-ink icon
+# identity (the platform masks the launch image to an icon, so text lives in
+# stage two). fullscreen matches the app's status-bar treatment during launch.
 # Regenerate with `dart run flutter_native_splash:create`.
 flutter_native_splash:
   android: true
   ios: false
   web: false
+  fullscreen: true
   color: "#F4FAF6"
   image: "assets/branding/splash.png"
   color_dark: "#141D28"

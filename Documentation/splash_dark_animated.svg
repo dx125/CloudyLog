@@ -1,0 +1,36 @@
+<svg width="750" height="1334" viewBox="0 0 750 1334" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Puff splash screen, dark mode, animated</title>
+<desc>Gust the cloud mascot floating above the Puff wordmark and tagline, with three pulsing loading dots below. In-app splash variant shown while local data initializes.</desc>
+<style>
+.pf-float{animation:pfFloat 4.5s ease-in-out infinite;transform-origin:center;}
+.pf-dot{animation:pfDot 1.4s ease-in-out infinite;}
+.pf-dot:nth-child(2){animation-delay:.2s}
+.pf-dot:nth-child(3){animation-delay:.4s}
+@keyframes pfFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes pfDot{0%,100%{opacity:.35;transform:translateY(0)}50%{opacity:1;transform:translateY(-6px)}}
+@media (prefers-reduced-motion: reduce){.pf-float,.pf-dot{animation:none}}
+</style>
+<rect x="0" y="0" width="750" height="1334" fill="#141D28"/>
+<g class="pf-float" transform="translate(375,600)">
+  <ellipse cx="0" cy="0" rx="150" ry="95" fill="#5DCAA5"/>
+  <circle cx="-100" cy="-50" r="72" fill="#5DCAA5"/>
+  <circle cx="3" cy="-90" r="88" fill="#5DCAA5"/>
+  <circle cx="103" cy="-45" r="63" fill="#5DCAA5"/>
+  <circle cx="-50" cy="-20" r="17" fill="#141D28"/>
+  <circle cx="55" cy="-20" r="17" fill="#141D28"/>
+  <circle cx="-44" cy="-26" r="5.7" fill="#9FE1CB"/>
+  <circle cx="61" cy="-26" r="5.7" fill="#9FE1CB"/>
+  <path d="M-27 28 Q0 55 27 28" fill="none" stroke="#141D28" stroke-width="14" stroke-linecap="round"/>
+  <path d="M-198 78 Q-153 55 -113 78" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".85"/>
+  <path d="M-218 128 Q-160 103 -108 128" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".45"/>
+  <path d="M113 78 Q158 55 198 78" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".85"/>
+  <path d="M108 128 Q166 103 218 128" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".45"/>
+</g>
+<text x="375" y="808" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="700" font-size="118" fill="#5DCAA5">Puff</text>
+<text x="375" y="856" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="600" font-size="38" fill="#9FE1CB">Every toot counts.</text>
+<g transform="translate(345,970)">
+  <circle class="pf-dot" cx="0" cy="0" r="10" fill="#1D9E75"/>
+  <circle class="pf-dot" cx="30" cy="0" r="10" fill="#1D9E75"/>
+  <circle class="pf-dot" cx="60" cy="0" r="10" fill="#1D9E75"/>
+</g>
+</svg>

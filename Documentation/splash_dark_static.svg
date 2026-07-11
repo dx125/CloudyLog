@@ -1,0 +1,22 @@
+<svg width="750" height="1334" viewBox="0 0 750 1334" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Puff splash screen, dark mode, static</title>
+<desc>Gust the cloud mascot above the Puff wordmark and tagline, centered on an ink-black canvas. Static variant with no loading indicator, for the native OS launch screen.</desc>
+<rect x="0" y="0" width="750" height="1334" fill="#141D28"/>
+<g transform="translate(375,600)">
+  <ellipse cx="0" cy="0" rx="150" ry="95" fill="#5DCAA5"/>
+  <circle cx="-100" cy="-50" r="72" fill="#5DCAA5"/>
+  <circle cx="3" cy="-90" r="88" fill="#5DCAA5"/>
+  <circle cx="103" cy="-45" r="63" fill="#5DCAA5"/>
+  <circle cx="-50" cy="-20" r="17" fill="#141D28"/>
+  <circle cx="55" cy="-20" r="17" fill="#141D28"/>
+  <circle cx="-44" cy="-26" r="5.7" fill="#9FE1CB"/>
+  <circle cx="61" cy="-26" r="5.7" fill="#9FE1CB"/>
+  <path d="M-27 28 Q0 55 27 28" fill="none" stroke="#141D28" stroke-width="14" stroke-linecap="round"/>
+  <path d="M-198 78 Q-153 55 -113 78" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".85"/>
+  <path d="M-218 128 Q-160 103 -108 128" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".45"/>
+  <path d="M113 78 Q158 55 198 78" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".85"/>
+  <path d="M108 128 Q166 103 218 128" fill="none" stroke="#9FE1CB" stroke-width="18" stroke-linecap="round" opacity=".45"/>
+</g>
+<text x="375" y="808" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="700" font-size="118" fill="#5DCAA5">Puff</text>
+<text x="375" y="856" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="600" font-size="38" fill="#9FE1CB">Every toot counts.</text>
+</svg>

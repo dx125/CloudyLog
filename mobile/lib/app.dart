@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'presentation/screens/duels_screen.dart';
 import 'presentation/screens/home_screen.dart';
+import 'presentation/screens/splash_screen.dart';
 import 'presentation/screens/stats_screen.dart';
 import 'presentation/screens/you_screen.dart';
 import 'services/settings_service.dart';
@@ -11,7 +12,12 @@ import 'services/tap_service.dart';
 import 'theme/puff_theme.dart';
 
 class PuffApp extends StatelessWidget {
-  const PuffApp({super.key});
+  const PuffApp({super.key, this.initialization});
+
+  /// Local startup work (Drift open, migrations, cache warm, settings and
+  /// entitlement load) that the launch splash covers. Null in tests/previews
+  /// that don't run real init — the shell then shows immediately.
+  final Future<void>? initialization;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +31,12 @@ class PuffApp extends StatelessWidget {
       themeMode: settings.themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const _PuffShell(),
+      home: initialization == null
+          ? const _PuffShell()
+          : SplashGate(
+              initialization: initialization!,
+              child: const _PuffShell(),
+            ),
     );
   }
 }

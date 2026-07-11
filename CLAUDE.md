@@ -32,6 +32,8 @@ Voice rules (enforced in review): cheeky never crude, one joke per screen, sente
 
 Note: `pubspec.yaml` pins `sqlparser: 0.44.5` in `dependency_overrides` — drift_dev 2.34 breaks against sqlparser 0.44.6. Drop the pin when drift_dev ships a fix.
 
+**App icon & splash (branding):** the native `android/` scaffold is gitignored and recreated with `flutter create --platforms=android .`, so the icon/splash are *regeneratable sources*, not committed native files. Tracked source of truth: the Gust PNGs in `mobile/assets/branding/` (rendered from the mascot geometry by `tool/render_brand_assets.dart` via `flutter test tool/render_brand_assets.dart`) plus the `flutter_launcher_icons` and `flutter_native_splash` config blocks in `pubspec.yaml`. After (re)creating the android host, reapply branding: `dart run flutter_launcher_icons` and `dart run flutter_native_splash:create`, then set `android:label` to `Puff` in `AndroidManifest.xml`. The icon is the design book's App Store icon (bright mint Gust on ink; adaptive + Android-13 monochrome themed); the splash centers Gust on cloud (light) / ink-deep (dark), with the mint-on-ink icon identity on Android 12+.
+
 **Architecture (offline-first — the one non-negotiable):** the Drift store is the source of truth; the server is a sync target and stats engine, never a dependency of the core loop. A tap must register in under 100 ms in airplane mode. Haptics/animation fire on the raw gesture handler (in `TapButton`), before any DB write.
 
 | Layer | Folders | Contents |

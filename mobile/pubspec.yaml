@@ -35,7 +35,39 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   drift_dev: ^2.20.0
   build_runner: ^2.4.13
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 flutter:
   uses-material-design: true
   generate: true
+
+# App launcher icon — Gust, the design book's App Store icon (bright mint body on
+# ink). Adaptive icon = ink field + Gust foreground; legacy/round from icon.png.
+# Regenerate the source PNGs with `flutter test tool/render_brand_assets.dart`,
+# then `dart run flutter_launcher_icons`.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/branding/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#1E2A38"
+  adaptive_icon_foreground: "assets/branding/icon_foreground.png"
+  adaptive_icon_monochrome: "assets/branding/icon_monochrome.png"
+
+# Launch splash — Gust centered on the canvas. Pre-Android-12 honors light/dark
+# (cloud / ink-deep); Android 12+ shows the mint-on-ink icon identity.
+# Regenerate with `dart run flutter_native_splash:create`.
+flutter_native_splash:
+  android: true
+  ios: false
+  web: false
+  color: "#F4FAF6"
+  image: "assets/branding/splash.png"
+  color_dark: "#141D28"
+  image_dark: "assets/branding/splash_dark.png"
+  android_12:
+    image: "assets/branding/icon_foreground.png"
+    icon_background_color: "#1E2A38"
+    image_dark: "assets/branding/icon_foreground.png"
+    icon_background_color_dark: "#1E2A38"

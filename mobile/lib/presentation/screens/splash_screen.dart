@@ -87,7 +87,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     return Semantics(
       label: strings.appTitle,
-      child: Container(
+      // Material (not a bare Container) so Text resolves a real default style
+      // instead of the unstyled yellow-underline fallback.
+      child: Material(
         color: puff.canvas,
         child: SafeArea(
           child: LayoutBuilder(

@@ -19,9 +19,12 @@ What gets applied either way:
 | `0004_global_stats.sql` | anonymous `daily_global_stats` + `refresh_global_stats()` + pg_cron job |
 | `0005_stat_reports.sql` | `user_daily_stats` (every tier reports one `(day, count)` row/day); repoints the aggregate at it |
 | `0006_api_grants.sql` | explicit table `GRANT`s to the `authenticated` role (RLS still constrains rows) — so the backend doesn't rely on Supabase's implicit default privileges |
+| `0007_event_source.sql` | `events.source` (`tap` \| `heard`) — keeps acoustically-detected events out of the health log and the world aggregate |
+| `0008_duels.sql` | `duels` / `duel_members` / `duel_scores` + `is_duel_member()`; creating is Pro-gated in RLS, joining is free. Names are curated-wordlist **indices**, never free text |
+| `0009_realtime_authz.sql` | RLS on `realtime.messages` so live-duel channels are private to members. **Needs the dashboard setting in step 9 to take effect.** |
 
 Functions: `sync-events`, `entitlements`, `global-stats`, `report-stats`,
-`account`. All have `verify_jwt = true`, so every request needs an
+`account`, `duels`. All have `verify_jwt = true`, so every request needs an
 `Authorization` header — the app always sends one (auth is anonymous-first).
 None use `service_role`; they run with the caller's JWT.
 
@@ -133,7 +136,17 @@ None use `service_role`; they run with the caller's JWT.
    select refresh_global_stats();
    ```
 
-9. **Wire the release build** — `mobile/.env` with the hosted values:
+9. **Turn OFF "Allow public access" in Realtime settings** — Dashboard →
+   Project Settings → Realtime. Live duels use *private* channels, and the RLS
+   policies in `0009_realtime_authz.sql` are only consulted when public access
+   is disabled. Leave it on and duel channels stay world-readable: anyone who
+   guesses a channel name sees the scores. There is no SQL for this; it is a
+   project setting, so it has to be done by hand on every environment.
+
+   Verify: `select * from pg_policies where schemaname = 'realtime';` should
+   list the two "realtime: duel members …" policies.
+
+10. **Wire the release build** — `mobile/.env` with the hosted values:
    ```
    PUFF_SUPABASE_URL=https://<ref>.supabase.co
    PUFF_SUPABASE_PUBLISHABLE_KEY=<Dashboard → Project Settings → API Keys → publishable (sb_publishable_…)>

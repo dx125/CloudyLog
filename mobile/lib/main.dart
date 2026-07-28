@@ -7,16 +7,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'data/acoustic/heuristic_classifier.dart';
+import 'data/acoustic/record_capture.dart';
+import 'data/acoustic/yamnet_classifier.dart';
 import 'data/drift/drift_event_store.dart';
 import 'data/drift/puff_database.dart';
 import 'data/event_store.dart';
 import 'data/file_diagnostics_store.dart';
+import 'data/gateways.dart';
 import 'data/settings_repository.dart';
 import 'data/supabase/supabase_gateways.dart';
 import 'services/auth_service.dart';
 import 'services/diagnostics_service.dart';
+import 'services/duel_service.dart';
 import 'services/entitlement_service.dart';
 import 'services/global_stats_service.dart';
+import 'services/listen_service.dart';
 import 'services/settings_service.dart';
 import 'services/share_service.dart';
 import 'services/stats_service.dart';
@@ -31,6 +37,14 @@ import 'services/tap_service.dart';
 const String _supabaseUrl = String.fromEnvironment('PUFF_SUPABASE_URL');
 const String _supabasePublishableKey =
     String.fromEnvironment('PUFF_SUPABASE_PUBLISHABLE_KEY');
+
+/// Development escape hatch: run acoustic detection on plain DSP instead of the
+/// trained model. See [HeuristicClassifier] — it exists so Listen mode and tag
+/// assist can be exercised before `assets/acoustic/head.bin` is produced, and
+/// it must never be the shipped detector. Production builds omit this and get
+/// [YamnetClassifier].
+const bool _useHeuristicAcoustics =
+    bool.fromEnvironment('PUFF_ACOUSTIC_HEURISTIC');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,6 +103,25 @@ Future<void> main() async {
     settingsRepo,
   );
 
+  // Acoustic detection. Constructed eagerly but inert: nothing opens the
+  // microphone or loads a model until a screen calls ListenService.start(),
+  // so this costs nothing at launch and never touches the tap path.
+  final AcousticClassifier classifier =
+      _useHeuristicAcoustics ? HeuristicClassifier() : YamnetClassifier();
+  final listenService = ListenService(
+    RecordAudioCapture(),
+    classifier,
+    tapService,
+    isPro: () => entitlementService.isPro,
+    onError: diagnostics.record,
+  );
+
+  final duelService = DuelService(
+    SupabaseDuelGateway(supabase, onError: diagnostics.record),
+    store,
+    channel: SupabaseDuelChannel(supabase, onError: diagnostics.record),
+  );
+
   // Local initialization the launch splash covers (Design Book §09, stage two).
   // Not awaited here: runApp starts immediately so the splash can render while
   // this runs, then hand off to home. Local-only — never gated on the network.
@@ -130,6 +163,8 @@ Future<void> main() async {
           value: globalStatsService,
         ),
         ChangeNotifierProvider<DiagnosticsService>.value(value: diagnostics),
+        ChangeNotifierProvider<ListenService>.value(value: listenService),
+        ChangeNotifierProvider<DuelService>.value(value: duelService),
         Provider<StatsService>.value(value: statsService),
         Provider<ShareService>.value(value: const SharePlusShareService()),
       ],

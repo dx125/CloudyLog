@@ -225,6 +225,99 @@
   "themeDark": "Dark",
   "soundSetting": "Tap sound",
   "soundSettingHint": "One tasteful pop. Off by default.",
+  "listenAssistSetting": "Listen while I tap",
+  "listenAssistSettingHint": "Puff uses the mic on this screen to guess the tag for you. Nothing is recorded or sent anywhere.",
+  "listenAssistDenied": "Puff can't use the mic. Check permissions in your phone's settings.",
+  "listenSuggestionHint": "Sounded like this one",
+  "listenTitle": "Listen mode",
+  "listenStart": "Start listening",
+  "listenStop": "Stop",
+  "listenPillHome": "Listen",
+  "listenHeardLabel": "heard this session",
+  "listenIntro": "Puff listens and counts for you. These stay separate from your tapped log.",
+  "listenSilentJoke": "Can't hear the silent ones. Nobody can — tap those in.",
+  "listenEmpty": "Listening. Nothing yet.",
+  "listenUndo": "Not me",
+  "listenUndone": "Removed.",
+  "listenDeniedTitle": "Puff needs the mic",
+  "listenDeniedBody": "Listen mode can't work without it. Your taps still count perfectly — this is just the hands-free version.",
+  "listenErrorTitle": "Listening isn't available",
+  "listenErrorBody": "Something went wrong starting the mic. It's in Settings → Diagnostics if you're curious.",
+  "listenBudgetLeft": "{seconds}s left",
+  "@listenBudgetLeft": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "listenBudgetDone": "That's the free session",
+  "listenBudgetDoneBody": "Pro listens as long as you like.",
+  "listenOpenSettings": "Open settings",
+  "duelsEmptyTitle": "Nobody to beat yet",
+  "duelsEmptyBody": "A duel needs two people. Start one and send the code, or join with a code someone sent you.",
+  "duelCreateAsync": "Start a week",
+  "duelCreateLive": "Start a live round",
+  "duelJoin": "Join with a code",
+  "duelJoinTitle": "Got a code?",
+  "duelJoinHint": "ABC234",
+  "duelJoinButton": "Join",
+  "duelJoinNotFound": "No duel with that code.",
+  "duelJoinEnded": "That duel's already over.",
+  "duelJoinLimit": "Free plays one duel at a time. Pro plays as many as you like.",
+  "duelCodeLabel": "Code",
+  "duelCodeCopied": "Code copied.",
+  "duelShareText": "Join my Puff duel — code {code}",
+  "@duelShareText": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "duelKindAsync": "This week",
+  "duelKindLive": "Live",
+  "duelTimeLeftDays": "{days}d left",
+  "@duelTimeLeftDays": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "duelTimeLeftHours": "{hours}h left",
+  "@duelTimeLeftHours": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "duelTimeLeftMinutes": "{minutes}m left",
+  "@duelTimeLeftMinutes": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "duelOver": "Finished",
+  "duelWaiting": "Waiting for someone to join",
+  "duelLeading": "{name} is ahead",
+  "@duelLeading": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "duelTied": "Dead even",
+  "duelYou": "You",
+  "duelLeave": "Leave duel",
+  "duelLeaveConfirm": "Leave this duel? Your score goes with you.",
+  "duelStartRound": "Start the round",
+  "duelRoundTitle": "Live round",
+  "duelRoundHint": "Phones down, both of you. Puff's listening.",
+  "duelRoundHonour": "Live rounds run on the honour system. Puff can't tell a real one from a good impression.",
+  "duelRoundEnd": "End round",
+  "duelRoundOver": "Round over",
+  "duelRoundWon": "You win",
+  "duelRoundLost": "{name} wins",
+  "@duelRoundLost": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "duelRoundTied": "A tie. Rematch?",
+  "duelProOnly": "Starting duels is a Pro thing. Joining one is always free.",
   "diagnosticsSetting": "Diagnostics",
   "diagnosticsSettingHint": "Errors the app caught quietly, kept for debugging",
   "diagnosticsTitle": "Diagnostics",

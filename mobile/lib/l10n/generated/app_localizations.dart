@@ -916,6 +916,354 @@ abstract class AppLocalizations {
   /// **'One tasteful pop. Off by default.'**
   String get soundSettingHint;
 
+  /// No description provided for @listenAssistSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen while I tap'**
+  String get listenAssistSetting;
+
+  /// No description provided for @listenAssistSettingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Puff uses the mic on this screen to guess the tag for you. Nothing is recorded or sent anywhere.'**
+  String get listenAssistSettingHint;
+
+  /// No description provided for @listenAssistDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Puff can\'t use the mic. Check permissions in your phone\'s settings.'**
+  String get listenAssistDenied;
+
+  /// No description provided for @listenSuggestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sounded like this one'**
+  String get listenSuggestionHint;
+
+  /// No description provided for @listenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen mode'**
+  String get listenTitle;
+
+  /// No description provided for @listenStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start listening'**
+  String get listenStart;
+
+  /// No description provided for @listenStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get listenStop;
+
+  /// No description provided for @listenPillHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get listenPillHome;
+
+  /// No description provided for @listenHeardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'heard this session'**
+  String get listenHeardLabel;
+
+  /// No description provided for @listenIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Puff listens and counts for you. These stay separate from your tapped log.'**
+  String get listenIntro;
+
+  /// No description provided for @listenSilentJoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t hear the silent ones. Nobody can — tap those in.'**
+  String get listenSilentJoke;
+
+  /// No description provided for @listenEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening. Nothing yet.'**
+  String get listenEmpty;
+
+  /// No description provided for @listenUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Not me'**
+  String get listenUndo;
+
+  /// No description provided for @listenUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed.'**
+  String get listenUndone;
+
+  /// No description provided for @listenDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Puff needs the mic'**
+  String get listenDeniedTitle;
+
+  /// No description provided for @listenDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen mode can\'t work without it. Your taps still count perfectly — this is just the hands-free version.'**
+  String get listenDeniedBody;
+
+  /// No description provided for @listenErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening isn\'t available'**
+  String get listenErrorTitle;
+
+  /// No description provided for @listenErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong starting the mic. It\'s in Settings → Diagnostics if you\'re curious.'**
+  String get listenErrorBody;
+
+  /// No description provided for @listenBudgetLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s left'**
+  String listenBudgetLeft(int seconds);
+
+  /// No description provided for @listenBudgetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s the free session'**
+  String get listenBudgetDone;
+
+  /// No description provided for @listenBudgetDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro listens as long as you like.'**
+  String get listenBudgetDoneBody;
+
+  /// No description provided for @listenOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get listenOpenSettings;
+
+  /// No description provided for @duelsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody to beat yet'**
+  String get duelsEmptyTitle;
+
+  /// No description provided for @duelsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A duel needs two people. Start one and send the code, or join with a code someone sent you.'**
+  String get duelsEmptyBody;
+
+  /// No description provided for @duelCreateAsync.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a week'**
+  String get duelCreateAsync;
+
+  /// No description provided for @duelCreateLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a live round'**
+  String get duelCreateLive;
+
+  /// No description provided for @duelJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with a code'**
+  String get duelJoin;
+
+  /// No description provided for @duelJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Got a code?'**
+  String get duelJoinTitle;
+
+  /// No description provided for @duelJoinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'ABC234'**
+  String get duelJoinHint;
+
+  /// No description provided for @duelJoinButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get duelJoinButton;
+
+  /// No description provided for @duelJoinNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No duel with that code.'**
+  String get duelJoinNotFound;
+
+  /// No description provided for @duelJoinEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'That duel\'s already over.'**
+  String get duelJoinEnded;
+
+  /// No description provided for @duelJoinLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plays one duel at a time. Pro plays as many as you like.'**
+  String get duelJoinLimit;
+
+  /// No description provided for @duelCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get duelCodeLabel;
+
+  /// No description provided for @duelCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied.'**
+  String get duelCodeCopied;
+
+  /// No description provided for @duelShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Join my Puff duel — code {code}'**
+  String duelShareText(String code);
+
+  /// No description provided for @duelKindAsync.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get duelKindAsync;
+
+  /// No description provided for @duelKindLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get duelKindLive;
+
+  /// No description provided for @duelTimeLeftDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d left'**
+  String duelTimeLeftDays(int days);
+
+  /// No description provided for @duelTimeLeftHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h left'**
+  String duelTimeLeftHours(int hours);
+
+  /// No description provided for @duelTimeLeftMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m left'**
+  String duelTimeLeftMinutes(int minutes);
+
+  /// No description provided for @duelOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get duelOver;
+
+  /// No description provided for @duelWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for someone to join'**
+  String get duelWaiting;
+
+  /// No description provided for @duelLeading.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is ahead'**
+  String duelLeading(String name);
+
+  /// No description provided for @duelTied.
+  ///
+  /// In en, this message translates to:
+  /// **'Dead even'**
+  String get duelTied;
+
+  /// No description provided for @duelYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get duelYou;
+
+  /// No description provided for @duelLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave duel'**
+  String get duelLeave;
+
+  /// No description provided for @duelLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this duel? Your score goes with you.'**
+  String get duelLeaveConfirm;
+
+  /// No description provided for @duelStartRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the round'**
+  String get duelStartRound;
+
+  /// No description provided for @duelRoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live round'**
+  String get duelRoundTitle;
+
+  /// No description provided for @duelRoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Phones down, both of you. Puff\'s listening.'**
+  String get duelRoundHint;
+
+  /// No description provided for @duelRoundHonour.
+  ///
+  /// In en, this message translates to:
+  /// **'Live rounds run on the honour system. Puff can\'t tell a real one from a good impression.'**
+  String get duelRoundHonour;
+
+  /// No description provided for @duelRoundEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End round'**
+  String get duelRoundEnd;
+
+  /// No description provided for @duelRoundOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Round over'**
+  String get duelRoundOver;
+
+  /// No description provided for @duelRoundWon.
+  ///
+  /// In en, this message translates to:
+  /// **'You win'**
+  String get duelRoundWon;
+
+  /// No description provided for @duelRoundLost.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wins'**
+  String duelRoundLost(String name);
+
+  /// No description provided for @duelRoundTied.
+  ///
+  /// In en, this message translates to:
+  /// **'A tie. Rematch?'**
+  String get duelRoundTied;
+
+  /// No description provided for @duelProOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting duels is a Pro thing. Joining one is always free.'**
+  String get duelProOnly;
+
   /// No description provided for @diagnosticsSetting.
   ///
   /// In en, this message translates to:

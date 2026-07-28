@@ -15,6 +15,10 @@ class Events extends Table {
   DateTimeColumn get occurredAt => dateTime()();
   TextColumn get tags => text().withDefault(const Constant('[]'))();
   TextColumn get deviceId => text().withDefault(const Constant(''))();
+
+  /// 'tap' | 'heard' — see [EventSource]. Defaulted so every pre-existing row
+  /// reads as tapped, which is exactly what it was.
+  TextColumn get source => text().withDefault(const Constant('tap'))();
   DateTimeColumn get syncedAt => dateTime().nullable()();
 
   @override
@@ -26,7 +30,17 @@ class PuffDatabase extends _$PuffDatabase {
   PuffDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          // v2: acoustic detection — events remember whether they were tapped
+          // or heard. The column default backfills every existing row to 'tap'.
+          if (from < 2) await m.addColumn(events, events.source);
+        },
+      );
 }
 
 QueryExecutor openPuffDatabase() {

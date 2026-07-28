@@ -37,6 +37,11 @@ class DriftEventStore implements EventStore {
   }
 
   @override
+  Future<void> delete(String id) async {
+    await (_db.delete(_db.events)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
   Future<PuffEvent?> byId(String id) async {
     final row = await (_db.select(_db.events)
           ..where((t) => t.id.equals(id)))
@@ -45,13 +50,17 @@ class DriftEventStore implements EventStore {
   }
 
   @override
-  Future<int> countForDay(DateTime day) async {
+  Future<int> countForDay(
+    DateTime day, {
+    SourceFilter source = SourceFilter.tapped,
+  }) async {
     final start = dayOf(day);
     final end = start.add(const Duration(days: 1));
     final countExp = _db.events.id.count();
     final query = _db.selectOnly(_db.events)
       ..addColumns([countExp])
       ..where(_db.events.type.equals(kTootType) &
+          _sourceWhere(source) &
           _db.events.occurredAt.isBiggerOrEqualValue(start) &
           _db.events.occurredAt.isSmallerThanValue(end));
     final row = await query.getSingle();
@@ -59,23 +68,39 @@ class DriftEventStore implements EventStore {
   }
 
   @override
-  Future<List<PuffEvent>> eventsBetween(DateTime from, DateTime to) async {
+  Future<List<PuffEvent>> eventsBetween(
+    DateTime from,
+    DateTime to, {
+    SourceFilter source = SourceFilter.all,
+  }) async {
     final rows = await (_db.select(_db.events)
           ..where((t) =>
               t.occurredAt.isBiggerOrEqualValue(from) &
-              t.occurredAt.isSmallerThanValue(to))
+              t.occurredAt.isSmallerThanValue(to) &
+              _sourceWhere(source))
           ..orderBy([(t) => OrderingTerm.asc(t.occurredAt)]))
         .get();
     return rows.map(_toDomain).toList();
   }
 
   @override
-  Future<List<PuffEvent>> allEvents() async {
+  Future<List<PuffEvent>> allEvents({
+    SourceFilter source = SourceFilter.all,
+  }) async {
     final rows = await (_db.select(_db.events)
+          ..where((t) => _sourceWhere(source))
           ..orderBy([(t) => OrderingTerm.asc(t.occurredAt)]))
         .get();
     return rows.map(_toDomain).toList();
   }
+
+  /// SQL for a [SourceFilter]. `all` becomes a constant-true term so callers
+  /// can always `&` it in without branching.
+  Expression<bool> _sourceWhere(SourceFilter filter) => switch (filter) {
+        SourceFilter.tapped => _db.events.source.equals(kSourceTap),
+        SourceFilter.heard => _db.events.source.equals(kSourceHeard),
+        SourceFilter.all => const Constant(true),
+      };
 
   @override
   Future<List<PuffEvent>> unsynced(int limit) async {
@@ -95,12 +120,14 @@ class DriftEventStore implements EventStore {
   }
 
   @override
-  Future<Map<DateTime, int>> countsByDay() async {
+  Future<Map<DateTime, int>> countsByDay({
+    SourceFilter source = SourceFilter.tapped,
+  }) async {
     // Pilot scale: group in Dart so "day" is unambiguously the device-local
     // day, matching everything the user sees.
     final rows = await (_db.selectOnly(_db.events)
           ..addColumns([_db.events.occurredAt])
-          ..where(_db.events.type.equals(kTootType)))
+          ..where(_db.events.type.equals(kTootType) & _sourceWhere(source)))
         .get();
     final counts = <DateTime, int>{};
     for (final row in rows) {
@@ -117,6 +144,7 @@ class DriftEventStore implements EventStore {
         occurredAt: e.occurredAt,
         tags: Value(jsonEncode(e.tags)),
         deviceId: Value(e.deviceId),
+        source: Value(sourceName(e.source)),
         syncedAt: Value(synced ? DateTime.now() : e.syncedAt),
       );
 
@@ -126,6 +154,7 @@ class DriftEventStore implements EventStore {
         occurredAt: row.occurredAt,
         tags: (jsonDecode(row.tags) as List<dynamic>).cast<String>(),
         deviceId: row.deviceId,
+        source: sourceFrom(row.source),
         syncedAt: row.syncedAt,
       );
 }

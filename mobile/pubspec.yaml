@@ -23,6 +23,17 @@ dependencies:
   path: ^1.9.0
   uuid: ^4.5.1
   google_fonts: ^6.2.1
+  # Acoustic detection (Documentation/live-detection-design.md §2).
+  # `record` streams raw PCM16 from the mic; flutter_litert runs YAMNet.
+  # flutter_litert over tflite_flutter: TFLite is now LiteRT and all further
+  # work is LiteRT-only, tflite_flutter has stalled at 0.12.x, and litert
+  # bundles the native libraries instead of making us place them by hand.
+  # Its Interpreter API is source-compatible, so this is a low-risk swap.
+  # record is pinned to the 6.x line: 7.x requires Dart >=3.12 and this SDK is
+  # 3.11.5. 6.x has the same startStream/pcm16bits API we need. Move to ^7 when
+  # the Flutter SDK is next upgraded.
+  record: ^6.2.1
+  flutter_litert: ^3.6.0
 
 # drift_dev 2.34 breaks against sqlparser 0.44.6 (DartPlaceholder.when was
 # removed within the ^0.44 range). Pin until a fixed drift_dev ships.
@@ -32,6 +43,8 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Drives DuelService's broadcast throttle without real waiting.
+  fake_async: ^1.3.1
   flutter_lints: ^4.0.0
   drift_dev: ^2.20.0
   build_runner: ^2.4.13
@@ -59,9 +72,12 @@ flutter_launcher_icons:
 # shows before Flutter boots. Just the Gust mark on the exact canvas color
 # (#F4FAF6 light / #141D28 dark) so there's no seam into the in-app stage-two
 # splash (SplashScreen), which carries the wordmark, tagline and loading dots.
-# Pre-Android-12 honors light/dark; Android 12+ shows the mint-on-ink icon
-# identity (the platform masks the launch image to an icon, so text lives in
-# stage two). fullscreen matches the app's status-bar treatment during launch.
+# Pre-Android-12 draws the full-screen Gust-on-canvas (splash.png / splash_dark).
+# Android 12+ can't render text — the OS masks the launch image to a circle and
+# centers it on the icon-background color — so it uses the splash-colored Gust
+# (splash_icon*) with the icon background set to the canvas: the disc blends into
+# the screen and only the deep-teal / mint Gust reads, matching the static
+# splash. fullscreen matches the app's status-bar treatment during launch.
 # Regenerate with `dart run flutter_native_splash:create`.
 flutter_native_splash:
   android: true
@@ -73,7 +89,7 @@ flutter_native_splash:
   color_dark: "#141D28"
   image_dark: "assets/branding/splash_dark.png"
   android_12:
-    image: "assets/branding/icon_foreground.png"
-    icon_background_color: "#1E2A38"
-    image_dark: "assets/branding/icon_foreground.png"
-    icon_background_color_dark: "#1E2A38"
+    image: "assets/branding/splash_icon.png"
+    icon_background_color: "#F4FAF6"
+    image_dark: "assets/branding/splash_icon_dark.png"
+    icon_background_color_dark: "#141D28"

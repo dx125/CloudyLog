@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/duel.dart';
 import '../../domain/entitlement.dart';
 import '../../domain/puff_event.dart';
 import '../diagnostics_store.dart';
@@ -158,6 +161,7 @@ class SupabaseEventsSyncGateway extends _SupabaseGateway
                 'occurred_at': e.occurredAt.toUtc().toIso8601String(),
                 'tags': e.tags,
                 'device_id': e.deviceId,
+                'source': sourceName(e.source),
               },
           ],
         });
@@ -179,9 +183,170 @@ class SupabaseEventsSyncGateway extends _SupabaseGateway
               tags: ((row['tags'] as List<dynamic>?) ?? const [])
                   .cast<String>(),
               deviceId: (row['device_id'] as String?) ?? '',
+              // Rows written before 0007 have no source; they were all taps.
+              source: sourceFrom(row['source'] as String?),
             ),
         ];
       });
+}
+
+class SupabaseDuelGateway extends _SupabaseGateway implements DuelGateway {
+  SupabaseDuelGateway(SupabaseClient? client, {DiagnosticsRecorder? onError})
+      : super(client, onError);
+
+  @override
+  Future<List<Duel>> list() => _guard('duels.list', () async {
+        final res = await _c.functions.invoke('duels', method: HttpMethod.get);
+        final rows =
+            ((res.data as Map<String, dynamic>)['duels'] as List<dynamic>?) ??
+                const [];
+        return [
+          for (final row in rows.cast<Map<String, dynamic>>())
+            Duel.fromJson(row),
+        ];
+      });
+
+  @override
+  Future<Duel?> preview(String code) => _guard('duels.preview', () async {
+        final res = await _c.functions.invoke(
+          'duels',
+          method: HttpMethod.get,
+          queryParameters: {'code': code},
+        );
+        final row = (res.data as Map<String, dynamic>)['duel'];
+        return row == null
+            ? null
+            : Duel.fromJson((row as Map).cast<String, Object?>());
+      });
+
+  @override
+  Future<Duel> create({required DuelKind kind}) =>
+      _guard('duels.create', () async {
+        final res = await _c.functions.invoke(
+          'duels',
+          body: {'action': 'create', 'kind': kind.wire},
+        );
+        final row = (res.data as Map<String, dynamic>)['duel'];
+        if (row == null) throw const CloudUnavailable('create failed');
+        return Duel.fromJson((row as Map).cast<String, Object?>());
+      });
+
+  @override
+  Future<void> join(String code) async {
+    try {
+      await _c.functions.invoke('duels', body: {
+        'action': 'join',
+        'code': code,
+      });
+    } on FunctionException catch (e) {
+      // 402 is the free-tier ceiling — a paywall moment, not a failure. 404/409
+      // mean the code is wrong or the duel is over. Everything else is a real
+      // fault and goes through the usual recording path.
+      if (e.status == 402) throw const DuelLimitReached();
+      if (e.status == 404) throw const DuelUnavailable('not-found');
+      if (e.status == 409) throw const DuelUnavailable('ended');
+      _onError?.call('duels.join', e, StackTrace.current);
+      throw CloudUnavailable(e.toString());
+    } catch (e, stack) {
+      _onError?.call('duels.join', e, stack);
+      throw CloudUnavailable(e.toString());
+    }
+  }
+
+  @override
+  Future<void> submitScore(String duelId, {int tapped = 0, int heard = 0}) =>
+      _guard('duels.score', () async {
+        await _c.functions.invoke('duels', body: {
+          'action': 'score',
+          'duel_id': duelId,
+          'tapped': tapped,
+          'heard': heard,
+        });
+      });
+
+  @override
+  Future<void> leave(String duelId) => _guard('duels.leave', () async {
+        await _c.functions.invoke('duels', body: {
+          'action': 'leave',
+          'duel_id': duelId,
+        });
+      });
+}
+
+/// Live-duel transport over a Supabase Realtime **private** channel.
+///
+/// Private (`private: true`) is not optional: authorization comes from the RLS
+/// policies in migration 0009, which are only consulted for private channels
+/// and only when "Allow public access" is off in the project's Realtime
+/// settings. Public channels would leave duel scores world-readable to anyone
+/// who guesses a topic.
+class SupabaseDuelChannel implements DuelChannel {
+  SupabaseDuelChannel(this._client, {DiagnosticsRecorder? onError})
+      : _onError = onError;
+
+  final SupabaseClient? _client;
+  final DiagnosticsRecorder? _onError;
+  RealtimeChannel? _channel;
+
+  static const _event = 'score';
+
+  @override
+  Stream<DuelLiveScore> join(String duelId) {
+    final client = _client;
+    final controller = StreamController<DuelLiveScore>();
+    if (client == null) {
+      controller.close();
+      return controller.stream;
+    }
+
+    final channel = client.channel(
+      'duel:$duelId',
+      opts: const RealtimeChannelConfig(private: true),
+    );
+    _channel = channel;
+
+    channel
+        .onBroadcast(
+          event: _event,
+          callback: (payload) {
+            final userId = payload['user_id'] as String?;
+            final count = (payload['count'] as num?)?.toInt();
+            if (userId == null || count == null) return;
+            // Ignore my own echo; the local count is already optimistic.
+            if (userId == client.auth.currentUser?.id) return;
+            controller.add(DuelLiveScore(userId: userId, count: count));
+          },
+        )
+        .subscribe((status, error) {
+      if (error != null) _onError?.call('duel.channel', error, StackTrace.current);
+    });
+
+    controller.onCancel = () async => channel.unsubscribe();
+    return controller.stream;
+  }
+
+  @override
+  Future<void> publish(String duelId, int count) async {
+    final client = _client;
+    final channel = _channel;
+    if (client == null || channel == null) return;
+    try {
+      await channel.sendBroadcastMessage(
+        event: _event,
+        payload: {'user_id': client.auth.currentUser?.id, 'count': count},
+      );
+    } catch (e, stack) {
+      // A dropped liveness frame is survivable — the authoritative score still
+      // goes through the edge function.
+      _onError?.call('duel.publish', e, stack);
+    }
+  }
+
+  @override
+  Future<void> leave() async {
+    await _channel?.unsubscribe();
+    _channel = null;
+  }
 }
 
 class SupabaseGlobalStatsGateway extends _SupabaseGateway

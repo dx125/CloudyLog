@@ -15,6 +15,13 @@ abstract class SettingsRepository {
   Future<void> setSoundEnabled(bool value);
   Future<List<String>> customTags();
   Future<void> setCustomTags(List<String> tags);
+
+  /// Design A: may the mic listen while Home is open, to suggest a quick tag?
+  /// Defaults to **off** — the microphone is never opened without the user
+  /// deciding to, and the tap loop is complete without it.
+  Future<bool> listenAssistEnabled();
+  Future<void> setListenAssistEnabled(bool value);
+
   Future<Entitlement?> cachedEntitlement();
   Future<void> cacheEntitlement(Entitlement? entitlement);
 
@@ -36,6 +43,7 @@ class SharedPrefsSettingsRepository implements SettingsRepository {
   static const _keyTheme = 'theme_mode';
   static const _keySound = 'sound_enabled';
   static const _keyCustomTags = 'custom_tags';
+  static const _keyListenAssist = 'listen_assist_enabled';
   static const _keyEntitlement = 'entitlement_cache';
   static const _keyLastStatsReport = 'last_stats_report_day';
 
@@ -78,6 +86,15 @@ class SharedPrefsSettingsRepository implements SettingsRepository {
   @override
   Future<void> setCustomTags(List<String> tags) async {
     await _prefs.setStringList(_keyCustomTags, tags);
+  }
+
+  @override
+  Future<bool> listenAssistEnabled() async =>
+      _prefs.getBool(_keyListenAssist) ?? false;
+
+  @override
+  Future<void> setListenAssistEnabled(bool value) async {
+    await _prefs.setBool(_keyListenAssist, value);
   }
 
   @override

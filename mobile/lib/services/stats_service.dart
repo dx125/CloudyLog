@@ -6,6 +6,11 @@ import '../domain/streaks.dart' as streaks;
 /// Everything the free 7-day view needs plus the Pro overview, derived from
 /// the local event log in one pass. All charts compute locally — the app is
 /// fully functional without an account.
+///
+/// Every query here is **tapped-only** ([SourceFilter.tapped]). Heard events
+/// (Listen mode, live duels) are logs, not health data, so they stay out of
+/// counts, streaks, badges, charts and Wrapped. Their own statistics live in
+/// the Pro sound-signature view, which asks for them explicitly.
 class StatsSnapshot {
   const StatsSnapshot({
     required this.weekCounts,
@@ -68,7 +73,7 @@ class StatsService {
       if (count > best) best = count;
     }
 
-    final events = await _store.allEvents();
+    final events = await _store.allEvents(source: SourceFilter.tapped);
     final classicUsed = <String>{};
     for (final event in events) {
       for (final tag in event.tags) {
@@ -97,7 +102,8 @@ class StatsService {
   Future<List<int>> hourHistogram() async {
     final now = _clock();
     final from = dayOf(now).subtract(const Duration(days: 30));
-    final events = await _store.eventsBetween(from, now);
+    final events =
+        await _store.eventsBetween(from, now, source: SourceFilter.tapped);
     final buckets = List<int>.filled(24, 0);
     for (final event in events) {
       if (event.type != kTootType) continue;
@@ -130,7 +136,7 @@ class StatsService {
 
   Future<WrappedFacts> wrapped() async {
     final now = _clock();
-    final events = await _store.allEvents();
+    final events = await _store.allEvents(source: SourceFilter.tapped);
     final thisYear = events
         .where((e) => e.type == kTootType && e.occurredAt.year == now.year)
         .toList();

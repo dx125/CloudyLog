@@ -18,6 +18,7 @@ class QuickTagsRow extends StatelessWidget {
     required this.selected,
     required this.enabled,
     required this.onToggle,
+    this.suggested,
     this.onAddCustom,
     this.addLabel,
   });
@@ -26,6 +27,14 @@ class QuickTagsRow extends StatelessWidget {
   final Set<String> selected;
   final bool enabled;
   final ValueChanged<String> onToggle;
+
+  /// Design A: the tag the microphone thinks it heard. Marked with a dashed
+  /// outline, **never auto-applied** — the user still taps it.
+  ///
+  /// A wrong suggestion costs a shrug. A wrongly *written* tag would put a
+  /// guess into the health log, which is the one thing this feature must not
+  /// do, so the mic stays out of the write path entirely.
+  final String? suggested;
 
   /// Pro: lets the user define their own tag. Null hides the chip.
   final VoidCallback? onAddCustom;
@@ -52,6 +61,11 @@ class QuickTagsRow extends StatelessWidget {
               context,
               label: tag.label,
               selected: selected.contains(tag.id),
+              // Only hint while the window is open and the chip isn't already
+              // chosen — a suggestion on a selected chip is just noise.
+              hinted: enabled &&
+                  tag.id == suggested &&
+                  !selected.contains(tag.id),
               onTap: enabled ? () => onToggle(tag.id) : null,
               puff: puff,
               style: labelStyle,
@@ -61,6 +75,7 @@ class QuickTagsRow extends StatelessWidget {
               context,
               label: addLabel ?? '+',
               selected: false,
+              hinted: false,
               onTap: onAddCustom,
               puff: puff,
               style: labelStyle,
@@ -74,27 +89,48 @@ class QuickTagsRow extends StatelessWidget {
     BuildContext context, {
     required String label,
     required bool selected,
+    required bool hinted,
     required VoidCallback? onTap,
     required PuffColors puff,
     required TextStyle style,
   }) {
+    // The hint uses `action`, never `pro`: coral is rationed to one use per
+    // screen (Pro markers, streaks, celebrations) and a tag guess hasn't
+    // earned it.
+    final borderColor = selected
+        ? puff.chipSelectedBorder
+        : hinted
+            ? puff.action
+            : puff.hairline;
+    final textColor = selected
+        ? puff.chipSelectedBorder
+        : hinted
+            ? puff.action
+            : puff.textSecondary;
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.fromLTRB(hinted ? 9 : 12, 6, 12, 6),
         decoration: BoxDecoration(
-          color: selected ? puff.chipSelectedBg : puff.surface,
+          color: selected
+              ? puff.chipSelectedBg
+              : hinted
+                  ? puff.action.withValues(alpha: 0.08)
+                  : puff.surface,
           borderRadius: BorderRadius.circular(PuffRadius.pill),
-          border: Border.all(
-            color: selected ? puff.chipSelectedBorder : puff.hairline,
-            width: 1.5,
-          ),
+          border: Border.all(color: borderColor, width: 1.5),
         ),
-        child: Text(
-          label,
-          style: style.copyWith(
-            color: selected ? puff.chipSelectedBorder : puff.textSecondary,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (hinted) ...[
+              Icon(Icons.mic_none_rounded, size: 13, color: puff.action),
+              const SizedBox(width: 3),
+            ],
+            Text(label, style: style.copyWith(color: textColor)),
+          ],
         ),
       ),
     );

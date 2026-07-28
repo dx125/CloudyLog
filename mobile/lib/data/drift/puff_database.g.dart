@@ -41,6 +41,13 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant(''));
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+      'source', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('tap'));
   static const VerificationMeta _syncedAtMeta =
       const VerificationMeta('syncedAt');
   @override
@@ -49,7 +56,7 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, type, occurredAt, tags, deviceId, syncedAt];
+      [id, type, occurredAt, tags, deviceId, source, syncedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -85,6 +92,10 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
       context.handle(_deviceIdMeta,
           deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta));
     }
+    if (data.containsKey('source')) {
+      context.handle(_sourceMeta,
+          source.isAcceptableOrUnknown(data['source']!, _sourceMeta));
+    }
     if (data.containsKey('synced_at')) {
       context.handle(_syncedAtMeta,
           syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta));
@@ -108,6 +119,8 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
           .read(DriftSqlType.string, data['${effectivePrefix}tags'])!,
       deviceId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}device_id'])!,
+      source: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}source'])!,
       syncedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}synced_at']),
     );
@@ -125,6 +138,10 @@ class Event extends DataClass implements Insertable<Event> {
   final DateTime occurredAt;
   final String tags;
   final String deviceId;
+
+  /// 'tap' | 'heard' — see [EventSource]. Defaulted so every pre-existing row
+  /// reads as tapped, which is exactly what it was.
+  final String source;
   final DateTime? syncedAt;
   const Event(
       {required this.id,
@@ -132,6 +149,7 @@ class Event extends DataClass implements Insertable<Event> {
       required this.occurredAt,
       required this.tags,
       required this.deviceId,
+      required this.source,
       this.syncedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -141,6 +159,7 @@ class Event extends DataClass implements Insertable<Event> {
     map['occurred_at'] = Variable<DateTime>(occurredAt);
     map['tags'] = Variable<String>(tags);
     map['device_id'] = Variable<String>(deviceId);
+    map['source'] = Variable<String>(source);
     if (!nullToAbsent || syncedAt != null) {
       map['synced_at'] = Variable<DateTime>(syncedAt);
     }
@@ -154,6 +173,7 @@ class Event extends DataClass implements Insertable<Event> {
       occurredAt: Value(occurredAt),
       tags: Value(tags),
       deviceId: Value(deviceId),
+      source: Value(source),
       syncedAt: syncedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(syncedAt),
@@ -169,6 +189,7 @@ class Event extends DataClass implements Insertable<Event> {
       occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
       tags: serializer.fromJson<String>(json['tags']),
       deviceId: serializer.fromJson<String>(json['deviceId']),
+      source: serializer.fromJson<String>(json['source']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
     );
   }
@@ -181,6 +202,7 @@ class Event extends DataClass implements Insertable<Event> {
       'occurredAt': serializer.toJson<DateTime>(occurredAt),
       'tags': serializer.toJson<String>(tags),
       'deviceId': serializer.toJson<String>(deviceId),
+      'source': serializer.toJson<String>(source),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
     };
   }
@@ -191,6 +213,7 @@ class Event extends DataClass implements Insertable<Event> {
           DateTime? occurredAt,
           String? tags,
           String? deviceId,
+          String? source,
           Value<DateTime?> syncedAt = const Value.absent()}) =>
       Event(
         id: id ?? this.id,
@@ -198,6 +221,7 @@ class Event extends DataClass implements Insertable<Event> {
         occurredAt: occurredAt ?? this.occurredAt,
         tags: tags ?? this.tags,
         deviceId: deviceId ?? this.deviceId,
+        source: source ?? this.source,
         syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
       );
   Event copyWithCompanion(EventsCompanion data) {
@@ -208,6 +232,7 @@ class Event extends DataClass implements Insertable<Event> {
           data.occurredAt.present ? data.occurredAt.value : this.occurredAt,
       tags: data.tags.present ? data.tags.value : this.tags,
       deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      source: data.source.present ? data.source.value : this.source,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
     );
   }
@@ -220,6 +245,7 @@ class Event extends DataClass implements Insertable<Event> {
           ..write('occurredAt: $occurredAt, ')
           ..write('tags: $tags, ')
           ..write('deviceId: $deviceId, ')
+          ..write('source: $source, ')
           ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
@@ -227,7 +253,7 @@ class Event extends DataClass implements Insertable<Event> {
 
   @override
   int get hashCode =>
-      Object.hash(id, type, occurredAt, tags, deviceId, syncedAt);
+      Object.hash(id, type, occurredAt, tags, deviceId, source, syncedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -237,6 +263,7 @@ class Event extends DataClass implements Insertable<Event> {
           other.occurredAt == this.occurredAt &&
           other.tags == this.tags &&
           other.deviceId == this.deviceId &&
+          other.source == this.source &&
           other.syncedAt == this.syncedAt);
 }
 
@@ -246,6 +273,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
   final Value<DateTime> occurredAt;
   final Value<String> tags;
   final Value<String> deviceId;
+  final Value<String> source;
   final Value<DateTime?> syncedAt;
   final Value<int> rowid;
   const EventsCompanion({
@@ -254,6 +282,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
     this.occurredAt = const Value.absent(),
     this.tags = const Value.absent(),
     this.deviceId = const Value.absent(),
+    this.source = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -263,6 +292,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
     required DateTime occurredAt,
     this.tags = const Value.absent(),
     this.deviceId = const Value.absent(),
+    this.source = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -273,6 +303,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
     Expression<DateTime>? occurredAt,
     Expression<String>? tags,
     Expression<String>? deviceId,
+    Expression<String>? source,
     Expression<DateTime>? syncedAt,
     Expression<int>? rowid,
   }) {
@@ -282,6 +313,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
       if (occurredAt != null) 'occurred_at': occurredAt,
       if (tags != null) 'tags': tags,
       if (deviceId != null) 'device_id': deviceId,
+      if (source != null) 'source': source,
       if (syncedAt != null) 'synced_at': syncedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -293,6 +325,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
       Value<DateTime>? occurredAt,
       Value<String>? tags,
       Value<String>? deviceId,
+      Value<String>? source,
       Value<DateTime?>? syncedAt,
       Value<int>? rowid}) {
     return EventsCompanion(
@@ -301,6 +334,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
       occurredAt: occurredAt ?? this.occurredAt,
       tags: tags ?? this.tags,
       deviceId: deviceId ?? this.deviceId,
+      source: source ?? this.source,
       syncedAt: syncedAt ?? this.syncedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -324,6 +358,9 @@ class EventsCompanion extends UpdateCompanion<Event> {
     if (deviceId.present) {
       map['device_id'] = Variable<String>(deviceId.value);
     }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
     }
@@ -341,6 +378,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
           ..write('occurredAt: $occurredAt, ')
           ..write('tags: $tags, ')
           ..write('deviceId: $deviceId, ')
+          ..write('source: $source, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -365,6 +403,7 @@ typedef $$EventsTableCreateCompanionBuilder = EventsCompanion Function({
   required DateTime occurredAt,
   Value<String> tags,
   Value<String> deviceId,
+  Value<String> source,
   Value<DateTime?> syncedAt,
   Value<int> rowid,
 });
@@ -374,6 +413,7 @@ typedef $$EventsTableUpdateCompanionBuilder = EventsCompanion Function({
   Value<DateTime> occurredAt,
   Value<String> tags,
   Value<String> deviceId,
+  Value<String> source,
   Value<DateTime?> syncedAt,
   Value<int> rowid,
 });
@@ -401,6 +441,9 @@ class $$EventsTableFilterComposer
 
   ColumnFilters<String> get deviceId => $composableBuilder(
       column: $table.deviceId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get syncedAt => $composableBuilder(
       column: $table.syncedAt, builder: (column) => ColumnFilters(column));
@@ -430,6 +473,9 @@ class $$EventsTableOrderingComposer
   ColumnOrderings<String> get deviceId => $composableBuilder(
       column: $table.deviceId, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
       column: $table.syncedAt, builder: (column) => ColumnOrderings(column));
 }
@@ -457,6 +503,9 @@ class $$EventsTableAnnotationComposer
 
   GeneratedColumn<String> get deviceId =>
       $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
 
   GeneratedColumn<DateTime> get syncedAt =>
       $composableBuilder(column: $table.syncedAt, builder: (column) => column);
@@ -490,6 +539,7 @@ class $$EventsTableTableManager extends RootTableManager<
             Value<DateTime> occurredAt = const Value.absent(),
             Value<String> tags = const Value.absent(),
             Value<String> deviceId = const Value.absent(),
+            Value<String> source = const Value.absent(),
             Value<DateTime?> syncedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -499,6 +549,7 @@ class $$EventsTableTableManager extends RootTableManager<
             occurredAt: occurredAt,
             tags: tags,
             deviceId: deviceId,
+            source: source,
             syncedAt: syncedAt,
             rowid: rowid,
           ),
@@ -508,6 +559,7 @@ class $$EventsTableTableManager extends RootTableManager<
             required DateTime occurredAt,
             Value<String> tags = const Value.absent(),
             Value<String> deviceId = const Value.absent(),
+            Value<String> source = const Value.absent(),
             Value<DateTime?> syncedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -517,6 +569,7 @@ class $$EventsTableTableManager extends RootTableManager<
             occurredAt: occurredAt,
             tags: tags,
             deviceId: deviceId,
+            source: source,
             syncedAt: syncedAt,
             rowid: rowid,
           ),

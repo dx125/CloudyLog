@@ -548,6 +548,22 @@ class _YouScreenState extends State<YouScreen> {
                   value: settings.soundEnabled,
                   onChanged: settings.setSoundEnabled,
                 ),
+                // Design A. Off by default: the mic is never opened without
+                // the user choosing to, and nothing is recorded or leaves the
+                // phone either way.
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    strings.listenAssistSetting,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  subtitle: Text(
+                    strings.listenAssistSettingHint,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  value: settings.listenAssistEnabled,
+                  onChanged: settings.setListenAssistEnabled,
+                ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(

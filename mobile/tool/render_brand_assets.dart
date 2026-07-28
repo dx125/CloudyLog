@@ -201,10 +201,39 @@ void main() {
       widthFraction: 0.60,
     );
 
+    // Android-12+ launch icons. The OS splash API masks the launch image to a
+    // circle and centers it on windowSplashScreenIconBackgroundColor, so these
+    // carry the *splash* colors (not the mint launcher identity) with the icon
+    // background set to the canvas — the disc then blends into the screen and
+    // only the Gust reads, matching the static splash. No gust lines (they'd
+    // clip against the circular mask), and the body is sized to the circle's
+    // safe zone: Gust is wider than tall, so widthFraction must stay under
+    // ~0.667 (160dp of a 240dp icon) or the side lumps get cropped left/right.
+    // Light: deep-teal Gust, cloud face.
+    await _writePng(
+      '$dir/splash_icon.png',
+      1152,
+      body: _deepTeal,
+      face: _cloud,
+      gustLines: false,
+      widthFraction: 0.55,
+    );
+    // Dark: bright-mint Gust, ink-deep face.
+    await _writePng(
+      '$dir/splash_icon_dark.png',
+      1152,
+      body: _mintBright,
+      face: _inkDeep,
+      gustLines: false,
+      widthFraction: 0.55,
+    );
+
     expect(File('$dir/icon.png').existsSync(), isTrue);
     expect(File('$dir/icon_foreground.png').existsSync(), isTrue);
     expect(File('$dir/icon_monochrome.png').existsSync(), isTrue);
     expect(File('$dir/splash.png').existsSync(), isTrue);
     expect(File('$dir/splash_dark.png').existsSync(), isTrue);
+    expect(File('$dir/splash_icon.png').existsSync(), isTrue);
+    expect(File('$dir/splash_icon_dark.png').existsSync(), isTrue);
   });
 }

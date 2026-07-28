@@ -468,6 +468,204 @@ class AppLocalizationsEn extends AppLocalizations {
   String get soundSettingHint => 'One tasteful pop. Off by default.';
 
   @override
+  String get listenAssistSetting => 'Listen while I tap';
+
+  @override
+  String get listenAssistSettingHint =>
+      'Puff uses the mic on this screen to guess the tag for you. Nothing is recorded or sent anywhere.';
+
+  @override
+  String get listenAssistDenied =>
+      'Puff can\'t use the mic. Check permissions in your phone\'s settings.';
+
+  @override
+  String get listenSuggestionHint => 'Sounded like this one';
+
+  @override
+  String get listenTitle => 'Listen mode';
+
+  @override
+  String get listenStart => 'Start listening';
+
+  @override
+  String get listenStop => 'Stop';
+
+  @override
+  String get listenPillHome => 'Listen';
+
+  @override
+  String get listenHeardLabel => 'heard this session';
+
+  @override
+  String get listenIntro =>
+      'Puff listens and counts for you. These stay separate from your tapped log.';
+
+  @override
+  String get listenSilentJoke =>
+      'Can\'t hear the silent ones. Nobody can — tap those in.';
+
+  @override
+  String get listenEmpty => 'Listening. Nothing yet.';
+
+  @override
+  String get listenUndo => 'Not me';
+
+  @override
+  String get listenUndone => 'Removed.';
+
+  @override
+  String get listenDeniedTitle => 'Puff needs the mic';
+
+  @override
+  String get listenDeniedBody =>
+      'Listen mode can\'t work without it. Your taps still count perfectly — this is just the hands-free version.';
+
+  @override
+  String get listenErrorTitle => 'Listening isn\'t available';
+
+  @override
+  String get listenErrorBody =>
+      'Something went wrong starting the mic. It\'s in Settings → Diagnostics if you\'re curious.';
+
+  @override
+  String listenBudgetLeft(int seconds) {
+    return '${seconds}s left';
+  }
+
+  @override
+  String get listenBudgetDone => 'That\'s the free session';
+
+  @override
+  String get listenBudgetDoneBody => 'Pro listens as long as you like.';
+
+  @override
+  String get listenOpenSettings => 'Open settings';
+
+  @override
+  String get duelsEmptyTitle => 'Nobody to beat yet';
+
+  @override
+  String get duelsEmptyBody =>
+      'A duel needs two people. Start one and send the code, or join with a code someone sent you.';
+
+  @override
+  String get duelCreateAsync => 'Start a week';
+
+  @override
+  String get duelCreateLive => 'Start a live round';
+
+  @override
+  String get duelJoin => 'Join with a code';
+
+  @override
+  String get duelJoinTitle => 'Got a code?';
+
+  @override
+  String get duelJoinHint => 'ABC234';
+
+  @override
+  String get duelJoinButton => 'Join';
+
+  @override
+  String get duelJoinNotFound => 'No duel with that code.';
+
+  @override
+  String get duelJoinEnded => 'That duel\'s already over.';
+
+  @override
+  String get duelJoinLimit =>
+      'Free plays one duel at a time. Pro plays as many as you like.';
+
+  @override
+  String get duelCodeLabel => 'Code';
+
+  @override
+  String get duelCodeCopied => 'Code copied.';
+
+  @override
+  String duelShareText(String code) {
+    return 'Join my Puff duel — code $code';
+  }
+
+  @override
+  String get duelKindAsync => 'This week';
+
+  @override
+  String get duelKindLive => 'Live';
+
+  @override
+  String duelTimeLeftDays(int days) {
+    return '${days}d left';
+  }
+
+  @override
+  String duelTimeLeftHours(int hours) {
+    return '${hours}h left';
+  }
+
+  @override
+  String duelTimeLeftMinutes(int minutes) {
+    return '${minutes}m left';
+  }
+
+  @override
+  String get duelOver => 'Finished';
+
+  @override
+  String get duelWaiting => 'Waiting for someone to join';
+
+  @override
+  String duelLeading(String name) {
+    return '$name is ahead';
+  }
+
+  @override
+  String get duelTied => 'Dead even';
+
+  @override
+  String get duelYou => 'You';
+
+  @override
+  String get duelLeave => 'Leave duel';
+
+  @override
+  String get duelLeaveConfirm => 'Leave this duel? Your score goes with you.';
+
+  @override
+  String get duelStartRound => 'Start the round';
+
+  @override
+  String get duelRoundTitle => 'Live round';
+
+  @override
+  String get duelRoundHint => 'Phones down, both of you. Puff\'s listening.';
+
+  @override
+  String get duelRoundHonour =>
+      'Live rounds run on the honour system. Puff can\'t tell a real one from a good impression.';
+
+  @override
+  String get duelRoundEnd => 'End round';
+
+  @override
+  String get duelRoundOver => 'Round over';
+
+  @override
+  String get duelRoundWon => 'You win';
+
+  @override
+  String duelRoundLost(String name) {
+    return '$name wins';
+  }
+
+  @override
+  String get duelRoundTied => 'A tie. Rematch?';
+
+  @override
+  String get duelProOnly =>
+      'Starting duels is a Pro thing. Joining one is always free.';
+
+  @override
   String get diagnosticsSetting => 'Diagnostics';
 
   @override

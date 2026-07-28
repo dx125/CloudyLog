@@ -24,6 +24,7 @@ class TapService extends ChangeNotifier {
   final Uuid _uuid;
 
   int _todayCount = 0;
+  int _todayHeardCount = 0;
   DateTime _today = DateTime(0);
   bool _loaded = false;
 
@@ -31,7 +32,14 @@ class TapService extends ChangeNotifier {
   DateTime? _lastTapAt;
   List<String> _lastEventTags = const [];
 
+  /// Today's *tapped* toots — the health number. Heard events are deliberately
+  /// excluded; see [todayHeardCount].
   int get todayCount => _todayCount;
+
+  /// Today's *heard* toots, counted separately (Listen mode, live duels). Never
+  /// added to [todayCount], never reported to world stats.
+  int get todayHeardCount => _todayHeardCount;
+
   bool get isLoaded => _loaded;
   DateTime get today => _today;
 
@@ -50,6 +58,8 @@ class TapService extends ChangeNotifier {
   Future<void> load() async {
     _today = dayOf(_clock());
     _todayCount = await _store.countForDay(_today);
+    _todayHeardCount =
+        await _store.countForDay(_today, source: SourceFilter.heard);
     _loaded = true;
     notifyListeners();
   }
@@ -71,6 +81,39 @@ class TapService extends ChangeNotifier {
     await _store.insert(event);
   }
 
+  /// Log one toot the microphone heard (Listen mode, live duels).
+  ///
+  /// Deliberately *not* `tap()`: heard events carry [EventSource.heard], count
+  /// into [todayHeardCount] instead of [todayCount], and never open the
+  /// quick-tag window — the user didn't press anything, so there's no "last
+  /// tap" to tag. Returns the new event's id so the caller can offer undo.
+  Future<String> logHeard({List<String> tags = const []}) async {
+    _rollDayIfNeeded();
+    final event = PuffEvent(
+      id: _uuid.v7(),
+      occurredAt: _clock(),
+      deviceId: _deviceId,
+      source: EventSource.heard,
+      tags: tags,
+    );
+    _todayHeardCount++;
+    notifyListeners();
+    await _store.insert(event);
+    return event.id;
+  }
+
+  /// Undo a heard log — Listen mode's dismiss. Removes the event outright so a
+  /// false positive leaves no trace anywhere, including in sync.
+  Future<void> undoHeard(String id) async {
+    final event = await _store.byId(id);
+    if (event == null || event.source != EventSource.heard) return;
+    if (dayOf(event.occurredAt) == _today && _todayHeardCount > 0) {
+      _todayHeardCount--;
+    }
+    notifyListeners();
+    await _store.delete(id);
+  }
+
   /// Toggle a quick tag on the last log — only within [kQuickTagWindow].
   Future<void> toggleTagOnLastEvent(String tag) async {
     final id = _lastEventId;
@@ -89,6 +132,7 @@ class TapService extends ChangeNotifier {
     if (day == _today) return;
     _today = day;
     _todayCount = await _store.countForDay(day);
+    _todayHeardCount = await _store.countForDay(day, source: SourceFilter.heard);
     notifyListeners();
   }
 
@@ -97,6 +141,7 @@ class TapService extends ChangeNotifier {
     if (day != _today) {
       _today = day;
       _todayCount = 0;
+      _todayHeardCount = 0;
     }
   }
 }

@@ -9,17 +9,24 @@ class SettingsService extends ChangeNotifier {
 
   ThemeMode _themeMode = ThemeMode.system;
   bool _soundEnabled = false;
+  bool _listenAssistEnabled = false;
   List<String> _customTags = const [];
   bool _loaded = false;
 
   ThemeMode get themeMode => _themeMode;
   bool get soundEnabled => _soundEnabled;
+
+  /// Design A: mic-assisted quick-tag suggestions on Home. Opt-in, off by
+  /// default — see [SettingsRepository.listenAssistEnabled].
+  bool get listenAssistEnabled => _listenAssistEnabled;
+
   List<String> get customTags => _customTags;
   bool get isLoaded => _loaded;
 
   Future<void> load() async {
     _themeMode = _parseMode(await _repository.themeMode());
     _soundEnabled = await _repository.soundEnabled();
+    _listenAssistEnabled = await _repository.listenAssistEnabled();
     _customTags = await _repository.customTags();
     _loaded = true;
     notifyListeners();
@@ -36,6 +43,13 @@ class SettingsService extends ChangeNotifier {
     if (value == _soundEnabled) return;
     _soundEnabled = value;
     await _repository.setSoundEnabled(value);
+    notifyListeners();
+  }
+
+  Future<void> setListenAssistEnabled(bool value) async {
+    if (value == _listenAssistEnabled) return;
+    _listenAssistEnabled = value;
+    await _repository.setListenAssistEnabled(value);
     notifyListeners();
   }
 

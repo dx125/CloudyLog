@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:puff/data/diagnostics_store.dart';
 import 'package:puff/data/event_store.dart';
 import 'package:puff/data/gateways.dart';
 import 'package:puff/data/settings_repository.dart';
+import 'package:puff/domain/acoustic.dart';
+import 'package:puff/domain/duel.dart';
 import 'package:puff/domain/entitlement.dart';
 import 'package:puff/domain/puff_event.dart';
 
@@ -25,39 +30,54 @@ class InMemoryEventStore implements EventStore {
   Future<void> updateTags(String id, List<String> tags) async {
     final existing = events[id];
     if (existing == null) return;
-    events[id] = PuffEvent(
-      id: existing.id,
-      occurredAt: existing.occurredAt,
-      type: existing.type,
-      tags: tags,
-      deviceId: existing.deviceId,
-    );
+    // copyWith leaves syncedAt null, which is the point: a tag edit must be
+    // re-pushed. It also carries `source` through, so a heard event stays heard.
+    events[id] = existing.copyWith(tags: tags);
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    events.remove(id);
   }
 
   @override
   Future<PuffEvent?> byId(String id) async => events[id];
 
   @override
-  Future<int> countForDay(DateTime day) async {
+  Future<int> countForDay(
+    DateTime day, {
+    SourceFilter source = SourceFilter.tapped,
+  }) async {
     final target = dayOf(day);
     return events.values
-        .where((e) => e.type == kTootType && dayOf(e.occurredAt) == target)
+        .where((e) =>
+            e.type == kTootType &&
+            source.matches(e.source) &&
+            dayOf(e.occurredAt) == target)
         .length;
   }
 
   @override
-  Future<List<PuffEvent>> eventsBetween(DateTime from, DateTime to) async {
+  Future<List<PuffEvent>> eventsBetween(
+    DateTime from,
+    DateTime to, {
+    SourceFilter source = SourceFilter.all,
+  }) async {
     final list = events.values
         .where((e) =>
-            !e.occurredAt.isBefore(from) && e.occurredAt.isBefore(to))
+            !e.occurredAt.isBefore(from) &&
+            e.occurredAt.isBefore(to) &&
+            source.matches(e.source))
         .toList()
       ..sort((a, b) => a.occurredAt.compareTo(b.occurredAt));
     return list;
   }
 
   @override
-  Future<List<PuffEvent>> allEvents() async {
-    final list = events.values.toList()
+  Future<List<PuffEvent>> allEvents({
+    SourceFilter source = SourceFilter.all,
+  }) async {
+    final list = events.values.where((e) => source.matches(e.source)).toList()
       ..sort((a, b) => a.occurredAt.compareTo(b.occurredAt));
     return list;
   }
@@ -78,10 +98,13 @@ class InMemoryEventStore implements EventStore {
   }
 
   @override
-  Future<Map<DateTime, int>> countsByDay() async {
+  Future<Map<DateTime, int>> countsByDay({
+    SourceFilter source = SourceFilter.tapped,
+  }) async {
     final counts = <DateTime, int>{};
     for (final event in events.values) {
       if (event.type != kTootType) continue;
+      if (!source.matches(event.source)) continue;
       final day = dayOf(event.occurredAt);
       counts[day] = (counts[day] ?? 0) + 1;
     }
@@ -92,6 +115,7 @@ class InMemoryEventStore implements EventStore {
 class InMemorySettingsRepository implements SettingsRepository {
   String theme = 'system';
   bool sound = false;
+  bool listenAssist = false;
   List<String> tags = [];
   Entitlement? entitlement;
   String? lastReportDay;
@@ -110,6 +134,12 @@ class InMemorySettingsRepository implements SettingsRepository {
 
   @override
   Future<void> setSoundEnabled(bool value) async => sound = value;
+
+  @override
+  Future<bool> listenAssistEnabled() async => listenAssist;
+
+  @override
+  Future<void> setListenAssistEnabled(bool value) async => listenAssist = value;
 
   @override
   Future<List<String>> customTags() async => tags;
@@ -206,6 +236,210 @@ class FakeGlobalStatsGateway implements GlobalStatsGateway {
     if (offline) throw const CloudUnavailable();
     reports.add(days);
   }
+}
+
+/// A scriptable microphone. Tests push frames by hand, so the whole detection
+/// cascade is exercised without ever opening a real capture device.
+class FakeAudioCaptureGateway implements AudioCaptureGateway {
+  FakeAudioCaptureGateway({this.permitted = true});
+
+  bool permitted;
+  bool permissionAsked = false;
+  bool started = false;
+  bool stopped = false;
+
+  final _controller = StreamController<Int16List>.broadcast();
+
+  @override
+  Future<bool> hasPermission() async => permitted;
+
+  @override
+  Future<bool> requestPermission() async {
+    permissionAsked = true;
+    return permitted;
+  }
+
+  @override
+  Stream<Int16List> start() {
+    started = true;
+    return _controller.stream;
+  }
+
+  @override
+  Future<void> stop() async {
+    stopped = true;
+  }
+
+  /// Emits one frame at the given amplitude (0..1), then lets the listener
+  /// chain run to completion.
+  ///
+  /// Drains the microtask queue with `await null` rather than
+  /// `Future.delayed(Duration.zero)`: inside `testWidgets` a zero-duration
+  /// delay is a *timer*, and timers only advance when the tester pumps — so a
+  /// delay-based yield deadlocks in widget tests. Microtasks drain in both
+  /// worlds. The loop covers the awaits between a frame arriving and an event
+  /// being written: deliver → onFrame → classify → logHeard → store.insert.
+  Future<void> emit(double amplitude, {int samples = 320}) async {
+    final value = (amplitude * 32767).round().clamp(-32768, 32767);
+    _controller.add(Int16List.fromList(List.filled(samples, value)));
+    for (var i = 0; i < 8; i++) {
+      await null;
+    }
+  }
+
+  /// Emits [count] quiet frames — enough to settle the noise floor, or to fill
+  /// the ring buffer before a burst.
+  Future<void> emitQuiet(int count, {int samples = 320}) async {
+    for (var i = 0; i < count; i++) {
+      await emit(0.001, samples: samples);
+    }
+  }
+
+  Future<void> close() => _controller.close();
+}
+
+/// Returns queued verdicts, so tests decide exactly what the "model" heard.
+class FakeAcousticClassifier implements AcousticClassifier {
+  FakeAcousticClassifier({this.failOnClassify = false});
+
+  final List<AcousticVerdict> queued = [];
+  bool loaded = false;
+  bool disposed = false;
+  int classifyCalls = 0;
+  bool failOnClassify;
+
+  /// Verdict returned once the queue is empty.
+  AcousticVerdict fallback = AcousticVerdict.silence;
+
+  void enqueue(double confidence, {AcousticSignature? signature}) {
+    queued.add(AcousticVerdict(
+      confidence: confidence,
+      signature: signature ?? AcousticSignature.unknown,
+    ));
+  }
+
+  @override
+  Future<void> load() async => loaded = true;
+
+  @override
+  Future<AcousticVerdict> classify(Float32List window) async {
+    classifyCalls++;
+    if (failOnClassify) throw StateError('classifier exploded');
+    return queued.isEmpty ? fallback : queued.removeAt(0);
+  }
+
+  @override
+  Future<void> dispose() async => disposed = true;
+}
+
+class FakeDuelGateway implements DuelGateway {
+  final List<Duel> duels = [];
+  final List<({String duelId, int tapped, int heard})> submissions = [];
+  final List<String> joined = [];
+
+  bool offline = false;
+  bool proBlocked = false;
+  bool atFreeLimit = false;
+  String? unavailableReason;
+  int listCalls = 0;
+  int nextId = 1;
+
+  void _checkOnline() {
+    if (offline) throw const CloudUnavailable();
+  }
+
+  @override
+  Future<List<Duel>> list() async {
+    _checkOnline();
+    listCalls++;
+    return List.of(duels);
+  }
+
+  @override
+  Future<Duel?> preview(String code) async {
+    _checkOnline();
+    for (final duel in duels) {
+      if (duel.code == code) return duel;
+    }
+    return null;
+  }
+
+  @override
+  Future<Duel> create({required DuelKind kind}) async {
+    _checkOnline();
+    // Mirrors the server: creating is Pro-gated by RLS, whose 403 arrives as
+    // CloudUnavailable.
+    if (proBlocked) throw const CloudUnavailable('403');
+    final now = DateTime(2026, 7, 20, 12);
+    final duel = Duel(
+      id: 'duel-${nextId++}',
+      code: 'CODE${nextId}A',
+      kind: kind,
+      nameAdjective: 0,
+      nameNoun: 0,
+      startsAt: now,
+      endsAt: now.add(
+        kind == DuelKind.live
+            ? const Duration(minutes: 3)
+            : const Duration(days: 7),
+      ),
+      status: DuelStatus.open,
+    );
+    duels.add(duel);
+    return duel;
+  }
+
+  @override
+  Future<void> join(String code) async {
+    _checkOnline();
+    if (atFreeLimit) throw const DuelLimitReached();
+    final reason = unavailableReason;
+    if (reason != null) throw DuelUnavailable(reason);
+    joined.add(code);
+  }
+
+  @override
+  Future<void> submitScore(String duelId, {int tapped = 0, int heard = 0}) async {
+    _checkOnline();
+    submissions.add((duelId: duelId, tapped: tapped, heard: heard));
+  }
+
+  @override
+  Future<void> leave(String duelId) async {
+    _checkOnline();
+    duels.removeWhere((d) => d.id == duelId);
+  }
+}
+
+class FakeDuelChannel implements DuelChannel {
+  final List<({String duelId, int count})> published = [];
+  String? joinedDuelId;
+  bool left = false;
+
+  final _controller = StreamController<DuelLiveScore>.broadcast();
+
+  @override
+  Stream<DuelLiveScore> join(String duelId) {
+    joinedDuelId = duelId;
+    return _controller.stream;
+  }
+
+  @override
+  Future<void> publish(String duelId, int count) async {
+    published.add((duelId: duelId, count: count));
+  }
+
+  @override
+  Future<void> leave() async {
+    left = true;
+  }
+
+  /// Simulates an opponent's broadcast arriving.
+  void emitOpponent(String userId, int count) {
+    _controller.add(DuelLiveScore(userId: userId, count: count));
+  }
+
+  Future<void> close() => _controller.close();
 }
 
 class InMemoryDiagnosticsStore implements DiagnosticsStore {

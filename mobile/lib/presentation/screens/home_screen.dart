@@ -6,6 +6,8 @@ import '../../domain/percentile.dart';
 import '../../domain/puff_event.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../services/entitlement_service.dart';
+import '../../services/listen_service.dart';
+import 'listen_screen.dart';
 import '../../services/settings_service.dart';
 import '../../services/stats_service.dart';
 import '../../services/tap_service.dart';
@@ -13,6 +15,47 @@ import '../../theme/puff_theme.dart';
 import '../widgets/quick_tags_row.dart';
 import '../widgets/tap_button.dart';
 import '../widgets/week_chart.dart';
+
+/// The way into Listen mode. Small and quiet on purpose — the giant button is
+/// the product, and this must read as an alternative, not a rival.
+class _ListenPill extends StatelessWidget {
+  const _ListenPill({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final puff = context.puff;
+    final strings = AppLocalizations.of(context)!;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+        decoration: BoxDecoration(
+          color: puff.surface,
+          borderRadius: BorderRadius.circular(PuffRadius.pill),
+          border: Border.all(color: puff.hairline),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.mic_none_rounded, size: 14, color: puff.action),
+            const SizedBox(width: 4),
+            Text(
+              strings.listenPillHome,
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    color: puff.action,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 /// The home screen has one job: make logging instant and satisfying.
 /// Count on top, giant button in the middle, one quick-tag row, one
@@ -43,6 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _tapService = tap..addListener(_reloadStats);
       _statsFuture = context.read<StatsService>().snapshot();
     }
+    _syncAssist();
   }
 
   @override
@@ -56,6 +100,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       context.read<TapService>().refreshIfStale();
+      _syncAssist();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // Backgrounded: release the microphone immediately. Puff listens only
+      // while the user is looking at this screen — no background capture, ever.
+      context.read<ListenService>().stop();
+    }
+  }
+
+  /// Starts or stops assist listening to match the setting.
+  ///
+  /// Assist writes nothing (see [ListenMode.assist]); it only informs which
+  /// chip gets marked. If the mic is unavailable or denied, this quietly does
+  /// nothing — the tap loop is complete without it.
+  void _syncAssist() {
+    final settings = context.read<SettingsService>();
+    final listen = context.read<ListenService>();
+    if (settings.listenAssistEnabled) {
+      if (!listen.isListening) listen.start(mode: ListenMode.assist);
+    } else if (listen.mode == ListenMode.assist && listen.isListening) {
+      listen.stop();
     }
   }
 
@@ -123,6 +188,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final isPro = context.watch<EntitlementService>().isPro;
     final localeTag = Localizations.localeOf(context).toLanguageTag();
 
+    // Design A: what the mic thinks it just heard, if anything, and only if
+    // assist is on. Never written — the chip is marked and the user decides.
+    final listen = context.watch<ListenService>();
+    final suggestedTag = settings.listenAssistEnabled
+        ? listen.recentDetection()?.tag
+        : null;
+
     final tagOptions = [
       for (final id in kClassicTags)
         TagOption(id: id, label: _tagLabel(strings, id)),
@@ -151,30 +223,51 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     color: puff.action,
                   ),
                 ),
-                FutureBuilder<StatsSnapshot>(
-                  future: _statsFuture,
-                  builder: (context, snapshot) {
-                    final streak = snapshot.data?.currentStreak ?? 0;
-                    if (streak < 1) return const SizedBox.shrink();
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: puff.streakBg,
-                        borderRadius: BorderRadius.circular(PuffRadius.pill),
-                      ),
-                      child: Text(
-                        strings.streakPill(streak),
-                        style: theme.textTheme.bodySmall!.copyWith(
-                          color: puff.streakFg,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12,
-                        ),
-                      ),
-                    );
-                  },
+                Row(
+                  children: [
+                    // Listen mode lives behind a small pill, never in front of
+                    // the button: nothing may come between the user and the tap.
+                    _ListenPill(
+                      onTap: () async {
+                        // Assist owns the mic while Home is up; hand it over.
+                        await context.read<ListenService>().stop();
+                        if (!context.mounted) return;
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ListenScreen(),
+                          ),
+                        );
+                        if (context.mounted) _syncAssist();
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    FutureBuilder<StatsSnapshot>(
+                      future: _statsFuture,
+                      builder: (context, snapshot) {
+                        final streak = snapshot.data?.currentStreak ?? 0;
+                        if (streak < 1) return const SizedBox.shrink();
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: puff.streakBg,
+                            borderRadius:
+                                BorderRadius.circular(PuffRadius.pill),
+                          ),
+                          child: Text(
+                            strings.streakPill(streak),
+                            style: theme.textTheme.bodySmall!.copyWith(
+                              color: puff.streakFg,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -229,6 +322,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               tags: tagOptions,
               selected: tap.lastEventTags.toSet(),
               enabled: tap.canTagLastEvent,
+              suggested: suggestedTag,
               onToggle: (id) =>
                   context.read<TapService>().toggleTagOnLastEvent(id),
               onAddCustom: isPro ? _addCustomTag : null,

@@ -74,7 +74,10 @@ class GlobalStatsService extends ChangeNotifier {
     final todayKey = dayKey(today);
     if (await _settings.lastStatsReportDay() == todayKey) return false;
 
-    final counts = await _store.countsByDay();
+    // Tapped only, stated explicitly rather than leaning on the default:
+    // this is the one place device data becomes population data, and heard
+    // events must never cross it (migration 0007).
+    final counts = await _store.countsByDay(source: SourceFilter.tapped);
     final days = <DailyTootCount>[
       for (var back = reportWindowDays - 1; back >= 0; back--)
         if ((counts[today.subtract(Duration(days: back))] ?? 0) > 0)
